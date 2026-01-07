@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Painel do Café</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --card:#121a33;
+      --text:#e7ecff;
+      --muted:#a9b3d6;
+      --line:rgba(255,255,255,.10);
+      --good:#38bdf8;
+      --bad:#fb7185;
+      --neutral:#cbd5e1;
+    }
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; background:var(--bg); color:var(--text);}
+    .container{max-width:1100px;margin:0 auto;padding:24px;}
+    header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;}
+    h1{margin:0;font-size:22px;font-weight:700;}
+    .sub{color:var(--muted);font-size:13px;margin-top:6px;}
+    .btnbar{display:flex;gap:10px;flex-wrap:wrap;}
+    a.btn{display:inline-block;padding:10px 12px;border:1px solid var(--line);border-radius:10px;color:var(--text);text-decoration:none;font-size:13px;background:rgba(255,255,255,.03)}
+    a.btn:hover{background:rgba(255,255,255,.06)}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0 22px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;}
+    .k{color:var(--muted);font-size:12px;}
+    .v{font-size:26px;font-weight:800;margin-top:6px;}
+    .pill{display:inline-block;margin-top:10px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--muted)}
+    .tablewrap{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+    table{width:100%;border-collapse:collapse;}
+    th,td{padding:10px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:13px;vertical-align:top;}
+    th{color:var(--muted);font-weight:700;background:rgba(255,255,255,.03)}
+    tr:hover td{background:rgba(255,255,255,.02)}
+    .right{text-align:right}
+    .muted{color:var(--muted)}
+    .scorepos{color:var(--good);font-weight:700}
+    .scoreneg{color:var(--bad);font-weight:700}
+    .scoreneu{color:var(--neutral);font-weight:700}
+    .footer{margin-top:14px;color:var(--muted);font-size:12px}
+    @media (max-width: 900px){
+      .grid{grid-template-columns:1fr}
+      header{flex-direction:column;align-items:flex-start}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Painel do Café</h1>
+        <div class="sub" id="subtitle">Carregando…</div>
+      </div>
+      <div class="btnbar">
+        <a class="btn" href="index.html">Home</a>
+        <a class="btn" href="painel.html">Painel</a>
+        <a class="btn" href="variaveis.html">Variáveis</a>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="card">
+        <div class="k">Termômetro Geral</div>
+        <div class="v" id="t-geral">—</div>
+        <div class="pill" id="pill-geral">—</div>
+      </div>
+      <div class="card">
+        <div class="k">Termômetro Bloco 1</div>
+        <div class="v" id="t-b1">—</div>
+        <div class="pill" id="pill-b1">—</div>
+      </div>
+      <div class="card">
+        <div class="k">Termômetro Bloco 2</div>
+        <div class="v" id="t-b2">—</div>
+        <div class="pill" id="pill-b2">—</div>
+      </div>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Bloco</th>
+            <th>Variável</th>
+            <th class="right">Último</th>
+            <th class="right">Percentil</th>
+            <th>Nível</th>
+            <th>Tendência</th>
+            <th>Momento</th>
+            <th class="right">Score Ponderado</th>
+            <th>Frequência</th>
+            <th>Última Atualização</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="10" class="muted">Carregando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="footer">
+      Observação: esta visualização é a versão inicial. Vamos evoluir a experiência (histórico do termômetro, filtros e detalhamento) nos próximos passos.
+    </div>
+  </div>
+
+  <script>
+    const DATA_URL = "data/cafe/painel_snapshot.json";
+
+    function fmtNumber(n){
+      if(n === null || n === undefined || Number.isNaN(n)) return "—";
+      return new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 }).format(n);
+    }
+    function fmtPercent(p){
+      if(p === null || p === undefined || Number.isNaN(p)) return "—";
+      return new Intl.NumberFormat("pt-BR", { style:"percent", maximumFractionDigits: 2 }).format(p);
+    }
+    function scoreClass(x){
+      if(x === null || x === undefined || Number.isNaN(x)) return "scoreneu";
+      if(x > 0.00001) return "scorepos";
+      if(x < -0.00001) return "scoreneg";
+      return "scoreneu";
+    }
+    function labelForThermo(x){
+      if(x === null || x === undefined || Number.isNaN(x)) return "—";
+      if(x >= 1.5) return "Altista forte";
+      if(x >= 0.5) return "Altista";
+      if(x > -0.5) return "Neutro";
+      if(x > -1.5) return "Baixista";
+      return "Baixista forte";
+    }
+
+    async function main(){
+      const subtitle = document.getElementById("subtitle");
+      const tbody = document.getElementById("tbody");
+
+      try{
+        const res = await fetch(DATA_URL, { cache: "no-store" });
+        if(!res.ok) throw new Error("Falha ao carregar JSON: " + res.status);
+        const data = await res.json();
+
+        subtitle.textContent = `Última atualização do snapshot: ${data.updated_at || "—"}`;
+
+        // termômetros
+        const tg = data.thermometros?.geral;
+        const tb1 = data.thermometros?.bloco_1;
+        const tb2 = data.thermometros?.bloco_2;
+
+        document.getElementById("t-geral").textContent = fmtNumber(tg);
+        document.getElementById("t-b1").textContent = fmtNumber(tb1);
+        document.getElementById("t-b2").textContent = fmtNumber(tb2);
+
+        document.getElementById("pill-geral").textContent = labelForThermo(tg);
+        document.getElementById("pill-b1").textContent = labelForThermo(tb1);
+        document.getElementById("pill-b2").textContent = labelForThermo(tb2);
+
+        // tabela (ordenar por bloco e depois por score ponderado desc)
+        const rows = Array.isArray(data.rows) ? data.rows.slice() : [];
+        rows.sort((a,b)=>{
+          const ba = (a.bloco ?? 0) - (b.bloco ?? 0);
+          if(ba !== 0) return ba;
+          return (b.score_ponderado ?? 0) - (a.score_ponderado ?? 0);
+        });
+
+        tbody.innerHTML = "";
+        for(const r of rows){
+          const tr = document.createElement("tr");
+          const scoreP = Number(r.score_ponderado);
+
+          tr.innerHTML = `
+            <td>${r.bloco ?? ""}</td>
+            <td>
+              <div style="font-weight:700">${r.variavel ?? ""}</div>
+              <div class="muted" style="font-size:12px;margin-top:4px">${(r.fonte ?? "").slice(0, 80)}${(r.fonte ?? "").length>80?"…":""}</div>
+            </td>
+            <td class="right">${fmtNumber(r.ultimo_valor)}</td>
+            <td class="right">${fmtPercent(r.percentil)}</td>
+            <td>${r.nivel ?? ""}</td>
+            <td>${r.tendencia ?? ""}</td>
+            <td>${r.momento ?? ""}</td>
+            <td class="right ${scoreClass(scoreP)}">${fmtNumber(scoreP)}</td>
+            <td>${r.frequencia ?? ""}</td>
+            <td>${r.ultima_atualizacao ?? ""}</td>
+          `;
+          tbody.appendChild(tr);
+        }
+
+      }catch(err){
+        subtitle.textContent = "Erro ao carregar dados.";
+        tbody.innerHTML = `<tr><td colspan="10" class="muted">Erro: ${String(err.message || err)}</td></tr>`;
+        console.error(err);
+      }
+    }
+
+    main();
+  </script>
+</body>
+</html>
