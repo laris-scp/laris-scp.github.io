@@ -86,7 +86,6 @@
       "gscpi": "data/cafe/series/gscpi_fretes.json",
       "cot_report": "data/cafe/series/cot_report.json",
       "certified_stocks": "data/cafe/series/certified_stocks.json",
-      // no próximo passo vamos acrescentar as outras variáveis aqui
     };
 
     function fmtNumber(n){
@@ -118,7 +117,6 @@
 
     // Base única de gráfico, com ajustes condicionais via opts (por id)
     function drawMultiLine(canvas, points, opts){
-      // points: [{date, close, mm50, mm252}]
       const o = Object.assign({
         showMM50: true,
         showMM252: true,
@@ -226,7 +224,7 @@
       const textW = ctx.measureText(lastLabel).width;
       ctx.fillText(lastLabel, padL+iw-textW, padT+ih+28);
 
-      // legend (condicional)
+      // legend
       ctx.font = "12px system-ui";
       let lx = padL;
       ctx.fillStyle = "rgba(255,255,255,.78)";
@@ -248,7 +246,7 @@
       const id = snapshotRow.id;
       const card = document.createElement("div");
       card.className = "card";
-      card.dataset.varid = id; // base: ajustes sempre condicionais por id
+      card.dataset.varid = id;
 
       card.innerHTML = `
         <div class="cardTop">
@@ -352,11 +350,17 @@
     }
 
     function getSeriesModeById(varId){
-      // Regras fixas por variável (condicional por id; sem exceções espalhadas)
-      if(varId === "gscpi") return "CLOSE_ONLY";        // apenas Close, sem médias
-      if(varId === "cot_report") return "COT_MM12W";    // Close + MM12W (mm50), ignorar mm252
+      if(varId === "gscpi") return "CLOSE_ONLY";
+      if(varId === "cot_report") return "COT_MM12W";
       if(varId === "certified_stocks") return "MM12M";
-      return "DEFAULT";                                 // Close + MM50 + MM252
+      return "DEFAULT";
+    }
+
+    function colSpanByMode(mode){
+      if(mode === "CLOSE_ONLY") return 2;
+      if(mode === "COT_MM12W") return 3;
+      if(mode === "MM12M") return 3;
+      return 4;
     }
 
     function setTableHeaderByMode(card, mode){
@@ -371,16 +375,24 @@
         return;
       }
 
-      if(mode === "MM12M"){
-  theadRow.innerHTML = `
-    <th>Data</th>
-    <th class="right">Total</th>
-    <th class="right">MM12M</th>
-  `;
-  return;
-}
+      if(mode === "COT_MM12W"){
+        theadRow.innerHTML = `
+          <th>Data</th>
+          <th class="right">Close</th>
+          <th class="right">MM12W</th>
+        `;
+        return;
+      }
 
-      // DEFAULT
+      if(mode === "MM12M"){
+        theadRow.innerHTML = `
+          <th>Data</th>
+          <th class="right">Total</th>
+          <th class="right">MM12M</th>
+        `;
+        return;
+      }
+
       theadRow.innerHTML = `
         <th>Data</th>
         <th class="right">Close</th>
@@ -404,13 +416,11 @@
         const pts = Array.isArray(data.series) ? data.series.slice() : [];
         pts.sort((a,b)=> String(a.date).localeCompare(String(b.date)));
 
-        // Header por modo (condicional por id)
         setTableHeaderByMode(card, mode);
 
-        // Tabela (mais recente em cima)
         tbody.innerHTML = "";
         if(pts.length === 0){
-          const colSpan = (mode === "DEFAULT") ? 4 : (mode === "COT_MM12W" ? 3 : 2);
+          const colSpan = colSpanByMode(mode);
           tbody.innerHTML = `<tr><td colspan="${colSpan}" class="muted">Série vazia.</td></tr>`;
         } else {
           for(let i=pts.length-1; i>=0; i--){
@@ -423,7 +433,12 @@
                 <td class="right">${fmtNumber(Number(p.close))}</td>
               `;
             } else if(mode === "COT_MM12W"){
-              // Regra: usar mm50 como MM12W; ignorar mm252 sempre
+              tr.innerHTML = `
+                <td>${fmtDateBR(p.date)}</td>
+                <td class="right">${fmtNumber(Number(p.close))}</td>
+                <td class="right">${fmtNumber(Number(p.mm50))}</td>
+              `;
+            } else if(mode === "MM12M"){
               tr.innerHTML = `
                 <td>${fmtDateBR(p.date)}</td>
                 <td class="right">${fmtNumber(Number(p.close))}</td>
@@ -443,61 +458,24 @@
         }
 
         // Gráfico (mesma base; ajustes condicionais por id)
-if(mode === "CLOSE_ONLY"){
-  const ptsChart = pts.map(p => ({
-    date: p.date,
-    close: p.close,
-    mm50: NaN,
-    mm252: NaN
-  }));
+        if(mode === "CLOSE_ONLY"){
+          const ptsChart = pts.map(p => ({ date: p.date, close: p.close, mm50: NaN, mm252: NaN }));
+          drawMultiLine(canvas, ptsChart, { showMM50:false, showMM252:false });
 
-  drawMultiLine(canvas, ptsChart, {
-    showMM50: false,
-    showMM252: false
-  });
+        } else if(mode === "COT_MM12W"){
+          const ptsChart = pts.map(p => ({ date: p.date, close: p.close, mm50: p.mm50, mm252: NaN }));
+          drawMultiLine(canvas, ptsChart, { showMM50:true, showMM252:false, labelMM50:"MM12W" });
 
-} else if(mode === "COT_MM12W"){
-  // mm50 exibida como MM12W; mm252 ignorada
-  const ptsChart = pts.map(p => ({
-    date: p.date,
-    close: p.close,
-    mm50: p.mm50,
-    mm252: NaN
-  }));
+        } else if(mode === "MM12M"){
+          const ptsChart = pts.map(p => ({ date: p.date, close: p.close, mm50: p.mm50, mm252: NaN }));
+          drawMultiLine(canvas, ptsChart, { showMM50:true, showMM252:false, labelMM50:"MM12M" });
 
-  drawMultiLine(canvas, ptsChart, {
-    showMM50: true,
-    showMM252: false,
-    labelMM50: "MM12W"
-  });
-
-} else if(mode === "MM12M"){
-  // Certified Stocks: TOTAL + MM12M
-  const ptsChart = pts.map(p => ({
-    date: p.date,
-    close: p.close,
-    mm50: p.mm50,
-    mm252: NaN
-  }));
-
-  drawMultiLine(canvas, ptsChart, {
-    showMM50: true,
-    showMM252: false,
-    labelMM50: "MM12M"
-  });
-
-} else {
-  drawMultiLine(canvas, pts, {
-    showMM50: true,
-    showMM252: true,
-    labelMM50: "MM50",
-    labelMM252: "MM252"
-  });
-}
-
+        } else {
+          drawMultiLine(canvas, pts, { showMM50:true, showMM252:true, labelMM50:"MM50", labelMM252:"MM252" });
+        }
 
       }catch(err){
-        const colSpan = (mode === "DEFAULT") ? 4 : (mode === "COT_MM12W" ? 3 : 2);
+        const colSpan = colSpanByMode(mode);
         tbody.innerHTML = `<tr><td colspan="${colSpan}" class="muted">Erro: ${String(err.message || err)}</td></tr>`;
         const ctx = canvas.getContext("2d");
         ctx.fillStyle = "rgba(255,255,255,.70)";
