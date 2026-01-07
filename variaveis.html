@@ -85,7 +85,7 @@
       "usd_brl": "data/cafe/series/usd_brl.json",
       "gscpi": "data/cafe/series/gscpi_fretes.json",
       "cot_report": "data/cafe/series/cot_report.json",
-      "certified_stocks": "data/cafe/series/certified_stocks.json",
+      "estoques_certificados": "data/cafe/series/estoques_certificados.json",
     };
 
     function fmtNumber(n){
@@ -352,7 +352,7 @@
     function getSeriesModeById(varId){
       if(varId === "gscpi") return "CLOSE_ONLY";
       if(varId === "cot_report") return "COT_MM12W";
-      if(varId === "certified_stocks") return "MM12M";
+      if(varId === "estoques_certificados") return "MM12M";
       return "DEFAULT";
     }
 
