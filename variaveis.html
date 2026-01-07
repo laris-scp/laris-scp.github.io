@@ -115,8 +115,17 @@
       return `${dd}/${mm}/${yy}`;
     }
 
-    function drawMultiLine(canvas, points){
+    // Base única de gráfico, com ajustes condicionais via opts (por id)
+    function drawMultiLine(canvas, points, opts){
       // points: [{date, close, mm50, mm252}]
+      const o = Object.assign({
+        showMM50: true,
+        showMM252: true,
+        labelClose: "Close",
+        labelMM50: "MM50",
+        labelMM252: "MM252",
+      }, (opts || {}));
+
       const ctx = canvas.getContext("2d");
       const W = canvas.width, H = canvas.height;
       ctx.clearRect(0,0,W,H);
@@ -132,7 +141,10 @@
         return;
       }
 
-      const keys = ["close","mm50","mm252"];
+      const keys = ["close"];
+      if(o.showMM50) keys.push("mm50");
+      if(o.showMM252) keys.push("mm252");
+
       const values = [];
       for(const p of points){
         for(const k of keys){
@@ -140,6 +152,14 @@
           if(!Number.isNaN(v)) values.push(v);
         }
       }
+
+      if(values.length < 2){
+        ctx.fillStyle = "rgba(255,255,255,.70)";
+        ctx.font = "14px system-ui";
+        ctx.fillText("Série insuficiente para plotar.", padL, padT+20);
+        return;
+      }
+
       let yMin = Math.min(...values);
       let yMax = Math.max(...values);
       const margin = (yMax - yMin) * 0.12 || 1;
@@ -171,7 +191,6 @@
         ctx.fillText(v.toFixed(1), 8, y+4);
       }
 
-      // lines (we must not set specific colors? Here it's just UI; ok. If you prefer, we can keep single color.)
       const styles = {
         close: "rgba(231,236,255,.92)",
         mm50:  "rgba(56,189,248,.95)",
@@ -180,7 +199,7 @@
 
       function plot(key){
         ctx.strokeStyle = styles[key];
-        ctx.lineWidth = (key === "close") ? 2 : 2;
+        ctx.lineWidth = 2;
         ctx.beginPath();
         let started = false;
         points.forEach((p,i)=>{
@@ -194,7 +213,9 @@
         ctx.stroke();
       }
 
-      plot("close"); plot("mm50"); plot("mm252");
+      plot("close");
+      if(o.showMM50) plot("mm50");
+      if(o.showMM252) plot("mm252");
 
       // x labels (first and last)
       ctx.fillStyle = "rgba(255,255,255,.70)";
@@ -204,20 +225,29 @@
       const textW = ctx.measureText(lastLabel).width;
       ctx.fillText(lastLabel, padL+iw-textW, padT+ih+28);
 
-      // legend
-      ctx.fillStyle = "rgba(255,255,255,.78)";
+      // legend (condicional)
       ctx.font = "12px system-ui";
-      ctx.fillText("Close", padL, padT-2);
-      ctx.fillStyle = styles.mm50;
-      ctx.fillText("MM50", padL+55, padT-2);
-      ctx.fillStyle = styles.mm252;
-      ctx.fillText("MM252", padL+105, padT-2);
+      let lx = padL;
+      ctx.fillStyle = "rgba(255,255,255,.78)";
+      ctx.fillText(o.labelClose, lx, padT-2);
+      lx += ctx.measureText(o.labelClose).width + 14;
+
+      if(o.showMM50){
+        ctx.fillStyle = styles.mm50;
+        ctx.fillText(o.labelMM50, lx, padT-2);
+        lx += ctx.measureText(o.labelMM50).width + 14;
+      }
+      if(o.showMM252){
+        ctx.fillStyle = styles.mm252;
+        ctx.fillText(o.labelMM252, lx, padT-2);
+      }
     }
 
     function buildCard(snapshotRow){
       const id = snapshotRow.id;
       const card = document.createElement("div");
       card.className = "card";
+      card.dataset.varid = id; // base: ajustes sempre condicionais por id
 
       card.innerHTML = `
         <div class="cardTop">
@@ -238,14 +268,13 @@
         <div class="tablebox">
           <table>
             <thead>
-  <tr>
-    <th>Data</th>
-    <th class="right" data-col="close">Close</th>
-    <th class="right" data-col="mm50">MM50</th>
-    <th class="right" data-col="mm252">MM252</th>
-  </tr>
-</thead>
-
+              <tr>
+                <th>Data</th>
+                <th class="right">Close</th>
+                <th class="right">MM50</th>
+                <th class="right">MM252</th>
+              </tr>
+            </thead>
             <tbody data-tbody="1">
               <tr><td colspan="4" class="muted">Carregando…</td></tr>
             </tbody>
@@ -305,7 +334,6 @@
         });
       });
 
-      // carregar série (se existir)
       const seriesUrl = SERIES_MAP[id];
       if(seriesUrl){
         loadSeriesIntoCard(card, seriesUrl);
@@ -322,67 +350,111 @@
       return card;
     }
 
+    function getSeriesModeById(varId){
+      // Regras fixas por variável (condicional por id; sem exceções espalhadas)
+      if(varId === "gscpi") return "CLOSE_ONLY";        // apenas Close, sem médias
+      if(varId === "cot_report") return "COT_MM12W";    // Close + MM12W (mm50), ignorar mm252
+      return "DEFAULT";                                 // Close + MM50 + MM252
+    }
+
+    function setTableHeaderByMode(card, mode){
+      const theadRow = card.querySelector(".tablebox thead tr");
+      if(!theadRow) return;
+
+      if(mode === "CLOSE_ONLY"){
+        theadRow.innerHTML = `
+          <th>Data</th>
+          <th class="right">Close</th>
+        `;
+        return;
+      }
+
+      if(mode === "COT_MM12W"){
+        theadRow.innerHTML = `
+          <th>Data</th>
+          <th class="right">Close</th>
+          <th class="right">MM12W</th>
+        `;
+        return;
+      }
+
+      // DEFAULT
+      theadRow.innerHTML = `
+        <th>Data</th>
+        <th class="right">Close</th>
+        <th class="right">MM50</th>
+        <th class="right">MM252</th>
+      `;
+    }
+
     async function loadSeriesIntoCard(card, url){
       const canvas = card.querySelector("canvas");
       const tbody = card.querySelector('[data-tbody="1"]');
+
+      const varId = card.dataset.varid || "";
+      const mode = getSeriesModeById(varId);
 
       try{
         const res = await fetch(url, { cache:"no-store" });
         if(!res.ok) throw new Error("Falha ao carregar série: " + res.status);
         const data = await res.json();
+
         const pts = Array.isArray(data.series) ? data.series.slice() : [];
         pts.sort((a,b)=> String(a.date).localeCompare(String(b.date)));
 
-        // tabela (mais recente em cima)
-        // Detecta "modo simples" (GSCPI): se mm50 e mm252 são sempre 0/NaN, escondemos essas colunas
-const isSimpleSeries = pts.length > 0 && pts.every(p => {
-  const a = Number(p.mm50);
-  const b = Number(p.mm252);
-  const aBad = Number.isNaN(a) || Math.abs(a) < 1e-12;
-  const bBad = Number.isNaN(b) || Math.abs(b) < 1e-12;
-  return aBad && bBad;
-});
+        // Header por modo (condicional por id)
+        setTableHeaderByMode(card, mode);
 
-// Esconde/mostra headers MM50/MM252 só neste card (pontual)
-const th50  = card.querySelector('th[data-col="mm50"]');
-const th252 = card.querySelector('th[data-col="mm252"]');
-if(th50)  th50.style.display  = isSimpleSeries ? "none" : "";
-if(th252) th252.style.display = isSimpleSeries ? "none" : "";
+        // Tabela (mais recente em cima)
+        tbody.innerHTML = "";
+        if(pts.length === 0){
+          const colSpan = (mode === "DEFAULT") ? 4 : (mode === "COT_MM12W" ? 3 : 2);
+          tbody.innerHTML = `<tr><td colspan="${colSpan}" class="muted">Série vazia.</td></tr>`;
+        } else {
+          for(let i=pts.length-1; i>=0; i--){
+            const p = pts[i];
+            const tr = document.createElement("tr");
 
-// Tabela (mais recente em cima)
-tbody.innerHTML = "";
-for(let i=pts.length-1; i>=0; i--){
-  const p = pts[i];
-  const tr = document.createElement("tr");
+            if(mode === "CLOSE_ONLY"){
+              tr.innerHTML = `
+                <td>${fmtDateBR(p.date)}</td>
+                <td class="right">${fmtNumber(Number(p.close))}</td>
+              `;
+            } else if(mode === "COT_MM12W"){
+              // Regra: usar mm50 como MM12W; ignorar mm252 sempre
+              tr.innerHTML = `
+                <td>${fmtDateBR(p.date)}</td>
+                <td class="right">${fmtNumber(Number(p.close))}</td>
+                <td class="right">${fmtNumber(Number(p.mm50))}</td>
+              `;
+            } else {
+              tr.innerHTML = `
+                <td>${fmtDateBR(p.date)}</td>
+                <td class="right">${fmtNumber(Number(p.close))}</td>
+                <td class="right">${fmtNumber(Number(p.mm50))}</td>
+                <td class="right">${fmtNumber(Number(p.mm252))}</td>
+              `;
+            }
 
-  if(isSimpleSeries){
-    tr.innerHTML = `
-      <td>${fmtDateBR(p.date)}</td>
-      <td class="right">${fmtNumber(Number(p.close))}</td>
-    `;
-  } else {
-    tr.innerHTML = `
-      <td>${fmtDateBR(p.date)}</td>
-      <td class="right">${fmtNumber(Number(p.close))}</td>
-      <td class="right">${fmtNumber(Number(p.mm50))}</td>
-      <td class="right">${fmtNumber(Number(p.mm252))}</td>
-    `;
-  }
+            tbody.appendChild(tr);
+          }
+        }
 
-  tbody.appendChild(tr);
-}
-
-// Gráfico: se for simples, desenha só "close" e não desenha as MMs
-if(isSimpleSeries){
-  const ptsSimple = pts.map(p => ({ date: p.date, close: p.close, mm50: NaN, mm252: NaN }));
-  drawMultiLine(canvas, ptsSimple);
-} else {
-  drawMultiLine(canvas, pts);
-}
-
+        // Gráfico (mesma base; ajustes condicionais por id)
+        if(mode === "CLOSE_ONLY"){
+          const ptsChart = pts.map(p => ({ date: p.date, close: p.close, mm50: NaN, mm252: NaN }));
+          drawMultiLine(canvas, ptsChart, { showMM50:false, showMM252:false });
+        } else if(mode === "COT_MM12W"){
+          // mm50 exibida como MM12W; mm252 ignorada
+          const ptsChart = pts.map(p => ({ date: p.date, close: p.close, mm50: p.mm50, mm252: NaN }));
+          drawMultiLine(canvas, ptsChart, { showMM50:true, showMM252:false, labelMM50:"MM12W" });
+        } else {
+          drawMultiLine(canvas, pts, { showMM50:true, showMM252:true, labelMM50:"MM50", labelMM252:"MM252" });
+        }
 
       }catch(err){
-        tbody.innerHTML = `<tr><td colspan="4" class="muted">Erro: ${String(err.message || err)}</td></tr>`;
+        const colSpan = (mode === "DEFAULT") ? 4 : (mode === "COT_MM12W" ? 3 : 2);
+        tbody.innerHTML = `<tr><td colspan="${colSpan}" class="muted">Erro: ${String(err.message || err)}</td></tr>`;
         const ctx = canvas.getContext("2d");
         ctx.fillStyle = "rgba(255,255,255,.70)";
         ctx.font = "14px system-ui";
@@ -404,16 +476,14 @@ if(isSimpleSeries){
 
         const rows = Array.isArray(snap.rows) ? snap.rows.slice() : [];
 
-        // Mostrar todas as variáveis do snapshot.
-// Se não existir série publicada, o card exibirá o aviso automaticamente.
-grid.innerHTML = "";
-rows.forEach(r=>{
-  grid.appendChild(buildCard(r));
-});
+        grid.innerHTML = "";
+        rows.forEach(r=>{
+          grid.appendChild(buildCard(r));
+        });
 
-if(rows.length === 0){
-  grid.innerHTML = `<div class="card">Snapshot sem variáveis.</div>`;
-}
+        if(rows.length === 0){
+          grid.innerHTML = `<div class="card">Snapshot sem variáveis.</div>`;
+        }
 
       }catch(err){
         subtitle.textContent = "Erro ao carregar dados.";
