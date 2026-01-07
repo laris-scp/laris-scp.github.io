@@ -368,18 +368,16 @@
 
         const rows = Array.isArray(snap.rows) ? snap.rows.slice() : [];
 
-        // Por enquanto: mostrar apenas as variáveis que já têm série publicada
-        // (neste passo: apenas preco_arabica)
-        const filtered = rows.filter(r => SERIES_MAP[r.id]);
+        // Mostrar todas as variáveis do snapshot.
+// Se não existir série publicada, o card exibirá o aviso automaticamente.
+grid.innerHTML = "";
+rows.forEach(r=>{
+  grid.appendChild(buildCard(r));
+});
 
-        grid.innerHTML = "";
-        filtered.forEach(r=>{
-          grid.appendChild(buildCard(r));
-        });
-
-        if(filtered.length === 0){
-          grid.innerHTML = `<div class="card">Nenhuma série histórica publicada ainda. Publique pelo menos 1 JSON em <code>data/cafe/series/</code>.</div>`;
-        }
+if(rows.length === 0){
+  grid.innerHTML = `<div class="card">Snapshot sem variáveis.</div>`;
+}
 
       }catch(err){
         subtitle.textContent = "Erro ao carregar dados.";
