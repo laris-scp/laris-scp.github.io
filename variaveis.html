@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Variáveis – Café</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --card:#121a33;
+      --text:#e7ecff;
+      --muted:#a9b3d6;
+      --line:rgba(255,255,255,.10);
+      --good:#38bdf8;
+      --bad:#fb7185;
+      --neutral:#cbd5e1;
+    }
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; background:var(--bg); color:var(--text);}
+    .container{max-width:1100px;margin:0 auto;padding:24px;}
+    header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;}
+    h1{margin:0;font-size:22px;font-weight:700;}
+    .sub{color:var(--muted);font-size:13px;margin-top:6px;}
+    .btnbar{display:flex;gap:10px;flex-wrap:wrap;}
+    a.btn{display:inline-block;padding:10px 12px;border:1px solid var(--line);border-radius:10px;color:var(--text);text-decoration:none;font-size:13px;background:rgba(255,255,255,.03)}
+    a.btn:hover{background:rgba(255,255,255,.06)}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:18px;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;}
+    .cardTop{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+    .title{font-size:14px;font-weight:800;margin:0;}
+    .meta{color:var(--muted);font-size:12px;margin-top:4px;}
+    .toggle{display:flex;gap:8px;}
+    button.tbtn{
+      cursor:pointer;border:1px solid var(--line);
+      background:rgba(255,255,255,.03); color:var(--text);
+      border-radius:10px; padding:8px 10px; font-size:12px;
+    }
+    button.tbtn.active{background:rgba(255,255,255,.10)}
+    .vizbox{margin-top:12px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:rgba(255,255,255,.02)}
+    canvas{width:100%;display:block}
+    .tablebox{margin-top:12px;border:1px solid var(--line);border-radius:12px;overflow:auto;max-height:260px;display:none;}
+    table{width:100%;border-collapse:collapse;}
+    th,td{padding:10px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:13px;}
+    th{color:var(--muted);font-weight:700;background:rgba(255,255,255,.03)}
+    .right{text-align:right}
+    .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:12px;}
+    .stat{border:1px solid var(--line);border-radius:12px;padding:10px;background:rgba(255,255,255,.02)}
+    .k{color:var(--muted);font-size:11px}
+    .v{font-weight:800;margin-top:4px}
+    .scorepos{color:var(--good);font-weight:800}
+    .scoreneg{color:var(--bad);font-weight:800}
+    .scoreneu{color:var(--neutral);font-weight:800}
+    .small{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.35}
+    details{margin-top:10px}
+    details summary{cursor:pointer;color:var(--muted);font-size:12px}
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr}
+      .stats{grid-template-columns:repeat(2,1fr)}
+      header{flex-direction:column;align-items:flex-start}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Variáveis – Café</h1>
+        <div class="sub" id="subtitle">Carregando…</div>
+      </div>
+      <div class="btnbar">
+        <a class="btn" href="index.html">Home</a>
+        <a class="btn" href="painel.html">Painel</a>
+        <a class="btn" href="variaveis.html">Variáveis</a>
+      </div>
+    </header>
+
+    <div class="grid" id="grid">
+      <div class="card">Carregando…</div>
+    </div>
+  </div>
+
+  <script>
+    const SNAP_URL = "data/cafe/painel_snapshot.json";
+    const SERIES_MAP = {
+      "preco_arabica": "data/cafe/series/preco_arabica.json"
+      // no próximo passo vamos acrescentar as outras variáveis aqui
+    };
+
+    function fmtNumber(n){
+      if(n === null || n === undefined || Number.isNaN(n)) return "—";
+      return new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 }).format(n);
+    }
+    function fmtPercent(p){
+      if(p === null || p === undefined || Number.isNaN(p)) return "—";
+      return new Intl.NumberFormat("pt-BR", { style:"percent", maximumFractionDigits: 2 }).format(p);
+    }
+    function scoreClass(x){
+      if(x === null || x === undefined || Number.isNaN(x)) return "scoreneu";
+      if(x > 0.00001) return "scorepos";
+      if(x < -0.00001) return "scoreneg";
+      return "scoreneu";
+    }
+
+    function parseISODate(s){
+      const [y,m,d] = String(s).split("-").map(Number);
+      return new Date(y, (m||1)-1, d||1);
+    }
+    function fmtDateBR(iso){
+      const dt = parseISODate(iso);
+      const dd = String(dt.getDate()).padStart(2,"0");
+      const mm = String(dt.getMonth()+1).padStart(2,"0");
+      const yy = dt.getFullYear();
+      return `${dd}/${mm}/${yy}`;
+    }
+
+    function drawMultiLine(canvas, points){
+      // points: [{date, close, mm50, mm252}]
+      const ctx = canvas.getContext("2d");
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0,0,W,H);
+
+      const padL = 52, padR = 18, padT = 18, padB = 42;
+      const iw = W - padL - padR;
+      const ih = H - padT - padB;
+
+      if(!points || points.length < 2){
+        ctx.fillStyle = "rgba(255,255,255,.70)";
+        ctx.font = "14px system-ui";
+        ctx.fillText("Série insuficiente para plotar.", padL, padT+20);
+        return;
+      }
+
+      const keys = ["close","mm50","mm252"];
+      const values = [];
+      for(const p of points){
+        for(const k of keys){
+          const v = Number(p[k]);
+          if(!Number.isNaN(v)) values.push(v);
+        }
+      }
+      let yMin = Math.min(...values);
+      let yMax = Math.max(...values);
+      const margin = (yMax - yMin) * 0.12 || 1;
+      yMin -= margin; yMax += margin;
+
+      function xPix(i){ return padL + (i/(points.length-1))*iw; }
+      function yPix(v){ return padT + (1 - (v - yMin)/(yMax - yMin))*ih; }
+
+      // grid
+      ctx.strokeStyle = "rgba(255,255,255,.08)";
+      ctx.lineWidth = 1;
+      const gridY = 5;
+      for(let k=0;k<=gridY;k++){
+        const y = padT + (k/gridY)*ih;
+        ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(padL+iw,y); ctx.stroke();
+      }
+
+      // axes
+      ctx.strokeStyle = "rgba(255,255,255,.18)";
+      ctx.beginPath(); ctx.moveTo(padL,padT); ctx.lineTo(padL,padT+ih); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(padL,padT+ih); ctx.lineTo(padL+iw,padT+ih); ctx.stroke();
+
+      // y labels
+      ctx.fillStyle = "rgba(255,255,255,.70)";
+      ctx.font = "12px system-ui";
+      for(let k=0;k<=gridY;k++){
+        const v = yMax - (k/gridY)*(yMax-yMin);
+        const y = padT + (k/gridY)*ih;
+        ctx.fillText(v.toFixed(1), 8, y+4);
+      }
+
+      // lines (we must not set specific colors? Here it's just UI; ok. If you prefer, we can keep single color.)
+      const styles = {
+        close: "rgba(231,236,255,.92)",
+        mm50:  "rgba(56,189,248,.95)",
+        mm252: "rgba(251,113,133,.90)"
+      };
+
+      function plot(key){
+        ctx.strokeStyle = styles[key];
+        ctx.lineWidth = (key === "close") ? 2 : 2;
+        ctx.beginPath();
+        let started = false;
+        points.forEach((p,i)=>{
+          const v = Number(p[key]);
+          if(Number.isNaN(v)) return;
+          const x = xPix(i);
+          const y = yPix(v);
+          if(!started){ ctx.moveTo(x,y); started = true; }
+          else ctx.lineTo(x,y);
+        });
+        ctx.stroke();
+      }
+
+      plot("close"); plot("mm50"); plot("mm252");
+
+      // x labels (first and last)
+      ctx.fillStyle = "rgba(255,255,255,.70)";
+      ctx.font = "12px system-ui";
+      ctx.fillText(fmtDateBR(points[0].date), padL, padT+ih+28);
+      const lastLabel = fmtDateBR(points[points.length-1].date);
+      const textW = ctx.measureText(lastLabel).width;
+      ctx.fillText(lastLabel, padL+iw-textW, padT+ih+28);
+
+      // legend
+      ctx.fillStyle = "rgba(255,255,255,.78)";
+      ctx.font = "12px system-ui";
+      ctx.fillText("Close", padL, padT-2);
+      ctx.fillStyle = styles.mm50;
+      ctx.fillText("MM50", padL+55, padT-2);
+      ctx.fillStyle = styles.mm252;
+      ctx.fillText("MM252", padL+105, padT-2);
+    }
+
+    function buildCard(snapshotRow){
+      const id = snapshotRow.id;
+      const card = document.createElement("div");
+      card.className = "card";
+
+      card.innerHTML = `
+        <div class="cardTop">
+          <div>
+            <p class="title">${snapshotRow.variavel || id}</p>
+            <div class="meta">Frequência: ${snapshotRow.frequencia || "—"} • Última atualização: ${snapshotRow.ultima_atualizacao || "—"}</div>
+          </div>
+          <div class="toggle">
+            <button class="tbtn active" data-mode="chart">Gráfico</button>
+            <button class="tbtn" data-mode="table">Tabela</button>
+          </div>
+        </div>
+
+        <div class="vizbox">
+          <canvas data-canvas="1" width="1000" height="320"></canvas>
+        </div>
+
+        <div class="tablebox">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th class="right">Close</th>
+                <th class="right">MM50</th>
+                <th class="right">MM252</th>
+              </tr>
+            </thead>
+            <tbody data-tbody="1">
+              <tr><td colspan="4" class="muted">Carregando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="k">Último valor</div>
+            <div class="v">${fmtNumber(snapshotRow.ultimo_valor)}</div>
+          </div>
+          <div class="stat">
+            <div class="k">Nível</div>
+            <div class="v">${snapshotRow.nivel || "—"}</div>
+          </div>
+          <div class="stat">
+            <div class="k">Tendência</div>
+            <div class="v">${snapshotRow.tendencia || "—"}</div>
+          </div>
+          <div class="stat">
+            <div class="k">Momento</div>
+            <div class="v">${snapshotRow.momento || "—"}</div>
+          </div>
+          <div class="stat">
+            <div class="k">Score ponderado</div>
+            <div class="v ${scoreClass(Number(snapshotRow.score_ponderado))}">${fmtNumber(Number(snapshotRow.score_ponderado))}</div>
+          </div>
+        </div>
+
+        <div class="small">
+          <div><b>Percentil:</b> ${fmtPercent(snapshotRow.percentil)}</div>
+        </div>
+
+        <details>
+          <summary>Ver regra de sinal e fonte</summary>
+          <div class="small"><b>Regra:</b> ${(snapshotRow.regra_de_sinal || "—")}</div>
+          <div class="small"><b>Fonte:</b> ${(snapshotRow.fonte || "—")}</div>
+        </details>
+      `;
+
+      const btns = Array.from(card.querySelectorAll("button.tbtn"));
+      const vizbox = card.querySelector(".vizbox");
+      const tablebox = card.querySelector(".tablebox");
+
+      btns.forEach(b=>{
+        b.addEventListener("click", ()=>{
+          btns.forEach(x=>x.classList.remove("active"));
+          b.classList.add("active");
+          const mode = b.dataset.mode;
+          if(mode === "table"){
+            vizbox.style.display = "none";
+            tablebox.style.display = "block";
+          } else {
+            tablebox.style.display = "none";
+            vizbox.style.display = "block";
+          }
+        });
+      });
+
+      // carregar série (se existir)
+      const seriesUrl = SERIES_MAP[id];
+      if(seriesUrl){
+        loadSeriesIntoCard(card, seriesUrl);
+      } else {
+        const tb = card.querySelector('[data-tbody="1"]');
+        tb.innerHTML = `<tr><td colspan="4" class="muted">Série histórica ainda não publicada para esta variável.</td></tr>`;
+        const canvas = card.querySelector("canvas");
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "rgba(255,255,255,.70)";
+        ctx.font = "14px system-ui";
+        ctx.fillText("Série histórica ainda não publicada.", 60, 60);
+      }
+
+      return card;
+    }
+
+    async function loadSeriesIntoCard(card, url){
+      const canvas = card.querySelector("canvas");
+      const tbody = card.querySelector('[data-tbody="1"]');
+
+      try{
+        const res = await fetch(url, { cache:"no-store" });
+        if(!res.ok) throw new Error("Falha ao carregar série: " + res.status);
+        const data = await res.json();
+        const pts = Array.isArray(data.series) ? data.series.slice() : [];
+        pts.sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+
+        // tabela (mais recente em cima)
+        tbody.innerHTML = "";
+        for(let i=pts.length-1; i>=0; i--){
+          const p = pts[i];
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${fmtDateBR(p.date)}</td>
+            <td class="right">${fmtNumber(Number(p.close))}</td>
+            <td class="right">${fmtNumber(Number(p.mm50))}</td>
+            <td class="right">${fmtNumber(Number(p.mm252))}</td>
+          `;
+          tbody.appendChild(tr);
+        }
+
+        drawMultiLine(canvas, pts);
+
+      }catch(err){
+        tbody.innerHTML = `<tr><td colspan="4" class="muted">Erro: ${String(err.message || err)}</td></tr>`;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "rgba(255,255,255,.70)";
+        ctx.font = "14px system-ui";
+        ctx.fillText("Erro ao carregar série.", 60, 60);
+        console.error(err);
+      }
+    }
+
+    async function main(){
+      const subtitle = document.getElementById("subtitle");
+      const grid = document.getElementById("grid");
+
+      try{
+        const res = await fetch(SNAP_URL, { cache:"no-store" });
+        if(!res.ok) throw new Error("Falha ao carregar snapshot: " + res.status);
+        const snap = await res.json();
+
+        subtitle.textContent = `Snapshot: ${snap.updated_at || "—"} • Cards: clique em “Tabela” para ver os dados.`;
+
+        const rows = Array.isArray(snap.rows) ? snap.rows.slice() : [];
+
+        // Por enquanto: mostrar apenas as variáveis que já têm série publicada
+        // (neste passo: apenas preco_arabica)
+        const filtered = rows.filter(r => SERIES_MAP[r.id]);
+
+        grid.innerHTML = "";
+        filtered.forEach(r=>{
+          grid.appendChild(buildCard(r));
+        });
+
+        if(filtered.length === 0){
+          grid.innerHTML = `<div class="card">Nenhuma série histórica publicada ainda. Publique pelo menos 1 JSON em <code>data/cafe/series/</code>.</div>`;
+        }
+
+      }catch(err){
+        subtitle.textContent = "Erro ao carregar dados.";
+        grid.innerHTML = `<div class="card">Erro: ${String(err.message || err)}</div>`;
+        console.error(err);
+      }
+    }
+
+    main();
+  </script>
+</body>
+</html>
