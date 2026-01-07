@@ -237,13 +237,14 @@
         <div class="tablebox">
           <table>
             <thead>
-              <tr>
-                <th>Data</th>
-                <th class="right">Close</th>
-                <th class="right">MM50</th>
-                <th class="right">MM252</th>
-              </tr>
-            </thead>
+  <tr>
+    <th>Data</th>
+    <th class="right" data-col="close">Close</th>
+    <th class="right" data-col="mm50">MM50</th>
+    <th class="right" data-col="mm252">MM252</th>
+  </tr>
+</thead>
+
             <tbody data-tbody="1">
               <tr><td colspan="4" class="muted">Carregando…</td></tr>
             </tbody>
@@ -332,20 +333,52 @@
         pts.sort((a,b)=> String(a.date).localeCompare(String(b.date)));
 
         // tabela (mais recente em cima)
-        tbody.innerHTML = "";
-        for(let i=pts.length-1; i>=0; i--){
-          const p = pts[i];
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${fmtDateBR(p.date)}</td>
-            <td class="right">${fmtNumber(Number(p.close))}</td>
-            <td class="right">${fmtNumber(Number(p.mm50))}</td>
-            <td class="right">${fmtNumber(Number(p.mm252))}</td>
-          `;
-          tbody.appendChild(tr);
-        }
+        // Detecta "modo simples" (GSCPI): se mm50 e mm252 são sempre 0/NaN, escondemos essas colunas
+const isSimpleSeries = pts.length > 0 && pts.every(p => {
+  const a = Number(p.mm50);
+  const b = Number(p.mm252);
+  const aBad = Number.isNaN(a) || Math.abs(a) < 1e-12;
+  const bBad = Number.isNaN(b) || Math.abs(b) < 1e-12;
+  return aBad && bBad;
+});
 
-        drawMultiLine(canvas, pts);
+// Esconde/mostra headers MM50/MM252 só neste card (pontual)
+const th50  = card.querySelector('th[data-col="mm50"]');
+const th252 = card.querySelector('th[data-col="mm252"]');
+if(th50)  th50.style.display  = isSimpleSeries ? "none" : "";
+if(th252) th252.style.display = isSimpleSeries ? "none" : "";
+
+// Tabela (mais recente em cima)
+tbody.innerHTML = "";
+for(let i=pts.length-1; i>=0; i--){
+  const p = pts[i];
+  const tr = document.createElement("tr");
+
+  if(isSimpleSeries){
+    tr.innerHTML = `
+      <td>${fmtDateBR(p.date)}</td>
+      <td class="right">${fmtNumber(Number(p.close))}</td>
+    `;
+  } else {
+    tr.innerHTML = `
+      <td>${fmtDateBR(p.date)}</td>
+      <td class="right">${fmtNumber(Number(p.close))}</td>
+      <td class="right">${fmtNumber(Number(p.mm50))}</td>
+      <td class="right">${fmtNumber(Number(p.mm252))}</td>
+    `;
+  }
+
+  tbody.appendChild(tr);
+}
+
+// Gráfico: se for simples, desenha só "close" e não desenha as MMs
+if(isSimpleSeries){
+  const ptsSimple = pts.map(p => ({ date: p.date, close: p.close, mm50: NaN, mm252: NaN }));
+  drawMultiLine(canvas, ptsSimple);
+} else {
+  drawMultiLine(canvas, pts);
+}
+
 
       }catch(err){
         tbody.innerHTML = `<tr><td colspan="4" class="muted">Erro: ${String(err.message || err)}</td></tr>`;
