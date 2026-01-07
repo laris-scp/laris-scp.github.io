@@ -98,6 +98,33 @@
         </tbody>
       </table>
     </div>
+        <!-- Histórico do Termômetro -->
+    <div class="card" style="margin-top:16px;">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+        <div>
+          <div class="k">Histórico do Termômetro Geral</div>
+          <div class="sub muted" id="hist-sub">Carregando histórico…</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:rgba(255,255,255,.02)">
+        <canvas id="thermoChart" width="1000" height="320" style="width:100%;display:block;"></canvas>
+      </div>
+
+      <div style="margin-top:12px;max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:12px;">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th class="right">Termômetro Geral</th>
+            </tr>
+          </thead>
+          <tbody id="hist-tbody">
+            <tr><td colspan="2" class="muted">Carregando…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
     <div class="footer">
       Observação: esta visualização é a versão inicial. Vamos evoluir a experiência (histórico do termômetro, filtros e detalhamento) nos próximos passos.
@@ -106,6 +133,7 @@
 
   <script>
     const DATA_URL = "data/cafe/painel_snapshot.json";
+    const HIST_URL = "data/cafe/hist_termometro.json";
 
     function fmtNumber(n){
       if(n === null || n === undefined || Number.isNaN(n)) return "—";
@@ -128,7 +156,113 @@
       if(x > -0.5) return "Neutro";
       if(x > -1.5) return "Baixista";
       return "Baixista forte";
-    }
+    } function parseISODate(s){
+  // s: "YYYY-MM-DD"
+  const [y,m,d] = String(s).split("-").map(Number);
+  return new Date(y, (m||1)-1, d||1);
+}
+function fmtDateBR(iso){
+  const dt = parseISODate(iso);
+  const dd = String(dt.getDate()).padStart(2,"0");
+  const mm = String(dt.getMonth()+1).padStart(2,"0");
+  const yy = dt.getFullYear();
+  return `${dd}/${mm}/${yy}`;
+}
+
+function drawLineChart(canvas, points){
+  // points: [{date, value}]
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width;
+  const H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  // padding
+  const padL = 52, padR = 18, padT = 18, padB = 42;
+  const iw = W - padL - padR;
+  const ih = H - padT - padB;
+
+  if(!points || points.length < 2){
+    ctx.fillStyle = "rgba(255,255,255,.70)";
+    ctx.font = "14px system-ui";
+    ctx.fillText("Histórico insuficiente para plotar.", padL, padT+20);
+    return;
+  }
+
+  const xs = points.map((p,i)=>i);
+  const ys = points.map(p=>Number(p.value));
+
+  let yMin = Math.min(...ys);
+  let yMax = Math.max(...ys);
+
+  // margem visual
+  const margin = (yMax - yMin) * 0.15 || 0.5;
+  yMin -= margin; yMax += margin;
+
+  function xPix(i){ return padL + (i/(points.length-1))*iw; }
+  function yPix(v){ return padT + (1 - (v - yMin)/(yMax - yMin))*ih; }
+
+  // grid
+  ctx.strokeStyle = "rgba(255,255,255,.08)";
+  ctx.lineWidth = 1;
+
+  const gridY = 5;
+  for(let k=0;k<=gridY;k++){
+    const y = padT + (k/gridY)*ih;
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(padL+iw,y); ctx.stroke();
+  }
+
+  // eixos
+  ctx.strokeStyle = "rgba(255,255,255,.18)";
+  ctx.beginPath(); ctx.moveTo(padL,padT); ctx.lineTo(padL,padT+ih); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(padL,padT+ih); ctx.lineTo(padL+iw,padT+ih); ctx.stroke();
+
+  // labels Y
+  ctx.fillStyle = "rgba(255,255,255,.70)";
+  ctx.font = "12px system-ui";
+  for(let k=0;k<=gridY;k++){
+    const v = yMax - (k/gridY)*(yMax-yMin);
+    const y = padT + (k/gridY)*ih;
+    ctx.fillText(v.toFixed(2), 8, y+4);
+  }
+
+  // linha zero
+  if(yMin < 0 && yMax > 0){
+    const y0 = yPix(0);
+    ctx.strokeStyle = "rgba(255,255,255,.22)";
+    ctx.setLineDash([6,6]);
+    ctx.beginPath(); ctx.moveTo(padL,y0); ctx.lineTo(padL+iw,y0); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // série
+  ctx.strokeStyle = "rgba(56,189,248,.95)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  points.forEach((p,i)=>{
+    const x = xPix(i);
+    const y = yPix(Number(p.value));
+    if(i===0) ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+
+  // pontos
+  ctx.fillStyle = "rgba(56,189,248,.95)";
+  points.forEach((p,i)=>{
+    const x = xPix(i);
+    const y = yPix(Number(p.value));
+    ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill();
+  });
+
+  // labels X (primeiro e último)
+  ctx.fillStyle = "rgba(255,255,255,.70)";
+  ctx.font = "12px system-ui";
+  ctx.fillText(fmtDateBR(points[0].date), padL, padT+ih+28);
+  const lastLabel = fmtDateBR(points[points.length-1].date);
+  const textW = ctx.measureText(lastLabel).width;
+  ctx.fillText(lastLabel, padL+iw-textW, padT+ih+28);
+}
+
 
     async function main(){
       const subtitle = document.getElementById("subtitle");
@@ -183,6 +317,40 @@
             <td>${r.ultima_atualizacao ?? ""}</td>
           `;
           tbody.appendChild(tr);
+        }
+        // ====== HISTÓRICO TERMÔMETRO ======
+        const histSub = document.getElementById("hist-sub");
+        const histTbody = document.getElementById("hist-tbody");
+        const canvas = document.getElementById("thermoChart");
+
+        try{
+          const r2 = await fetch(HIST_URL, { cache: "no-store" });
+          if(!r2.ok) throw new Error("Falha ao carregar hist_termometro.json: " + r2.status);
+          const hist = await r2.json();
+          const pts = Array.isArray(hist.series) ? hist.series.slice() : [];
+          pts.sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+
+          histSub.textContent = `Pontos: ${pts.length} | Fonte: ${hist.meta?.source || "—"}`;
+
+          // tabela
+          histTbody.innerHTML = "";
+          for(let i=pts.length-1; i>=0; i--){
+            const p = pts[i];
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${fmtDateBR(p.date)}</td>
+              <td class="right ${scoreClass(Number(p.value))}">${fmtNumber(Number(p.value))}</td>
+            `;
+            histTbody.appendChild(tr);
+          }
+
+          // gráfico
+          drawLineChart(canvas, pts);
+
+        }catch(e){
+          histSub.textContent = "Erro ao carregar histórico.";
+          histTbody.innerHTML = `<tr><td colspan="2" class="muted">Erro: ${String(e.message || e)}</td></tr>`;
+          console.error(e);
         }
 
       }catch(err){
