@@ -146,7 +146,7 @@
   "peso": 2.0,
   "score_ponderado": 5.0,
   "frequencia": "Anual",
-  "ultima_atualizacao": "datetime.now()",
+  "ultima_atualizacao": "2026-01-07 12:37:29",
   "regra_de_sinal": "Score baseado no STU World (nível/tendência/momento) com inversão do bloco 2 (STU baixo = bullish). Tabela mostra decomposição por países (peso produção 5y × Δprodução YoY).",
   "fonte": "SQLite (vw_coffee) – World STU + produção dos principais países"
 }
