@@ -67,26 +67,7 @@
       "regra_de_sinal": "Nível indica se o dólar está baixo ou alto versus seu comportamento histórico recente; Tendência mostra a direção atual comparando o valor com médias de curto e longo prazo; Momento indica se essa tendência está ganhando ou perdendo força ao observar a evolução mensal da média de curto prazo; Score combina Nível, Tendência e Momento (com peso) em um único indicador.",
       "fonte": "BCB SGS (série 1) – USD/BRL"
     },
-    {
-      "id": "exportacao_agregada",
-      "bloco": 1,
-      "variavel": "EXPORTAÇÃO AGREGADA",
-      "ultimo_valor": 95515,
-      "percentil": 0.3871,
-      "nivel": "BAIXO",
-      "valor_nivel": -0.5,
-      "tendencia": "LATERAL",
-      "valor_tendencia": 0.0,
-      "momento": "NEUTRO",
-      "valor_momento": 0.0,
-      "score": -0.5,
-      "peso": 2.0,
-      "score_ponderado": -1.0,
-      "frequencia": "Anual",
-      "ultima_atualizacao": "2026-01-07 12:35:34",
-      "regra_de_sinal": "Nível indica se o valor está baixo ou alto versus seu histórico; Tendência mostra se a variável vem subindo, caindo ou ficando estável ao comparar os anos mais recentes; Momento indica se essa tendência está ganhando ou perdendo força; Score combina Nível, Tendência e Momento (com peso e ajuste por bloco quando aplicável) em um único indicador.",
-      "fonte": "USDA PSD (vw_coffee) – Exports agregada: Brazil, Vietnam, Colombia, Ethiopia, Uganda"
-    },
+    
     {
       "id": "basis_cepea_ice",
       "bloco": 1,
@@ -147,60 +128,29 @@
       "regra_de_sinal": "Nível indica se os estoques certificados da ICE estão baixos ou altos versus os últimos anos; Tendência compara a média de 1 ano com 2 e 3 anos para dizer se os estoques vêm subindo, caindo ou andando de lado; Momento mostra se essa tendência está acelerando ou perdendo força; Score combina Nível, Tendência e Momento (com ajuste de bloco e peso) em um único indicador.",
       "fonte": "ICE – Certified Stocks (EOM) – Coffee C"
     },
-    {
-      "id": "stock_to_use_global",
-      "bloco": 2,
-      "variavel": "STOCK TO USE GLOBAL",
-      "ultimo_valor": 0.0622,
-      "percentil": 0.0152,
-      "nivel": "MUITO BAIXO",
-      "valor_nivel": -1.0,
-      "tendencia": "QUEDA",
-      "valor_tendencia": -1.0,
-      "momento": "QUEDA DESACELERANDO",
-      "valor_momento": -0.5,
-      "score": 2.5,
-      "peso": 2.0,
-      "score_ponderado": 5.0,
-      "frequencia": "Anual",
-      "ultima_atualizacao": "2026-01-07 12:37:26",
-      "regra_de_sinal": "Nível indica se o stock-to-use global está baixo ou alto versus o histórico; Tendência mostra se o indicador vem subindo, caindo ou ficando estável ao comparar os anos mais recentes; Momento indica se essa tendência está ganhando ou perdendo força; Score combina Nível, Tendência e Momento (com ajuste de bloco e peso) em um único indicador.",
-      "fonte": "USDA PSD (vw_coffee) – World – Stock-to-Use"
-    },
-    {
-      "id": "producao_brasil",
-      "bloco": 2,
-      "variavel": "PRODUÇÃO BRASIL",
-      "ultimo_valor": 63000,
-      "percentil": 0.4194,
-      "nivel": "NEUTRO",
-      "valor_nivel": 0.0,
-      "tendencia": "QUEDA",
-      "valor_tendencia": -1.0,
-      "momento": "QUEDA ACELERANDO",
-      "valor_momento": -1.0,
-      "score": 2.0,
-      "peso": 1.0,
-      "score_ponderado": 2.0,
-      "frequencia": "Anual",
-      "ultima_atualizacao": "2026-01-06 13:21:09",
-      "regra_de_sinal": "Nível indica se o valor está baixo ou alto versus seu histórico; Tendência mostra se a variável vem subindo, caindo ou ficando estável ao comparar os anos mais recentes; Momento indica se essa tendência está ganhando ou perdendo força; Score combina Nível, Tendência e Momento (com peso e ajuste por bloco quando aplicável) em um único indicador.",
-      "fonte": "USDA PSD (vw_coffee) – Brazil – production"
-    },
+    
+   
     {
   "id": "fundamental_stu",
+  "bloco": 2,
   "variavel": "FUNDAMENTAL S&D (STU Global)",
-  "frequencia": "Anual",
-  "ultima_atualizacao": "—",
   "ultimo_valor": null,
   "percentil": null,
   "nivel": "—",
+  "valor_nivel": 0.0,
   "tendencia": "—",
+  "valor_tendencia": 0.0,
   "momento": "—",
-  "score_ponderado": null,
+  "valor_momento": 0.0,
+  "score": 0.0,
+  "peso": 2.0,
+  "score_ponderado": 0.0,
+  "frequencia": "Anual",
+  "ultima_atualizacao": "—",
   "regra_de_sinal": "Score baseado no STU World (nível/tendência/momento). Tabela mostra decomposição por países (peso produção 5y × Δprodução YoY).",
   "fonte": "SQLite (vw_coffee) – World STU + produção dos principais países"
 }
+
 
   ]
 }
