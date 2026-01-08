@@ -86,6 +86,7 @@
       "gscpi": "data/cafe/series/gscpi_fretes.json",
       "cot_report": "data/cafe/series/cot_report.json",
       "estoques_certificados": "data/cafe/series/estoques_certificados.json",
+      "basis_cepea_ice": "data/cafe/series/basis_cepea_ice.json",
     };
 
     function fmtNumber(n){
@@ -413,8 +414,24 @@
         if(!res.ok) throw new Error("Falha ao carregar série: " + res.status);
         const data = await res.json();
 
-        const pts = Array.isArray(data.series) ? data.series.slice() : [];
-        pts.sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+// Aceita dois formatos:
+// (A) { series: [...] }  -> padrão antigo
+// (B) { meta: {...}, data: [...] } -> seu JSON do basis
+let raw = [];
+if(Array.isArray(data.series)) raw = data.series.slice();
+else if(Array.isArray(data.data)) raw = data.data.slice();
+
+const pts = raw.map(p => ({
+  date: p.date || p.Data || p.data,
+  // padrão do site: close / mm50 / mm252
+  // seu JSON do basis: basis_med5 é a linha principal
+  close: (p.close ?? p.Close ?? p.basis_med5 ?? p.basis ?? p.value),
+  mm50:  (p.mm50  ?? p.MM50),
+  mm252: (p.mm252 ?? p.MM252),
+}));
+
+pts.sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+
 
         setTableHeaderByMode(card, mode);
 
