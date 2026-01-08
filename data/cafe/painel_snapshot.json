@@ -186,6 +186,21 @@
       "ultima_atualizacao": "2026-01-06 13:21:09",
       "regra_de_sinal": "Nível indica se o valor está baixo ou alto versus seu histórico; Tendência mostra se a variável vem subindo, caindo ou ficando estável ao comparar os anos mais recentes; Momento indica se essa tendência está ganhando ou perdendo força; Score combina Nível, Tendência e Momento (com peso e ajuste por bloco quando aplicável) em um único indicador.",
       "fonte": "USDA PSD (vw_coffee) – Brazil – production"
-    }
+    },
+    {
+  "id": "fundamental_stu",
+  "variavel": "FUNDAMENTAL S&D (STU Global)",
+  "frequencia": "Anual",
+  "ultima_atualizacao": "—",
+  "ultimo_valor": null,
+  "percentil": null,
+  "nivel": "—",
+  "tendencia": "—",
+  "momento": "—",
+  "score_ponderado": null,
+  "regra_de_sinal": "Score baseado no STU World (nível/tendência/momento). Tabela mostra decomposição por países (peso produção 5y × Δprodução YoY).",
+  "fonte": "SQLite (vw_coffee) – World STU + produção dos principais países"
+}
+
   ]
 }
