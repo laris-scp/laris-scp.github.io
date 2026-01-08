@@ -87,6 +87,7 @@
       "cot_report": "data/cafe/series/cot_report.json",
       "estoques_certificados": "data/cafe/series/estoques_certificados.json",
       "basis_cepea_ice": "data/cafe/series/basis_cepea_ice.json",
+      "fundamental_stu": "data/cafe/series/fundamental_stu.json",
     };
 
     function fmtNumber(n){
@@ -351,18 +352,22 @@
     }
 
     function getSeriesModeById(varId){
-      if(varId === "gscpi") return "CLOSE_ONLY";
-      if(varId === "cot_report") return "COT_MM12W";
-      if(varId === "estoques_certificados") return "MM12M";
-      return "DEFAULT";
-    }
+  if(varId === "gscpi") return "CLOSE_ONLY";
+  if(varId === "cot_report") return "COT_MM12W";
+  if(varId === "estoques_certificados") return "MM12M";
+  if(varId === "fundamental_stu") return "FUNDAMENTAL_STU";
+  return "DEFAULT";
+}
+
 
     function colSpanByMode(mode){
-      if(mode === "CLOSE_ONLY") return 2;
-      if(mode === "COT_MM12W") return 3;
-      if(mode === "MM12M") return 3;
-      return 4;
-    }
+  if(mode === "CLOSE_ONLY") return 2;
+  if(mode === "COT_MM12W") return 3;
+  if(mode === "MM12M") return 3;
+  if(mode === "FUNDAMENTAL_STU") return 5;
+  return 4;
+}
+
 
     function setTableHeaderByMode(card, mode){
       const theadRow = card.querySelector(".tablebox thead tr");
@@ -393,6 +398,18 @@
         `;
         return;
       }
+
+      if(mode === "FUNDAMENTAL_STU"){
+  theadRow.innerHTML = `
+    <th>País</th>
+    <th class="right">Peso (Prod. 5y)</th>
+    <th class="right">Produção (t)</th>
+    <th class="right">Δ YoY</th>
+    <th class="right">Contrib.</th>
+  `;
+  return;
+}
+
 
       theadRow.innerHTML = `
         <th>Data</th>
@@ -431,6 +448,33 @@ const pts = raw.map(p => ({
 }));
 
 pts.sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+// --- TABELA ESPECIAL: FUNDAMENTAL STU (decomp) ---
+if(mode === "FUNDAMENTAL_STU"){
+  setTableHeaderByMode(card, mode);
+  tbody.innerHTML = "";
+
+  const rows = (data && data.decomp && Array.isArray(data.decomp.rows)) ? data.decomp.rows : [];
+  if(rows.length === 0){
+    tbody.innerHTML = `<tr><td colspan="5" class="muted">Decomposição vazia.</td></tr>`;
+  } else {
+    for(const r of rows){
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${String(r.country ?? "—")}</td>
+        <td class="right">${fmtPercent(Number(r.w_prod_5y))}</td>
+        <td class="right">${fmtNumber(Number(r.prod))}</td>
+        <td class="right">${fmtNumber(Number(r.d_prod_yoy))}</td>
+        <td class="right">${fmtNumber(Number(r.contrib))}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+  }
+
+  // Gráfico: linha única (STU World) — usar close
+  const ptsChart = pts.map(p => ({ date: p.date, close: p.close, mm50: NaN, mm252: NaN }));
+  drawMultiLine(canvas, ptsChart, { showMM50:false, showMM252:false, labelClose:"STU (World)" });
+  return;
+}
 
 
         setTableHeaderByMode(card, mode);
