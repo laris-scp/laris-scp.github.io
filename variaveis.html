@@ -453,12 +453,19 @@
   date: p.date || p.Data || p.data,
   close: (p.close ?? p.Close ?? p.basis_med5 ?? p.basis ?? p.value),
 
-  // "mm50" continua sendo o campo interno usado pelo renderer,
-  // mas para COT aceitamos mm12w/mm12W e caímos para mm50 por compatibilidade.
-  mm50:  (p.mm12w ?? p.mm12W ?? p.mm50 ?? p.MM50),
+  // Campo interno "mm50" é reaproveitado pelo renderer.
+  // Prioridade:
+  //  - COT: mm12w
+  //  - Mensais (ex.: Ureia): mm4m
+  //  - Legado: mm50
+  mm50:  (p.mm12w ?? p.mm12W ?? p.mm4m ?? p.mm50 ?? p.MM50),
 
-  mm252: (p.mm252 ?? p.MM252),
+  // Prioridade:
+  //  - Mensais (ex.: Ureia): mm12m
+  //  - Legado: mm252
+  mm252: (p.mm12m ?? p.mm252 ?? p.MM252),
 }));
+
 
 
         pts.sort((a,b)=> String(a.date).localeCompare(String(b.date)));
