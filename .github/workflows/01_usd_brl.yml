@@ -1,0 +1,49 @@
+name: 01 - Update USD/BRL (series/usd_brl.json)
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 10:00 UTC = 07:00 America/Sao_Paulo (UTC-3)
+    - cron: "0 10 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cafe-usdbrl
+  cancel-in-progress: false
+
+jobs:
+  update-usdbrl:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas requests
+
+      - name: Run updater
+        run: |
+          python scripts/cafe/update_usd_brl.py
+
+      - name: Commit only if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet; then
+            echo "No changes detected. Skipping commit."
+            exit 0
+          fi
+
+          git add data/cafe/series/usd_brl.json
+          git commit -m "data(cafe): update usd_brl.json"
+          git push
