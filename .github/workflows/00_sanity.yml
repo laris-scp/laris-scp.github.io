@@ -3,7 +3,6 @@ name: 00 - Sanity (Automation Wiring)
 on:
   workflow_dispatch:
   schedule:
-    # 10:00 UTC = 07:00 America/Sao_Paulo (UTC-3)
     - cron: "0 10 * * *"
 
 permissions:
@@ -16,7 +15,6 @@ concurrency:
 jobs:
   sanity:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -32,11 +30,8 @@ jobs:
             "note": "This file is updated by GitHub Actions to validate automation wiring."
           }
           EOF
-          echo "Listing file:"
-          ls -la data/cafe/series/automation_sanity.json
           echo "Git status:"
           git status --porcelain
-
 
       - name: Commit only if changed
         run: |
