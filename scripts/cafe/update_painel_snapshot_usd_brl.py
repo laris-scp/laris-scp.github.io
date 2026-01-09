@@ -117,19 +117,16 @@ def main():
     # Score (sem peso)
     score = float(valor_nivel + valor_tendencia + valor_momento)
 
-    # --- Carregar snapshot e atualizar apenas o id=usd_brl ---
+        # --- Carregar snapshot e atualizar apenas o id=usd_brl ---
     snapshot = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))
 
-    # Pode ser lista direta ou objeto com chave "items". Vamos suportar ambos.
-    if isinstance(snapshot, dict) and "items" in snapshot:
-        items = snapshot["items"]
-    elif isinstance(snapshot, list):
-        items = snapshot
-    else:
-        raise RuntimeError("Formato inesperado em painel_snapshot.json")
+    if not (isinstance(snapshot, dict) and "rows" in snapshot and isinstance(snapshot["rows"], list)):
+        raise RuntimeError("Formato inesperado em painel_snapshot.json: esperado dict com chave 'rows' (lista).")
+
+    rows = snapshot["rows"]
 
     found = False
-    for item in items:
+    for item in rows:
         if item.get("id") == "usd_brl":
             peso = float(item.get("peso", 1.0))  # preserva o peso atual
             item.update({
@@ -152,19 +149,17 @@ def main():
             break
 
     if not found:
-        raise RuntimeError("Não encontrei id='usd_brl' em painel_snapshot.json")
+        raise RuntimeError("Não encontrei id='usd_brl' em painel_snapshot.json (rows).")
 
-    # Persistir no mesmo formato
-    if isinstance(snapshot, dict) and "items" in snapshot:
-        snapshot["items"] = items
-        out_obj = snapshot
-    else:
-        out_obj = items
+    # Atualiza timestamp geral do snapshot
+    snapshot["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    snapshot["rows"] = rows
 
     SNAPSHOT_PATH.write_text(
-        json.dumps(out_obj, ensure_ascii=False, indent=2) + "\n",
+        json.dumps(snapshot, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8"
     )
+
 
     print("OK: painel_snapshot.json atualizado (usd_brl).")
     print("Ult:", ult, "| Nivel:", nivel_txt, valor_nivel, "| Tend:", tendencia, valor_tendencia, "| Mom:", momento, valor_momento)
