@@ -3,8 +3,9 @@ name: 07 - Update Fertilizante (Ureia) (series/fertilizante_urea.json)
 on:
   workflow_dispatch:
   schedule:
-    # Dia 5 às 07:00 BRT = 10:00 UTC
-    - cron: "0 10 5 * *"
+  # Dia 5 e dia 15 às 07:00 BRT = 10:00 UTC
+  - cron: "0 10 5 * *"
+  - cron: "0 10 15 * *"
 
 permissions:
   contents: write
