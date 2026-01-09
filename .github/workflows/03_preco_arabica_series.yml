@@ -1,0 +1,49 @@
+name: 03 - Update Preço Arábica (series/preco_arabica.json)
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 10:02 UTC = 07:02 America/Sao_Paulo (UTC-3) — evita colisão com USD/BRL
+    - cron: "2 10 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cafe-preco-arabica-series
+  cancel-in-progress: false
+
+jobs:
+  update-preco-arabica:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas yfinance
+
+      - name: Run updater
+        run: |
+          python scripts/cafe/update_preco_arabica_series.py
+
+      - name: Commit only if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet; then
+            echo "No changes detected. Skipping commit."
+            exit 0
+          fi
+
+          git add data/cafe/series/preco_arabica.json
+          git commit -m "data(cafe): update preco_arabica.json"
+          git push
