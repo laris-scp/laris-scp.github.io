@@ -1,1 +1,48 @@
-temp
+name: 00 - Sanity (Automation Wiring)
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 10:00 UTC = 07:00 America/Sao_Paulo (UTC-3)
+    - cron: "0 10 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cafe-automation
+  cancel-in-progress: false
+
+jobs:
+  sanity:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Create/update sanity file
+        run: |
+          mkdir -p data/cafe
+          TS="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          cat > data/cafe/_automation_sanity.json << EOF
+          {
+            "name": "cafe_automation_sanity",
+            "updated_at_utc": "${TS}",
+            "note": "This file is updated by GitHub Actions to validate automation wiring."
+          }
+          EOF
+
+      - name: Commit only if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet; then
+            echo "No changes detected. Skipping commit."
+            exit 0
+          fi
+
+          git add data/cafe/_automation_sanity.json
+          git commit -m "chore(cafe): sanity update"
+          git push
