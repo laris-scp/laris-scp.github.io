@@ -2,9 +2,9 @@
   "commodity": "cafe",
   "updated_at": "2026-01-07 12:37:31",
   "thermometros": {
-  "bloco_1": -0.13,
+  "bloco_1": -1.0,
   "bloco_2": 1.75,
-  "geral": 0.50
+  "geral": 0.38
 },
   "rows": [
     {
