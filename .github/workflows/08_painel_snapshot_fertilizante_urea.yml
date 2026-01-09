@@ -1,0 +1,39 @@
+name: 08 - Update Painel Snapshot (Fertilizante Ureia)
+
+on:
+  workflow_run:
+    workflows: ["07 - Update Fertilizante (Ureia) (series/fertilizante_urea.json)"]
+    types:
+      - completed
+
+permissions:
+  contents: write
+
+jobs:
+  update-snapshot:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: |
+          python -m pip install --upgrade pip
+          pip install pandas
+
+      - run: |
+          python scripts/cafe/update_painel_snapshot_fertilizante_urea.py
+
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "No changes detected. Skipping commit."
+            exit 0
+          fi
+          git add data/cafe/painel_snapshot.json
+          git commit -m "data(cafe): update painel_snapshot (fertilizante_urea)"
+          git push
