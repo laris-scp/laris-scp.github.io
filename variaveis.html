@@ -450,11 +450,16 @@
         else if(Array.isArray(data.data)) raw = data.data.slice();
 
         const pts = raw.map(p => ({
-          date: p.date || p.Data || p.data,
-          close: (p.close ?? p.Close ?? p.basis_med5 ?? p.basis ?? p.value),
-          mm50:  (p.mm50  ?? p.MM50),
-          mm252: (p.mm252 ?? p.MM252),
-        }));
+  date: p.date || p.Data || p.data,
+  close: (p.close ?? p.Close ?? p.basis_med5 ?? p.basis ?? p.value),
+
+  // "mm50" continua sendo o campo interno usado pelo renderer,
+  // mas para COT aceitamos mm12w/mm12W e caímos para mm50 por compatibilidade.
+  mm50:  (p.mm12w ?? p.mm12W ?? p.mm50 ?? p.MM50),
+
+  mm252: (p.mm252 ?? p.MM252),
+}));
+
 
         pts.sort((a,b)=> String(a.date).localeCompare(String(b.date)));
 
