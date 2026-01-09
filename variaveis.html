@@ -88,6 +88,7 @@
       "estoques_certificados": "data/cafe/series/estoques_certificados.json",
       "fertilizante_urea": "data/cafe/series/fertilizante_urea.json",
       "fundamental_stu": "data/cafe/series/fundamental_stu.json",
+      "clima_soil": "data/cafe/series/clima_soil.json"
     };
 
     function fmtNumber(n){
@@ -357,6 +358,7 @@
       if(varId === "estoques_certificados") return "MM12M";
       if(varId === "fertilizante_urea") return "M4_M12";
       if(varId === "fundamental_stu") return "FUNDAMENTAL_STU";
+      if (varId === "clima_soil") return "CLOSE_ONLY";
       return "DEFAULT";
     }
 
