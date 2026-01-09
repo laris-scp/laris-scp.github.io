@@ -25,7 +25,7 @@ jobs:
         run: |
           mkdir -p data/cafe
           TS="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-          cat > data/cafe/_automation_sanity.json << EOF
+          cat > data/cafe/automation_sanity.json << EOF
           {
             "name": "cafe_automation_sanity",
             "updated_at_utc": "${TS}",
@@ -43,6 +43,6 @@ jobs:
             exit 0
           fi
 
-          git add data/cafe/_automation_sanity.json
+          git add data/cafe/automation_sanity.json
           git commit -m "chore(cafe): sanity update"
           git push
