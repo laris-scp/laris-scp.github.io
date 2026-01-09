@@ -1,0 +1,38 @@
+name: 05 - Update COT Report (series/cot_report.json)
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Sexta 23:00 UTC = 20:00 America/Sao_Paulo (UTC-3)
+    - cron: "0 23 * * 5"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cafe-cot-series
+  cancel-in-progress: false
+
+jobs:
+  update-cot-series:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: |
+          python -m pip install --upgrade pip
+          pip install pandas requests
+      - run: |
+          python scripts/cafe/update_cot_report_series.py
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "No changes detected. Skipping commit."
+            exit 0
+          fi
+          git add data/cafe/series/cot_report.json
+          git commit -m "data(cafe): update cot_report.json"
+          git push
