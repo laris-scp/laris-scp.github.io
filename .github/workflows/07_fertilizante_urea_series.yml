@@ -1,0 +1,42 @@
+name: 07 - Update Fertilizante (Ureia) (series/fertilizante_urea.json)
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Dia 5 às 07:00 BRT = 10:00 UTC
+    - cron: "0 10 5 * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cafe-urea-series
+  cancel-in-progress: false
+
+jobs:
+  update-urea-series:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: |
+          python -m pip install --upgrade pip
+          pip install pandas requests
+
+      - run: |
+          python scripts/cafe/update_fertilizante_urea_series.py
+
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "No changes detected. Skipping commit."
+            exit 0
+          fi
+          git add data/cafe/series/fertilizante_urea.json
+          git commit -m "data(cafe): update fertilizante_urea.json"
+          git push
