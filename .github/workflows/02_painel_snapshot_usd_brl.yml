@@ -1,0 +1,49 @@
+name: 02 - Update Painel Snapshot (USD/BRL only)
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Rodar logo após o USD/BRL (ex: 10:05 UTC)
+    - cron: "5 10 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cafe-snapshot-usdbrl
+  cancel-in-progress: false
+
+jobs:
+  update-snapshot-usdbrl:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas
+
+      - name: Run updater
+        run: |
+          python scripts/cafe/update_painel_snapshot_usd_brl.py
+
+      - name: Commit only if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet; then
+            echo "No changes detected. Skipping commit."
+            exit 0
+          fi
+
+          git add data/cafe/painel_snapshot.json
+          git commit -m "data(cafe): update painel_snapshot (usd_brl)"
+          git push
