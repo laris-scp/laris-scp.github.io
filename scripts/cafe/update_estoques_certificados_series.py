@@ -12,8 +12,6 @@ OUT_PATH = REPO_ROOT / "data/cafe/series/estoques_certificados.json"
 
 ICE_XLS_URL = "https://www.ice.com/publicdocs/futures_us_reports/coffee/EOM_KC_cert_stox_by_port_nov96-present.xls"
 
-# Se não existir histórico válido, carrega apenas últimos N meses (comportamento conservador)
-FALLBACK_MONTHS = 24
 
 # Correção de escala (se XLS vier ~10x maior que o histórico)
 RATIO_MIN = 8.0
@@ -119,10 +117,10 @@ def main():
 
     # decide o que adicionar
     if max_date is None:
-        cutoff = (pd.Timestamp.today() - pd.DateOffset(months=FALLBACK_MONTHS)).date().isoformat()
-        ice_new = ice.loc[ice["DATE"] >= cutoff].copy()
+        ice_new = ice.copy()
     else:
         ice_new = ice.loc[ice["DATE"] > max_date].copy()
+
 
     # merge (append-only) + dedupe
     base = existing_df[["date", "value"]].copy() if not existing_df.empty else pd.DataFrame(columns=["date", "value"])
