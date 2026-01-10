@@ -1,6 +1,6 @@
 {
   "commodity": "cafe",
-  "updated_at": "2026-01-10 22:11:41",
+  "updated_at": "2026-01-10 23:40:51",
   "thermometros": {
     "bloco_1": -1.07,
     "bloco_2": 1.68,
@@ -112,7 +112,7 @@
       "bloco": 2,
       "variavel": "ESTOQUES CERTIFICADOS",
       "ultimo_valor": 453155.0,
-      "percentil": 0.0909,
+      "percentil": 0.12709030100334448,
       "nivel": "MUITO BAIXO",
       "valor_nivel": -1.0,
       "tendencia": "LATERAL",
@@ -123,9 +123,9 @@
       "peso": 2.0,
       "score_ponderado": 2.0,
       "frequencia": "Mensal",
-      "ultima_atualizacao": "2026-01-07 12:37:29",
+      "ultima_atualizacao": "2026-01-10 23:40:51",
       "regra_de_sinal": "Nível indica se os estoques certificados da ICE estão baixos ou altos versus os últimos anos; Tendência compara a média de 1 ano com 2 e 3 anos para dizer se os estoques vêm subindo, caindo ou andando de lado; Momento mostra se essa tendência está acelerando ou perdendo força; Score combina Nível, Tendência e Momento (com ajuste de bloco e peso) em um único indicador.",
-      "fonte": "ICE – Certified Stocks (EOM) – Coffee C"
+      "fonte": "ICE – Certified Stocks (EOM)"
     },
     {
       "id": "fundamental_stu",
