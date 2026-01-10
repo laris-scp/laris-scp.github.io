@@ -1,17 +1,21 @@
 {
   "commodity": "cafe",
   "series": [
-    {
-      "date": "2026-01-10",
-      "value": 0.38
-    }
+    { "date": "2025-12-31", "value": 0.32 },
+    { "date": "2026-01-02", "value": 0.57 },
+    { "date": "2026-01-05", "value": 0.50 },
+    { "date": "2026-01-06", "value": 0.47 },
+    { "date": "2026-01-07", "value": 0.27 },
+    { "date": "2026-01-08", "value": 0.27 },
+    { "date": "2026-01-09", "value": 0.38 },
+    { "date": "2026-01-10", "value": 0.43 }
   ],
   "meta": {
     "id": "hist_termometro",
     "title": "Histórico do Termômetro Geral",
     "source": "painel_snapshot.json (thermometros.geral)",
     "frequency": "Diária",
-    "updated_at": "2026-01-10 19:22:52",
-    "value_name": "TERMOMETRO GERAL"
+    "value_name": "TERMOMETRO GERAL",
+    "updated_at": "2026-01-10 00:00:00"
   }
 }
