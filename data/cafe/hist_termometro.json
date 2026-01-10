@@ -1,16 +1,17 @@
 {
+  "commodity": "cafe",
+  "series": [
+    {
+      "date": "2026-01-10",
+      "value": 0.38
+    }
+  ],
   "meta": {
     "id": "hist_termometro",
     "title": "Histórico do Termômetro Geral",
     "source": "painel_snapshot.json (thermometros.geral)",
     "frequency": "Diária",
-    "updated_at": "2026-01-10 18:57:25",
+    "updated_at": "2026-01-10 19:22:52",
     "value_name": "TERMOMETRO GERAL"
-  },
-  "data": [
-    {
-      "date": "2026-01-10",
-      "value": 0.38
-    }
-  ]
+  }
 }
