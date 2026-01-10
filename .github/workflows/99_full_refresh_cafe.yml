@@ -42,6 +42,8 @@ jobs:
       # 1) SERIES (todas)
       # =========================
       - name: Run series scripts
+        env:
+          CDS_API_KEY: ${{ secrets.CDS_API_KEY }}
         run: |
           python scripts/cafe/update_usd_brl.py
           python scripts/cafe/update_preco_arabica_series.py
@@ -51,6 +53,7 @@ jobs:
           python scripts/cafe/update_clima_soil_series.py
           python scripts/cafe/update_fundamental_stu_series.py
           python scripts/cafe/update_estoques_certificados_series.py
+
 
       # =========================
       # 2) SNAPSHOT (todas)
