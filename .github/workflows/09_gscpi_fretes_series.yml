@@ -1,56 +1,42 @@
-name: Update 09_gscpi_fretes_series
+name: 09 - Update GSCPI (Fretes) (series/gscpi_fretes.json)
 
 on:
-  schedule:
-    - cron: "0 10 5 * *"   # Dia 5, 10:00 UTC (07:00 BRT)
   workflow_dispatch:
+  schedule:
+  # Dia 5 às 07:00 BRT = 10:00 UTC
+  - cron: "0 10 5 * *"
 
 permissions:
   contents: write
 
 concurrency:
-  group: gscpi-fretes-series
+  group: cafe-gscpi-series
   cancel-in-progress: false
 
 jobs:
   update-gscpi-series:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      # Mantém padrão comum: instala dependências do repo
-      # Se o seu repo usa outro arquivo/pasta (ex.: requirements/...), ajuste aqui.
-      - name: Install dependencies
-        run: |
+      - run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pandas requests openpyxl
 
-      - name: Run GSCPI series updater
-        run: |
+      - run: |
           python scripts/cafe/update_gscpi_fretes_series.py
 
-      - name: Commit changes (if any)
-        run: |
+      - run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          # Só stage do arquivo esperado
-          git add data/cafe/series/gscpi_fretes.json
-
-          # Se não houver diff, não commita
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
+          if git diff --quiet; then
+            echo "No changes detected. Skipping commit."
             exit 0
           fi
-
-          git commit -m "Update GSCPI series (NY Fed)"
+          git add data/cafe/series/gscpi_fretes.json
+          git commit -m "data(cafe): update gscpi_fretes.json"
           git push
