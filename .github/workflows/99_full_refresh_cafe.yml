@@ -68,7 +68,7 @@ jobs:
           python scripts/cafe/update_painel_snapshot_gscpi.py
           python scripts/cafe/update_painel_snapshot_clima_soil.py
           python scripts/cafe/update_painel_snapshot_fundamental_stu.py
-          python scripts/cafe/update_painel_snapshot_estoques_certificados.py
+        # python scripts/cafe/update_painel_snapshot_estoques_certificados.py
 
       # =========================
       # 3) TERMÔMETROS + HIST
