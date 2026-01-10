@@ -143,7 +143,7 @@
       "peso": 2.0,
       "score_ponderado": 5.0,
       "frequencia": "Anual",
-      "ultima_atualizacao": "2026-01-10 18:46:16",
+      "ultima_atualizacao": "2026-01-10 18:58:32",
       "regra_de_sinal": "Score baseado no STU World (nível/tendência/momento) com inversão do bloco 2 (STU baixo = bullish). Tabela mostra decomposição por países (peso produção 5y × Δprodução YoY).",
       "fonte": "USDA/FAS PSD API — Coffee, Green (World STU + produção dos principais países)"
     },
