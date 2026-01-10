@@ -16,7 +16,10 @@ ICE_XLS_URL = "https://www.ice.com/publicdocs/futures_us_reports/coffee/EOM_KC_c
 # Correção de escala (se XLS vier ~10x maior que o histórico)
 RATIO_MIN = 8.0
 RATIO_MAX = 12.0
-BACKFILL_MIN_POINTS = 200  # se o json tiver menos que isso, faz backfill completo (1996–hoje)
+
+# Backfill 1x: se o json existente tiver menos pontos que isso, refaz tudo (1996–hoje).
+# Depois disso, vira append-only normal.
+BACKFILL_MIN_POINTS = 200
 
 
 def load_json(path: Path):
@@ -57,7 +60,7 @@ def download_ice_xls(url: str) -> pd.DataFrame:
 
     raw = pd.read_excel(BytesIO(r.content), header=None, engine="xlrd")
 
-    # Seu padrão: data na col 1 e total na col 10
+    # Padrão: data na col 1 e total na col 10
     ice = raw.iloc[:, [1, 10]].copy()
     ice.columns = ["DATA", "TOTAL"]
 
@@ -79,7 +82,6 @@ def main():
 
     existing_df = pd.DataFrame(series_in) if series_in else pd.DataFrame(columns=["date", "value", "mm12m"])
 
-    
     # limpa e normaliza histórico existente
     if not existing_df.empty:
         existing_df["date"] = existing_df["date"].apply(as_date_str)
@@ -118,13 +120,11 @@ def main():
 
     # decide o que adicionar (backfill 1x se histórico ainda é curto)
     need_backfill = (len(existing_df) < BACKFILL_MIN_POINTS)
-    
+
     if max_date is None or need_backfill:
         ice_new = ice.copy()
     else:
         ice_new = ice.loc[ice["DATE"] > max_date].copy()
-
-
 
     # merge (append-only) + dedupe
     base = existing_df[["date", "value"]].copy() if not existing_df.empty else pd.DataFrame(columns=["date", "value"])
@@ -133,7 +133,13 @@ def main():
     merged = pd.concat([base, add], ignore_index=True)
     merged["date"] = merged["date"].apply(as_date_str)
     merged["value"] = pd.to_numeric(merged["value"], errors="coerce")
-    merged = merged.dropna(subset=["date", "value"]).sort_values("date").drop_duplicates(subset=["date"], keep="last").reset_index(drop=True)
+    merged = (
+        merged
+        .dropna(subset=["date", "value"])
+        .sort_values("date")
+        .drop_duplicates(subset=["date"], keep="last")
+        .reset_index(drop=True)
+    )
 
     # calcula MM12M (12 pontos)
     merged["mm12m"] = merged["value"].rolling(window=12, min_periods=12).mean()
