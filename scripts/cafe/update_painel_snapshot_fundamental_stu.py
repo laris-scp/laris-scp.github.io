@@ -133,20 +133,22 @@ def main() -> None:
     nivel, valor_nivel = nivel_from_percentil(percentil)
     tendencia, valor_tendencia, momento, valor_momento = tendencia_momento(vals)
 
-    # localizar item no snapshot
-    items = snap.get("items", None)
-    if not isinstance(items, list):
-        raise RuntimeError("painel_snapshot.json esperado com chave 'items' (lista).")
+    
+    # localizar lista de linhas do snapshot (formato oficial do projeto: chave 'rows')
+    rows = snap.get("rows", None)
+    if not isinstance(rows, list):
+        raise RuntimeError("painel_snapshot.json esperado com chave 'rows' (lista).")
+
 
     idx = None
-    for i, it in enumerate(items):
+    for i, it in enumerate(rows):
         if str(it.get("id", "")).strip() == VAR_ID:
             idx = i
             break
     if idx is None:
         raise RuntimeError(f"Item id='{VAR_ID}' não encontrado em painel_snapshot.json.")
 
-    item = items[idx]
+    item = rows[idx]
 
     bloco = int(item.get("bloco", 1))
     mult_bloco = 1.0 if bloco == 1 else (-1.0 if bloco == 2 else 1.0)
@@ -182,8 +184,9 @@ def main() -> None:
         "fonte": FONTE,
     })
 
-    items[idx] = item
-    snap["items"] = items
+    rows[idx] = item
+    snap["rows"] = rows
+
 
     write_json(SNAPSHOT_PATH, snap)
 
