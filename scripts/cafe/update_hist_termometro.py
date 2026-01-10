@@ -173,11 +173,14 @@ def main() -> None:
     meta_out.setdefault("frequency", "Diária")
     meta_out["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+        # --- saída FINAL no formato que o site consome ---
+    # commodity + series (não "data")
     out = {
         "commodity": commodity,
         "series": series,
         "meta": meta_out,
     }
+
 
     write_json(HIST_PATH, out)
 
