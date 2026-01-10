@@ -2,17 +2,17 @@
 # =============================================================================
 # HIST TERMÔMETRO (Geral) — Append-only a partir do painel_snapshot.json
 #
-# Objetivo:
-# - Ler data/cafe/painel_snapshot.json
-# - Extrair:
-#     date  = YYYY-MM-DD (a partir de updated_at)
-#     value = thermometros.geral
-# - Atualizar data/cafe/hist_termometro.json (append-only, sem duplicar a mesma date)
+# Formato OFICIAL (compatível com o site):
+# {
+#   "commodity": "cafe",
+#   "series": [ { "date":"YYYY-MM-DD", "value": <float> }, ... ],
+#   "meta": {... opcional ...}
+# }
 #
 # Regras:
-# - Se a API/inputs falharem (snapshot inválido, chaves ausentes): ERRO (workflow vermelho)
-# - Se não houver dado novo (date já existe): OK (verde) e não altera o arquivo
-# - Não depende de Sheets/Drive
+# - Se inputs falharem: ERRO (workflow vermelho)
+# - Se não houver dado novo (date já existe): OK (verde) e não altera arquivo
+# - Append-only
 # =============================================================================
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ from __future__ import annotations
 import json
 import os
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 SNAPSHOT_PATH = os.path.join("data", "cafe", "painel_snapshot.json")
 HIST_PATH = os.path.join("data", "cafe", "hist_termometro.json")
@@ -63,13 +63,11 @@ def parse_snapshot(snapshot: Any) -> Tuple[str, float]:
     if geral is None:
         die("painel_snapshot.json sem 'thermometros.geral'.")
 
-    # date = apenas YYYY-MM-DD (primeira parte)
-    date = updated_at.strip().split(" ")[0]
+    date = updated_at.strip().split(" ")[0]  # YYYY-MM-DD
     if len(date) != 10:
         die(f"updated_at inválido para extrair data (esperado YYYY-MM-DD ...): '{updated_at}'")
 
     try:
-        # valida a data
         datetime.strptime(date, "%Y-%m-%d")
     except Exception:
         die(f"Data inválida extraída de updated_at: '{date}'")
@@ -82,47 +80,58 @@ def parse_snapshot(snapshot: Any) -> Tuple[str, float]:
     return date, value
 
 
-def normalize_hist(hist: Any) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
+def normalize_existing_hist(hist: Any) -> Tuple[str, Dict[str, Any], List[Dict[str, Any]]]:
     """
-    Suporta:
-    - hist como dict com 'data': [...]
-    - hist como lista na raiz: [...]
-    Retorna (meta_dict, data_list)
+    Aceita:
+    - Formato oficial: dict com 'commodity' + 'series'
+    - Formato antigo gerado por engano: dict com 'meta' + 'data'
+    - Formato legado: lista na raiz
+    Retorna: (commodity, meta, series_points)
     """
+    commodity = "cafe"
     meta: Dict[str, Any] = {}
-    data: List[Dict[str, Any]] = []
+    series: List[Dict[str, Any]] = []
 
     if hist is None:
-        return meta, data
+        return commodity, meta, series
 
     if isinstance(hist, dict):
-        meta = hist.get("meta", {}) if isinstance(hist.get("meta", {}), dict) else {}
-        data_raw = hist.get("data", [])
-        if not isinstance(data_raw, list):
-            die("hist_termometro.json: chave 'data' existe mas não é lista.")
-        data = data_raw
-        return meta, data
+        if isinstance(hist.get("commodity"), str):
+            commodity = hist["commodity"]
+
+        if isinstance(hist.get("meta"), dict):
+            meta = hist["meta"]
+
+        # Formato oficial
+        if isinstance(hist.get("series"), list):
+            series = hist["series"]
+            return commodity, meta, series
+
+        # Formato errado (meta/data)
+        if isinstance(hist.get("data"), list):
+            # converter data -> series
+            series = [{"date": p.get("date"), "value": p.get("value")} for p in hist["data"] if isinstance(p, dict)]
+            return commodity, meta, series
+
+        die("hist_termometro.json: não encontrei 'series' nem 'data' em formato válido.")
 
     if isinstance(hist, list):
-        # formato legado: lista na raiz
-        return meta, hist
+        # legado: lista de pontos
+        series = hist
+        return commodity, meta, series
 
-    die("hist_termometro.json em formato inesperado (nem dict nem list).")
-    return meta, data  # pragma: no cover
+    die("hist_termometro.json em formato inesperado.")
+    return commodity, meta, series
 
 
-def extract_points(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """
-    Filtra e normaliza pontos válidos:
-    esperado: {"date": "YYYY-MM-DD", "value": number}
-    """
+def clean_points(points: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     out: List[Dict[str, Any]] = []
-    for p in data:
+    for p in points:
         if not isinstance(p, dict):
             continue
         d = p.get("date")
         v = p.get("value")
-        if not d or not isinstance(d, str):
+        if not isinstance(d, str) or len(d) != 10:
             continue
         try:
             datetime.strptime(d, "%Y-%m-%d")
@@ -146,40 +155,35 @@ def main() -> None:
     date, value = parse_snapshot(snapshot)
 
     hist = load_json(HIST_PATH)
-    meta, data_raw = normalize_hist(hist)
-    points = extract_points(data_raw)
+    commodity, meta, series_raw = normalize_existing_hist(hist)
+    series = clean_points(series_raw)
 
-    existing_dates = {p["date"] for p in points}
+    existing_dates = {p["date"] for p in series}
     if date in existing_dates:
         print(f"OK: hist_termometro.json já contém date={date}. Sem mudanças.")
         return
 
-    points.append({"date": date, "value": value})
-    points.sort(key=lambda x: x["date"])
+    series.append({"date": date, "value": value})
+    series.sort(key=lambda x: x["date"])
 
-    # Monta saída no formato oficial (dict com meta + data)
+    # Atualiza meta (mantendo o que já existe)
+    meta_out = dict(meta) if isinstance(meta, dict) else {}
+    meta_out.setdefault("title", "Histórico do Termômetro Geral")
+    meta_out.setdefault("source", "painel_snapshot.json (thermometros.geral)")
+    meta_out.setdefault("frequency", "Diária")
+    meta_out["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
     out = {
-        "meta": {
-            "id": "hist_termometro",
-            "title": "Histórico do Termômetro Geral",
-            "source": "painel_snapshot.json (thermometros.geral)",
-            "frequency": "Diária",
-            "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        },
-        "data": points,
+        "commodity": commodity,
+        "series": series,
+        "meta": meta_out,
     }
-
-    # preserva campos extras de meta existentes (se houver)
-    if isinstance(meta, dict):
-        for k, v in meta.items():
-            if k not in out["meta"]:
-                out["meta"][k] = v
 
     write_json(HIST_PATH, out)
 
-    print("OK: hist_termometro.json atualizado (append-only).")
+    print("OK: hist_termometro.json atualizado (append-only) no formato oficial (series).")
     print(f"Adicionado: date={date} | value={value}")
-    print(f"Total pontos: {len(points)}")
+    print(f"Total pontos: {len(series)}")
 
 
 if __name__ == "__main__":
