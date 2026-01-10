@@ -150,7 +150,7 @@ def main():
         "frequency": "Mensal (EOM)",
         "unit": "contratos (ICE) / total reportado",
         "updated_at": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
-        "notes": f"append-only; fallback {FALLBACK_MONTHS}m se vazio; escala x{scale_factor}",
+        "notes": f"append-only; full history; escala x{scale_factor}",
     }
 
     out = {"meta": meta_out, "series": series_out}
