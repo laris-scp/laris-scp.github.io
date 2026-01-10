@@ -31,8 +31,8 @@ jobs:
             openpyxl \
             "xlrd>=2.0.1" \
             lxml \
-            python-dateutil pytz
-
+            python-dateutil pytz \
+            xarray netCDF4
 
 
 
