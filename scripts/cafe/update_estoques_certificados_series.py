@@ -16,6 +16,7 @@ ICE_XLS_URL = "https://www.ice.com/publicdocs/futures_us_reports/coffee/EOM_KC_c
 # Correção de escala (se XLS vier ~10x maior que o histórico)
 RATIO_MIN = 8.0
 RATIO_MAX = 12.0
+BACKFILL_MIN_POINTS = 200  # se o json tiver menos que isso, faz backfill completo (1996–hoje)
 
 
 def load_json(path: Path):
@@ -115,11 +116,14 @@ def main():
     if scale_factor != 1.0:
         ice["TOTAL"] = ice["TOTAL"] * scale_factor
 
-    # decide o que adicionar
-    if max_date is None:
+    # decide o que adicionar (backfill 1x se histórico ainda é curto)
+    need_backfill = (len(existing_df) < BACKFILL_MIN_POINTS)
+    
+    if max_date is None or need_backfill:
         ice_new = ice.copy()
     else:
         ice_new = ice.loc[ice["DATE"] > max_date].copy()
+
 
 
     # merge (append-only) + dedupe
