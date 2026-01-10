@@ -80,22 +80,26 @@ def main():
 
     existing_df = pd.DataFrame(series_in) if series_in else pd.DataFrame(columns=["date", "value", "mm12m"])
 
-    # limpa e normaliza
-        if not existing_df.empty:
+    
+    # limpa e normaliza histórico existente
+    if not existing_df.empty:
         existing_df["date"] = existing_df["date"].apply(as_date_str)
         existing_df["value"] = pd.to_numeric(existing_df.get("value"), errors="coerce")
-        existing_df = existing_df.dropna(subset=["date", "value"]).sort_values("date").reset_index(drop=True)
+        existing_df = (
+            existing_df
+            .dropna(subset=["date", "value"])
+            .sort_values("date")
+            .reset_index(drop=True)
+        )
 
-        if existing_df.empty:
-            max_date = None
-            last_hist_total = None
-        else:
-            max_date = existing_df["date"].max()
-            last_hist_total = float(existing_df.loc[existing_df["date"] == max_date, "value"].iloc[-1])
-    else:
+    if existing_df.empty:
         max_date = None
         last_hist_total = None
-
+    else:
+        max_date = existing_df["date"].max()
+        last_hist_total = float(
+            existing_df.loc[existing_df["date"] == max_date, "value"].iloc[-1]
+        )
 
     # baixa ICE
     ice = download_ice_xls(ICE_XLS_URL)
