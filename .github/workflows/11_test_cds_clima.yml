@@ -1,0 +1,58 @@
+name: 11 - Test CDS Copernicus (Clima)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-cds:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install cdsapi xarray netcdf4
+
+      - name: Configure CDS credentials
+        env:
+          CDS_API_KEY: ${{ secrets.CDS_API_KEY }}
+        run: |
+          echo "url: https://cds.climate.copernicus.eu/api" > ~/.cdsapirc
+          echo "key: ${CDS_API_KEY}" >> ~/.cdsapirc
+          chmod 600 ~/.cdsapirc
+          echo "OK: .cdsapirc criado"
+
+      - name: Test download ERA5-Land (1 year)
+        run: |
+          python - << 'EOF'
+          import cdsapi
+          from pathlib import Path
+
+          out = Path("test_clima.nc")
+
+          client = cdsapi.Client()
+          client.retrieve(
+              "reanalysis-era5-land-monthly-means",
+              {
+                  "product_type": ["monthly_averaged_reanalysis"],
+                  "variable": ["volumetric_soil_water_layer_3"],
+                  "year": ["2024"],
+                  "month": ["01"],
+                  "time": ["00:00"],
+                  "area": [-15, -55, -25, -40],
+                  "data_format": "netcdf",
+                  "download_format": "unarchived",
+              },
+          ).download(str(out))
+
+          print("Arquivo baixado:", out, "| existe =", out.exists())
+          EOF
