@@ -27,7 +27,7 @@ def load_source_series() -> pd.DataFrame:
     r = requests.get(GSCPI_URL_XLSX, timeout=120)
     r.raise_for_status()
 
-    wb = pd.read_excel(BytesIO(r.content), sheet_name=None)
+    wb = pd.read_excel(BytesIO(r.content), sheet_name=None, engine="openpyxl")
 
     series_df = None
     used_sheet = None
