@@ -1,0 +1,39 @@
+name: 17 - cafe - estoques_certificados - series
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 12 5 * *" # dia 5, 12:00 UTC (09:00 Brasil, aprox.)
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas requests xlrd openpyxl
+
+      - name: Update series (estoques certificados)
+        run: |
+          python scripts/cafe/update_estoques_certificados_series.py
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/cafe/series/estoques_certificados.json
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git commit -m "data(cafe): update estoques_certificados series"
+          git push
