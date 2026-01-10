@@ -51,29 +51,31 @@ def parse_date_yyyy_mm_dd(s: str) -> str:
 
 def ensure_official_format(obj):
     """
-    Converte/garante formato oficial:
+    Formato oficial esperado pelo site:
     {
       "meta": {...},
-      "data": [{"date":"YYYY-MM-DD","value":float}, ...]
+      "series": [{"date":"YYYY-MM-DD","value":float}, ...]
     }
+    Aceita também legado com chave 'data'.
     """
-    if isinstance(obj, dict) and "meta" in obj and "data" in obj and isinstance(obj["data"], list):
-        # já é oficial
-        return obj, True
+    if isinstance(obj, dict):
+        if "meta" in obj and "series" in obj and isinstance(obj["series"], list):
+            return obj, True
+        if "meta" in obj and "data" in obj and isinstance(obj["data"], list):
+            # legado -> converte para series
+            return {"meta": obj.get("meta", {}), "series": obj["data"]}, False
 
-    # se vier em outro formato, tenta migrar minimamente
+    # se vier como lista de pontos
     if isinstance(obj, list):
-        # lista de pontos
-        data = []
+        series = []
         for p in obj:
-            if isinstance(p, dict) and "date" in p and ("value" in p or "close" in p):
-                v = p.get("value", p.get("close"))
-                data.append({"date": parse_date_yyyy_mm_dd(p["date"]), "value": float(v)})
-        out = {"meta": {}, "data": data}
-        return out, False
+            if isinstance(p, dict) and "date" in p and "value" in p:
+                series.append({"date": str(p["date"]), "value": float(p["value"])})
+        return {"meta": {}, "series": series}, False
 
-    # formato desconhecido -> inicializa vazio oficial
-    return {"meta": {}, "data": []}, False
+    # formato desconhecido -> inicializa vazio no formato oficial
+    return {"meta": {}, "series": []}, False
+
 
 def main():
     snap = load_json(SNAPSHOT_PATH)
@@ -95,12 +97,13 @@ def main():
 
     # Carrega histórico
     hist_raw = load_json(HIST_PATH)
-    hist_obj, is_official = ensure_official_format(hist_raw) if hist_raw is not None else ({"meta": {}, "data": []}, True)
+    hist_obj, is_official = ensure_official_format(hist_raw) if hist_raw is not None else ({"meta": {}, "series": []}, True)
 
     meta_in = hist_obj.get("meta") if isinstance(hist_obj, dict) else {}
-    series = hist_obj.get("data") if isinstance(hist_obj, dict) else None
+    series = hist_obj.get("series") if isinstance(hist_obj, dict) else None
     if not isinstance(series, list):
-        die("hist_termometro.json esperado com chave 'data' (lista).")
+        die("hist_termometro.json esperado com chave 'series' (lista).")
+
 
     # Normaliza e filtra pontos válidos
     cleaned = []
@@ -144,7 +147,7 @@ def main():
     meta_out.setdefault("value_name", "TERMOMETRO GERAL")
     meta_out["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    out = {"meta": meta_out, "data": series_out}
+    out = {"meta": meta_out, "series": series_out}
     save_json(HIST_PATH, out)
 
     print("OK: hist_termometro.json atualizado (upsert por data).")
