@@ -44,6 +44,7 @@ jobs:
       - name: Run series scripts
         env:
           CDS_API_KEY: ${{ secrets.CDS_API_KEY }}
+          FAS_PSD_API_KEY: ${{ secrets.FAS_PSD_API_KEY }}
         run: |
           python scripts/cafe/update_usd_brl.py
           python scripts/cafe/update_preco_arabica_series.py
