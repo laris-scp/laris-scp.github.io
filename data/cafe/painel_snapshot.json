@@ -1,6 +1,6 @@
 {
   "commodity": "cafe",
-  "updated_at": "2026-01-10 19:48:17",
+  "updated_at": "2026-01-10 20:47:40",
   "thermometros": {
     "bloco_1": -1.07,
     "bloco_2": 1.68,
@@ -23,7 +23,7 @@
       "peso": 1.0,
       "score_ponderado": -2.5,
       "frequencia": "Diária",
-      "ultima_atualizacao": "2026-01-10 10:28:58",
+      "ultima_atualizacao": "2026-01-10 20:47:39",
       "regra_de_sinal": "Nível indica se o preço está baixo ou alto versus o histórico recente; Tendência mostra a direção atual comparando o preço com médias de curto e longo prazo; Momento indica se essa tendência está ganhando ou perdendo força ao observar a evolução mensal da média; Score combina Nível, Tendência e Momento (com peso e ajuste por bloco) em um único indicador.",
       "fonte": "Yahoo Finance (KC=F) | diário | Close | MMs 50/252 | janela nível 10a"
     },
@@ -43,7 +43,7 @@
       "peso": 2.0,
       "score_ponderado": 0.0,
       "frequencia": "Semanal",
-      "ultima_atualizacao": "2026-01-09 23:20:55",
+      "ultima_atualizacao": "2026-01-10 20:47:39",
       "regra_de_sinal": "Nível mostra se o posicionamento líquido dos fundos (Managed Money) está baixo ou alto em relação aos últimos 5 anos; Tendência indica se esse posicionamento vem aumentando, diminuindo ou ficando estável ao comparar médias de períodos mais antigos e mais recentes; Momento mostra se essa tendência está ganhando ou perdendo força ao comparar a mudança entre as janelas; Score combina Nível, Tendência e Momento (com peso) em um indicador único.",
       "fonte": "CFTC COT (Disaggregated) | Coffee C (ICE) | Managed Money (net long - short)"
     },
@@ -63,7 +63,7 @@
       "peso": 2.0,
       "score_ponderado": -5.0,
       "frequencia": "Diária",
-      "ultima_atualizacao": "2026-01-10 10:30:28",
+      "ultima_atualizacao": "2026-01-10 20:47:38",
       "regra_de_sinal": "Nível indica se o dólar está baixo ou alto versus seu comportamento histórico recente; Tendência mostra a direção atual comparando o valor com médias de curto e longo prazo; Momento indica se essa tendência está ganhando ou perdendo força ao observar a evolução mensal da média de curto prazo; Score combina Nível, Tendência e Momento (com peso) em um único indicador.",
       "fonte": "BCB SGS (série 1) – USD/BRL"
     },
@@ -83,7 +83,7 @@
       "peso": 1.0,
       "score_ponderado": -1.0,
       "frequencia": "Mensal",
-      "ultima_atualizacao": "2026-01-09 20:36:33",
+      "ultima_atualizacao": "2026-01-10 20:47:39",
       "regra_de_sinal": "Nível indica se o preço da ureia está baixo ou alto no histórico. Tendência compara médias móveis de 4 e 12 meses. Momento avalia aceleração ou desaceleração da média curta. Ureia mais cara eleva custo de produção e tende a reduzir oferta futura de café.",
       "fonte": "World Bank – Commodity Markets Outlook (Pink Sheet, Urea $/mt)"
     },
@@ -103,7 +103,7 @@
       "peso": 1.0,
       "score_ponderado": 1.0,
       "frequencia": "Mensal",
-      "ultima_atualizacao": "2026-01-10 15:02:37",
+      "ultima_atualizacao": "2026-01-10 20:47:40",
       "regra_de_sinal": "Nível = percentil do GSCPI no histórico completo. Tendência usa os 3 últimos pontos com eps=0.05: ALTA (d1,d2>eps), QUEDA (d1,d2<-eps), LATERAL (|d1|,|d2|<=eps), senão INDEFINIDA. Momento compara d2 vs d1 (acelera/desacelera). Score ajustado por BLOCO e multiplicado pelo PESO.",
       "fonte": "NY Fed – Global Supply Chain Pressure Index (GSCPI)"
     },
@@ -143,7 +143,7 @@
       "peso": 2.0,
       "score_ponderado": 5.0,
       "frequencia": "Anual",
-      "ultima_atualizacao": "2026-01-10 18:58:32",
+      "ultima_atualizacao": "2026-01-10 20:47:40",
       "regra_de_sinal": "Score baseado no STU World (nível/tendência/momento) com inversão do bloco 2 (STU baixo = bullish). Tabela mostra decomposição por países (peso produção 5y × Δprodução YoY).",
       "fonte": "USDA/FAS PSD API — Coffee, Green (World STU + produção dos principais países)"
     },
@@ -163,7 +163,7 @@
       "peso": 1.5,
       "score_ponderado": 2.25,
       "frequencia": "Mensal",
-      "ultima_atualizacao": "2026-01-10 15:45:15",
+      "ultima_atualizacao": "2026-01-10 20:47:40",
       "regra_de_sinal": "Score climático baseado na umidade do solo (ERA5-Land, camada 28–100cm). Menor umidade (seca) indica maior risco produtivo e tende a ser bullish para o preço. Nível via percentil histórico; tendência e momento via últimos 3 meses.",
       "fonte": "ERA5-Land (ECMWF/Copernicus) — swvl3 (Volumetric soil water layer 3), média regional Brasil cafeeiro (bbox [-15, -55, -25, -40]). Último mês=2025-12-01."
     }
