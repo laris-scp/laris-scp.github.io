@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   workflow_run:
     workflows:
-      - Update 09_gscpi_fretes_series
+      - 09_gscpi_fretes_series
     types:
       - completed
 
