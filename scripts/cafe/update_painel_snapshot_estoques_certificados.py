@@ -100,8 +100,7 @@ def main():
     })
 
     snap["updated_at"] = now
-    snap["thermometers"]["geral"] = snap["thermometers"]["geral"]
-
+    
     save_json(SNAPSHOT_PATH, snap)
     print("OK: painel_snapshot atualizado (estoques certificados).")
 
