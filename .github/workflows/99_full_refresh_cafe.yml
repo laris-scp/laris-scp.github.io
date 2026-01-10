@@ -1,0 +1,88 @@
+name: 99_full_refresh_cafe
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: full_refresh_cafe
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # mantenha aqui somente o que algum script realmente usa
+          python -m pip install requests numpy pandas
+
+      # =========================
+      # 1) SERIES (todas)
+      # =========================
+      - name: Run series scripts
+        run: |
+          python scripts/cafe/update_usd_brl.py
+          python scripts/cafe/update_preco_arabica_series.py
+          python scripts/cafe/update_cot_report_series.py
+          python scripts/cafe/update_fertilizante_urea_series.py
+          python scripts/cafe/update_gscpi_fretes_series.py
+          python scripts/cafe/update_clima_soil_series.py
+          python scripts/cafe/update_fundamental_stu_series.py
+          python scripts/cafe/update_estoques_certificados_series.py
+
+      # =========================
+      # 2) SNAPSHOT (todas)
+      # =========================
+      - name: Run snapshot scripts
+        run: |
+          python scripts/cafe/update_painel_snapshot_usd_brl.py
+          python scripts/cafe/update_painel_snapshot_preco_arabica.py
+          python scripts/cafe/update_painel_snapshot_cot_report.py
+          python scripts/cafe/update_painel_snapshot_fertilizante_urea.py
+          python scripts/cafe/update_painel_snapshot_gscpi.py
+          python scripts/cafe/update_painel_snapshot_clima_soil.py
+          python scripts/cafe/update_painel_snapshot_fundamental_stu.py
+          python scripts/cafe/update_painel_snapshot_estoques_certificados.py
+
+      # =========================
+      # 3) TERMÔMETROS + HIST
+      # =========================
+      - name: Update thermometros in painel_snapshot.json
+        run: |
+          python scripts/cafe/update_painel_thermometros.py
+
+      - name: Update hist_termometro.json
+        run: |
+          python scripts/cafe/update_hist_termometro.py
+
+      # =========================
+      # 4) COMMIT (apenas JSONs do site)
+      # =========================
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add data/cafe/series/*.json
+          git add data/cafe/painel_snapshot.json
+          git add data/cafe/hist_termometro.json
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "data(cafe): full refresh (series + snapshot + thermometros)"
+          git push
