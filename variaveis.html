@@ -449,22 +449,30 @@
         if(Array.isArray(data.series)) raw = data.series.slice();
         else if(Array.isArray(data.data)) raw = data.data.slice();
 
-        const pts = raw.map(p => ({
-  date: p.date || p.Data || p.data,
-  close: (p.close ?? p.Close ?? p.basis_med5 ?? p.basis ?? p.value),
+        const pts = raw.map(p => {
+        const date = (p.date || p.Data || p.data);
+        const close = (p.close ?? p.Close ?? p.basis_med5 ?? p.basis ?? p.value);
+      
+        // Base (mantém compatibilidade com o que já existia)
+        let mm50  = (p.mm12w ?? p.mm12W ?? p.mm4m ?? p.mm50 ?? p.MM50);
+        let mm252 = (p.mm252 ?? p.MM252);
+      
+        // Ajustes por "mode"
+        // - MM12M (Estoques Certificados): a média vem em p.mm12m e precisa alimentar mm50
+        // - M4_M12 (Ureia): mm4m -> mm50 e mm12m -> mm252
+        if(mode === "MM12M"){
+          mm50 = (p.mm12m ?? mm50);
+          mm252 = NaN;
+        } else if(mode === "M4_M12"){
+          mm252 = (p.mm12m ?? mm252);
+        } else {
+          // caso genérico: se vier mm12m e não houver mm252, usa mm12m como mm252
+          if(mm252 == null) mm252 = (p.mm12m ?? mm252);
+        }
+      
+        return { date, close, mm50, mm252 };
+      });
 
-  // Campo interno "mm50" é reaproveitado pelo renderer.
-  // Prioridade:
-  //  - COT: mm12w
-  //  - Mensais (ex.: Ureia): mm4m
-  //  - Legado: mm50
-  mm50:  (p.mm12w ?? p.mm12W ?? p.mm4m ?? p.mm50 ?? p.MM50),
-
-  // Prioridade:
-  //  - Mensais (ex.: Ureia): mm12m
-  //  - Legado: mm252
-  mm252: (p.mm12m ?? p.mm252 ?? p.MM252),
-}));
 
 
 
