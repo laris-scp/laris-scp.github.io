@@ -1,1 +1,56 @@
+name: Update 09_gscpi_fretes_series
 
+on:
+  schedule:
+    - cron: "0 10 5 * *"   # Dia 5, 10:00 UTC (07:00 BRT)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gscpi-fretes-series
+  cancel-in-progress: false
+
+jobs:
+  update-gscpi-series:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # Mantém padrão comum: instala dependências do repo
+      # Se o seu repo usa outro arquivo/pasta (ex.: requirements/...), ajuste aqui.
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run GSCPI series updater
+        run: |
+          python scripts/cafe/update_gscpi_fretes_series.py
+
+      - name: Commit changes (if any)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Só stage do arquivo esperado
+          git add data/cafe/series/gscpi_fretes.json
+
+          # Se não houver diff, não commita
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Update GSCPI series (NY Fed)"
+          git push
