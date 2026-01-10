@@ -25,7 +25,7 @@ jobs:
 
       - run: |
           python -m pip install --upgrade pip
-          pip install pandas requests openpyxl
+          pip install pandas requests openpyxl xlrd
 
       - run: |
           python scripts/cafe/update_gscpi_fretes_series.py
