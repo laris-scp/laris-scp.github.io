@@ -145,7 +145,7 @@ def main():
     meta_out.setdefault("source", "painel_snapshot.json (thermometros.geral)")
     meta_out.setdefault("frequency", "Diária")
     meta_out.setdefault("value_name", "TERMOMETRO GERAL")
-    meta_out["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    meta_out["updated_at"] = updated_at
 
     out = {"meta": meta_out, "series": series_out}
     save_json(HIST_PATH, out)
