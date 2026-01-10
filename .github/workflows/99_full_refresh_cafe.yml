@@ -53,7 +53,7 @@ jobs:
           python scripts/cafe/update_gscpi_fretes_series.py
           python scripts/cafe/update_clima_soil_series.py
           python scripts/cafe/update_fundamental_stu_series.py
-          python scripts/cafe/update_estoques_certificados_series.py
+        # python scripts/cafe/update_estoques_certificados_series.py 
 
 
       # =========================
