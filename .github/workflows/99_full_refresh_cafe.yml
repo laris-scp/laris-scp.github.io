@@ -32,7 +32,9 @@ jobs:
             "xlrd>=2.0.1" \
             lxml \
             python-dateutil pytz \
-            xarray netCDF4
+            xarray netCDF4 \
+            cdsapi
+
 
 
 
