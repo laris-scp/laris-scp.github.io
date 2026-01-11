@@ -13,6 +13,7 @@ on:
       - "10_painel_snapshot_gscpi"
       - "13_painel_snapshot_clima_soil"
       - "15_painel_snapshot_fundamental_stu"
+      - "18_painel_snapshot_estoques_certificados"
     types:
       - completed
 
