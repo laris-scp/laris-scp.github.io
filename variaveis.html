@@ -239,9 +239,9 @@
 
       // legend
       ctx.font = "16px system-ui";
-      let lx = padL + 18;
+      let lx = padL + 24;
       ctx.fillStyle = "rgba(255,255,255,.78)";
-      ctx.fillText(o.labelClose, lx, padT + 6);
+      ctx.fillText(o.labelClose, lx, padT-2);
       lx += ctx.measureText(o.labelClose).width + 14;
 
       if(o.showMM50){
