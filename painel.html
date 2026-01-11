@@ -276,9 +276,10 @@ function drawLineChart(canvas, points){
         subtitle.textContent = `Última atualização do snapshot: ${data.updated_at || "—"}`;
 
         // termômetros
-        const tg = data.thermometros?.geral;
-        const tb1 = data.thermometros?.bloco_1;
-        const tb2 = data.thermometros?.bloco_2;
+        const tg = data.thermometers?.geral;
+        const tb1 = data.thermometers?.bloco_1;
+        const tb2 = data.thermometers?.bloco_2;
+
 
         document.getElementById("t-geral").textContent = fmtNumber(tg);
         document.getElementById("t-b1").textContent = fmtNumber(tb1);
