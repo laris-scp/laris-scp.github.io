@@ -82,18 +82,18 @@ def main():
     if not isinstance(snap, dict):
         die("painel_snapshot.json inválido ou ausente.")
 
-    if "thermometros" not in snap or not isinstance(snap["thermometros"], dict):
-        die("painel_snapshot.json esperado com chave 'thermometros' (dict).")
+    if "thermometers" not in snap or not isinstance(snap["thermometers"], dict):
+        die("painel_snapshot.json esperado com chave 'thermometers' (dict).")
 
-    if "geral" not in snap["thermometros"]:
-        die("painel_snapshot.json esperado com thermometros.geral.")
+    if "geral" not in snap["thermometers"]:
+        die("painel_snapshot.json esperado com thermometers.geral.")
 
     updated_at = snap.get("updated_at")
     if not updated_at:
         die("painel_snapshot.json sem 'updated_at'.")
 
     date = parse_date_yyyy_mm_dd(updated_at)
-    value = float(snap["thermometros"]["geral"])
+    value = float(snap["thermometers"]["geral"])
 
     # Carrega histórico
     hist_raw = load_json(HIST_PATH)
@@ -142,7 +142,7 @@ def main():
     meta_out = dict(meta_in) if isinstance(meta_in, dict) else {}
     meta_out.setdefault("id", "hist_termometro")
     meta_out.setdefault("title", "Histórico do Termômetro Geral")
-    meta_out.setdefault("source", "painel_snapshot.json (thermometros.geral)")
+    meta_out.setdefault("source", "painel_snapshot.json (thermometers.geral)")
     meta_out.setdefault("frequency", "Diária")
     meta_out.setdefault("value_name", "TERMOMETRO GERAL")
     meta_out["updated_at"] = updated_at
