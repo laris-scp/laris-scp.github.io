@@ -313,7 +313,7 @@ function drawLineChart(canvas, points){
             <td>${r.nivel ?? ""}</td>
             <td>${r.tendencia ?? ""}</td>
             <td>${r.momento ?? ""}</td>
-            <td class="right ${scoreClass(scoreP)}">${fmtNumber(scoreP)}</td>
+            <td class="right">${Number.isFinite(scoreP) ? scoreP.toFixed(2) : ""}</td>
             <td>${r.frequencia ?? ""}</td>
             <td>${r.ultima_atualizacao ?? ""}</td>
           `;
