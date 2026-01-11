@@ -43,8 +43,8 @@
     th{color:var(--muted);font-weight:700;background:rgba(255,255,255,.03)}
     .right{text-align:right}
     .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:12px;}
-    .stat{border:1px solid var(--line);border-radius:12px;padding:10px;background:rgba(255,255,255,.02)}
-    .k{color:var(--muted);font-size:11px}
+    .stat{border:1px solid var(--line);border-radius:12px;padding:8px;background:rgba(255,255,255,.02)}
+    .k{color:var(--muted);font-size:10px}
     .v{font-weight:800;margin-top:4px}
     .scorepos{color:var(--good);font-weight:800}
     .scoreneg{color:var(--bad);font-weight:800}
@@ -132,7 +132,7 @@
       const W = canvas.width, H = canvas.height;
       ctx.clearRect(0,0,W,H);
 
-      const padL = 60, padR = 20, padT = 24, padB = 52;
+      const padL = 60, padR = 40, padT = 36, padB = 52;
       const iw = W - padL - padR;
       const ih = H - padT - padB;
 
@@ -229,7 +229,11 @@
         const x = xPix(idx);
         const label = fmtDateBR(points[idx].date);
         const tw = ctx.measureText(label).width;
-        ctx.fillText(label, x - tw/2, padT + ih + 32);
+        let xx = x - tw/2;
+        if(i === 0) xx = padL;                 // primeiro tick encosta no início do plot
+        if(i === ticks-1) xx = padL + iw - tw; // último tick termina dentro do plot
+        ctx.fillText(label, xx, padT + ih + 32);
+
 }
 ;
 
@@ -270,7 +274,7 @@
         </div>
 
         <div class="vizbox">
-          <canvas data-canvas="1" width="1200" height="420"></canvas>
+          <canvas data-canvas="1" width="1200" height="480"></canvas>
         </div>
 
         <div class="tablebox">
