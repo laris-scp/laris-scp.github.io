@@ -56,6 +56,10 @@ def main() -> None:
         raise FileNotFoundError(f"Arquivo não encontrado: {SNAPSHOT_PATH}")
 
     snapshot = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))
+    # Remove chave legada para evitar divergência no frontend
+    if "thermometros" in snapshot:
+        del snapshot["thermometros"]
+
 
     rows = snapshot.get("rows")
     if not isinstance(rows, list):
@@ -77,7 +81,7 @@ def main() -> None:
 
     SNAPSHOT_PATH.write_text(json.dumps(snapshot, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    print("OK: painel_snapshot.json termometros recalculados.")
+    print("OK: painel_snapshot.json thermometers recalculados.")
     print(f"DEBUG bloco_1: soma_sp={s1:.4f} soma_peso={p1:.4f} t={t1}")
     print(f"DEBUG bloco_2: soma_sp={s2:.4f} soma_peso={p2:.4f} t={t2}")
     print(f"DEBUG geral  : soma_sp={sg:.4f} soma_peso={pg:.4f} t={tg}")
