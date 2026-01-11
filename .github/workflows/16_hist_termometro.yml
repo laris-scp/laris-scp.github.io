@@ -6,14 +6,15 @@ on:
     # Dispara sempre que QUALQUER snapshot rodar e terminar com sucesso.
     # Ajuste a lista se você quiser restringir.
     workflows:
-      - "02_painel_snapshot_usd_brl"
-      - "04_painel_snapshot_preco_arabica"
-      - "06_painel_snapshot_cot_report"
-      - "08_painel_snapshot_fertilizante_urea"
-      - "10_painel_snapshot_gscpi"
-      - "13_painel_snapshot_clima_soil"
+      - "02 - Update Painel Snapshot (USD/BRL only)"
+      - "04 - Update Painel Snapshot (Preço Arábica)"
+      - "06 - Update Painel Snapshot (COT Report)"
+      - "08 - Update Painel Snapshot (Fertilizante Ureia)"
+      - "10 - Update painel_snapshot (GSCPI)"
+      - "13 - Update painel_snapshot (CLIMA soil)"
       - "15_painel_snapshot_fundamental_stu"
-      - "18_painel_snapshot_estoques_certificados"
+      - "18 - Update painel_snapshot (Estoques Certificados)"
+
     types:
       - completed
 
