@@ -1,6 +1,6 @@
 {
   "commodity": "cafe",
-  "updated_at": "2026-01-11 00:44:43",
+  "updated_at": "2026-01-11 01:02:32",
   "thermometros": {
     "bloco_1": -1.07,
     "bloco_2": 1.68,
@@ -167,5 +167,10 @@
       "regra_de_sinal": "Score climático baseado na umidade do solo (ERA5-Land, camada 28–100cm). Menor umidade (seca) indica maior risco produtivo e tende a ser bullish para o preço. Nível via percentil histórico; tendência e momento via últimos 3 meses.",
       "fonte": "ERA5-Land (ECMWF/Copernicus) — swvl3 (Volumetric soil water layer 3), média regional Brasil cafeeiro (bbox [-15, -55, -25, -40]). Último mês=2025-12-01."
     }
-  ]
+  ],
+  "thermometers": {
+    "bloco_1": -1.07,
+    "bloco_2": 1.68,
+    "geral": 0.14
+  }
 }
