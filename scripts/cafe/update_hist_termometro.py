@@ -142,7 +142,7 @@ def main():
     meta_out = dict(meta_in) if isinstance(meta_in, dict) else {}
     meta_out.setdefault("id", "hist_termometro")
     meta_out.setdefault("title", "Histórico do Termômetro Geral")
-    meta_out.setdefault("source", "painel_snapshot.json (thermometers.geral)")
+    meta_out["source"] = "painel_snapshot.json (thermometers.geral)"
     meta_out.setdefault("frequency", "Diária")
     meta_out.setdefault("value_name", "TERMOMETRO GERAL")
     meta_out["updated_at"] = updated_at
