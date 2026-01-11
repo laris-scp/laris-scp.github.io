@@ -132,7 +132,7 @@
       const W = canvas.width, H = canvas.height;
       ctx.clearRect(0,0,W,H);
 
-      const padL = 52, padR = 18, padT = 18, padB = 42;
+      const padL = 60, padR = 20, padT = 24, padB = 52;
       const iw = W - padL - padR;
       const ih = H - padT - padB;
 
@@ -219,13 +219,19 @@
       if(o.showMM50) plot("mm50");
       if(o.showMM252) plot("mm252");
 
-      // x labels (first and last)
+      // x labels (múltiplos ticks)
       ctx.fillStyle = "rgba(255,255,255,.70)";
-      ctx.font = "12px system-ui";
-      ctx.fillText(fmtDateBR(points[0].date), padL, padT+ih+28);
-      const lastLabel = fmtDateBR(points[points.length-1].date);
-      const textW = ctx.measureText(lastLabel).width;
-      ctx.fillText(lastLabel, padL+iw-textW, padT+ih+28);
+      ctx.font = "13px system-ui";
+      
+      const ticks = 6; // quantidade de datas visíveis
+      for(let i=0;i<ticks;i++){
+        const idx = Math.round(i*(points.length-1)/(ticks-1));
+        const x = xPix(idx);
+        const label = fmtDateBR(points[idx].date);
+        const tw = ctx.measureText(label).width;
+        ctx.fillText(label, x - tw/2, padT + ih + 32);
+}
+;
 
       // legend
       ctx.font = "12px system-ui";
@@ -264,7 +270,7 @@
         </div>
 
         <div class="vizbox">
-          <canvas data-canvas="1" width="1000" height="320"></canvas>
+          <canvas data-canvas="1" width="1200" height="420"></canvas>
         </div>
 
         <div class="tablebox">
