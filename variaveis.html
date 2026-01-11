@@ -186,7 +186,7 @@
 
       // y labels
       ctx.fillStyle = "rgba(255,255,255,.70)";
-      ctx.font = "16px system-ui";
+      ctx.font = "18px system-ui";
       for(let k=0;k<=gridY;k++){
         const v = yMax - (k/gridY)*(yMax-yMin);
         const y = padT + (k/gridY)*ih;
@@ -221,7 +221,7 @@
 
       // x labels (múltiplos ticks)
       ctx.fillStyle = "rgba(255,255,255,.70)";
-      ctx.font = "17px system-ui";
+      ctx.font = "19px system-ui";
       
       const ticks = 6; // quantidade de datas visíveis
       for(let i=0;i<ticks;i++){
@@ -238,7 +238,7 @@
 ;
 
       // legend
-      ctx.font = "16px system-ui";
+      ctx.font = "18px system-ui";
       let lx = padL + 24;
       ctx.fillStyle = "rgba(255,255,255,.78)";
       ctx.fillText(o.labelClose, lx, padT-2);
