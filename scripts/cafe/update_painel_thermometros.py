@@ -68,7 +68,7 @@ def main() -> None:
     def r2(x: float | None) -> float | None:
         return None if x is None else round(float(x), 2)
 
-    snapshot["thermometros"] = {
+    snapshot["thermometers"] = {
         "bloco_1": r2(t1),
         "bloco_2": r2(t2),
         "geral":   r2(tg),
