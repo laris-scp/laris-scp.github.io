@@ -118,7 +118,7 @@
       return `${dd}/${mm}/${yy}`;
     }
 
-    // Base única de gráfico, com ajustes condicionais via opts (por id)
+    // Base única de gráfico
     function drawMultiLine(canvas, points, opts){
       const o = Object.assign({
         showMM50: true,
@@ -200,7 +200,7 @@
       };
 
       function plot(key){
-        ctx.strokeStyle = styles[key];
+        ctx.strokeStyle = styles[key] || "rgba(231,236,255,.92)";
         ctx.lineWidth = 2;
         ctx.beginPath();
         let started = false;
@@ -219,23 +219,20 @@
       if(o.showMM50) plot("mm50");
       if(o.showMM252) plot("mm252");
 
-      // x labels (múltiplos ticks)
+      // x labels
       ctx.fillStyle = "rgba(255,255,255,.70)";
       ctx.font = "19px system-ui";
-      
-      const ticks = 6; // quantidade de datas visíveis
+      const ticks = 6;
       for(let i=0;i<ticks;i++){
         const idx = Math.round(i*(points.length-1)/(ticks-1));
         const x = xPix(idx);
         const label = fmtDateBR(points[idx].date);
         const tw = ctx.measureText(label).width;
         let xx = x - tw/2;
-        if(i === 0) xx = padL;                 // primeiro tick encosta no início do plot
-        if(i === ticks-1) xx = padL + iw - tw; // último tick termina dentro do plot
+        if(i === 0) xx = padL;
+        if(i === ticks-1) xx = padL + iw - tw;
         ctx.fillText(label, xx, padT + ih + 32);
-
-}
-;
+      }
 
       // legend
       ctx.font = "18px system-ui";
@@ -255,8 +252,98 @@
       }
     }
 
+    function getSeriesModeById(varId){
+      if(varId === "gscpi") return "CLOSE_ONLY";
+      if(varId === "cot_report") return "COT_MM12W";
+      if(varId === "estoques_certificados") return "MM12M";
+      if(varId === "fertilizante_urea") return "M4_M12";
+      if(varId === "fundamental_stu") return "FUNDAMENTAL_STU";
+      if(varId === "clima_soil") return "CLIMA_SOIL";
+      return "DEFAULT";
+    }
+
+    function colSpanByMode(mode){
+      if(mode === "CLOSE_ONLY") return 2;
+      if(mode === "COT_MM12W") return 3;
+      if(mode === "MM12M") return 3;
+      if(mode === "M4_M12") return 4;
+      if(mode === "FUNDAMENTAL_STU") return 5;
+      if(mode === "CLIMA_SOIL") return 3;
+      return 4;
+    }
+
+    function setTableHeaderByMode(card, mode){
+      const theadRow = card.querySelector(".tablebox thead tr");
+      if(!theadRow) return;
+
+      if(mode === "CLOSE_ONLY"){
+        theadRow.innerHTML = `
+          <th>Data</th>
+          <th class="right">Close</th>
+        `;
+        return;
+      }
+
+      if(mode === "COT_MM12W"){
+        theadRow.innerHTML = `
+          <th>Data</th>
+          <th class="right">Close</th>
+          <th class="right">MM12W</th>
+        `;
+        return;
+      }
+
+      if(mode === "MM12M"){
+        theadRow.innerHTML = `
+          <th>Data</th>
+          <th class="right">Total</th>
+          <th class="right">MM12M</th>
+        `;
+        return;
+      }
+
+      if(mode === "M4_M12"){
+        theadRow.innerHTML = `
+          <th>Data</th>
+          <th class="right">Urea</th>
+          <th class="right">M4</th>
+          <th class="right">M12</th>
+        `;
+        return;
+      }
+
+      if(mode === "FUNDAMENTAL_STU"){
+        theadRow.innerHTML = `
+          <th>País</th>
+          <th class="right">Peso (Prod. 5y)</th>
+          <th class="right">Produção (t)</th>
+          <th class="right">Δ YoY</th>
+          <th class="right">Contrib.</th>
+        `;
+        return;
+      }
+
+      if(mode === "CLIMA_SOIL"){
+        theadRow.innerHTML = `
+          <th>Data</th>
+          <th class="right">SWVL3</th>
+          <th class="right">Stress_6m</th>
+        `;
+        return;
+      }
+
+      theadRow.innerHTML = `
+        <th>Data</th>
+        <th class="right">Close</th>
+        <th class="right">MM50</th>
+        <th class="right">MM252</th>
+      `;
+    }
+
     function buildCard(snapshotRow){
       const id = snapshotRow.id;
+      const mode = getSeriesModeById(id);
+
       const card = document.createElement("div");
       card.className = "card";
       card.dataset.varid = id;
@@ -315,7 +402,6 @@
             <div class="v ${scoreClass(Number(snapshotRow.score_ponderado))}">${fmtNumber(Number(snapshotRow.score_ponderado))}</div>
           </div>
         </div>
-      
 
         <details>
           <summary>Ver regra de sinal e fonte</summary>
@@ -323,6 +409,9 @@
           <div class="small"><b>Fonte:</b> ${(snapshotRow.fonte || "—")}</div>
         </details>
       `;
+
+      // header correto já no build (evita header antigo “fantasma”)
+      setTableHeaderByMode(card, mode);
 
       const btns = Array.from(card.querySelectorAll("button.tbtn"));
       const vizbox = card.querySelector(".vizbox");
@@ -332,8 +421,8 @@
         b.addEventListener("click", ()=>{
           btns.forEach(x=>x.classList.remove("active"));
           b.classList.add("active");
-          const mode = b.dataset.mode;
-          if(mode === "table"){
+          const m = b.dataset.mode;
+          if(m === "table"){
             vizbox.style.display = "none";
             tablebox.style.display = "block";
           } else {
@@ -348,7 +437,8 @@
         loadSeriesIntoCard(card, seriesUrl);
       } else {
         const tb = card.querySelector('[data-tbody="1"]');
-        tb.innerHTML = `<tr><td colspan="4" class="muted">Série histórica ainda não publicada para esta variável.</td></tr>`;
+        const colSpan = colSpanByMode(mode);
+        tb.innerHTML = `<tr><td colspan="${colSpan}" class="muted">Série histórica ainda não publicada para esta variável.</td></tr>`;
         const canvas = card.querySelector("canvas");
         const ctx = canvas.getContext("2d");
         ctx.fillStyle = "rgba(255,255,255,.70)";
@@ -357,84 +447,6 @@
       }
 
       return card;
-    }
-
-    function getSeriesModeById(varId){
-      if(varId === "gscpi") return "CLOSE_ONLY";
-      if(varId === "cot_report") return "COT_MM12W";
-      if(varId === "estoques_certificados") return "MM12M";
-      if(varId === "fertilizante_urea") return "M4_M12";
-      if(varId === "fundamental_stu") return "FUNDAMENTAL_STU";
-      if (varId === "clima_soil") return "CLOSE_ONLY";
-      return "DEFAULT";
-    }
-
-    function colSpanByMode(mode){
-      if(mode === "CLOSE_ONLY") return 2;
-      if(mode === "COT_MM12W") return 3;
-      if(mode === "MM12M") return 3;
-      if(mode === "M4_M12") return 4;
-      if(mode === "FUNDAMENTAL_STU") return 5;
-      return 4;
-    }
-
-    function setTableHeaderByMode(card, mode){
-      const theadRow = card.querySelector(".tablebox thead tr");
-      if(!theadRow) return;
-
-      if(mode === "CLOSE_ONLY"){
-        theadRow.innerHTML = `
-          <th>Data</th>
-          <th class="right">Close</th>
-        `;
-        return;
-      }
-
-      if(mode === "COT_MM12W"){
-        theadRow.innerHTML = `
-          <th>Data</th>
-          <th class="right">Close</th>
-          <th class="right">MM12W</th>
-        `;
-        return;
-      }
-
-      if(mode === "MM12M"){
-        theadRow.innerHTML = `
-          <th>Data</th>
-          <th class="right">Total</th>
-          <th class="right">MM12M</th>
-        `;
-        return;
-      }
-
-      if(mode === "M4_M12"){
-        theadRow.innerHTML = `
-          <th>Data</th>
-          <th class="right">Urea</th>
-          <th class="right">M4</th>
-          <th class="right">M12</th>
-        `;
-        return;
-      }
-
-      if(mode === "FUNDAMENTAL_STU"){
-        theadRow.innerHTML = `
-          <th>País</th>
-          <th class="right">Peso (Prod. 5y)</th>
-          <th class="right">Produção (t)</th>
-          <th class="right">Δ YoY</th>
-          <th class="right">Contrib.</th>
-        `;
-        return;
-      }
-
-      theadRow.innerHTML = `
-        <th>Data</th>
-        <th class="right">Close</th>
-        <th class="right">MM50</th>
-        <th class="right">MM252</th>
-      `;
     }
 
     async function loadSeriesIntoCard(card, url){
@@ -450,101 +462,62 @@
         const data = await res.json();
 
         // Aceita dois formatos:
-        // (A) { series: [...] }  -> padrão antigo
-        // (B) { meta: {...}, data: [...] } -> JSON legado (basis)
+        // (A) { series: [...] }  -> padrão
+        // (B) { meta: {...}, data: [...] } -> legado
         let raw = [];
         if(Array.isArray(data.series)) raw = data.series.slice();
         else if(Array.isArray(data.data)) raw = data.data.slice();
 
-        const pts = raw.map(p => {
-        const date = (p.date || p.Data || p.data);
-        const close = (p.close ?? p.Close ?? p.basis_med5 ?? p.basis ?? p.value);
-      
-        // Base (mantém compatibilidade com o que já existia)
-        let mm50  = (p.mm12w ?? p.mm12W ?? p.mm4m ?? p.mm50 ?? p.MM50);
-        let mm252 = (p.mm252 ?? p.MM252);
-      
-        // Ajustes por "mode"
-        // - MM12M (Estoques Certificados): a média vem em p.mm12m e precisa alimentar mm50
-        // - M4_M12 (Ureia): mm4m -> mm50 e mm12m -> mm252
-        if(mode === "MM12M"){
-          mm50 = (p.mm12m ?? mm50);
-          mm252 = NaN;
-        } else if(mode === "M4_M12"){
-          mm252 = (p.mm12m ?? mm252);
-        } else {
-          // caso genérico: se vier mm12m e não houver mm252, usa mm12m como mm252
-          if(mm252 == null) mm252 = (p.mm12m ?? mm252);
-        }
-      
-        return { date, close, mm50, mm252 };
-      });
+        // =========================
+        // EXCEÇÃO: CLIMA (SOIL) — Stress_6m
+        // =========================
+        if(varId === "clima_soil"){
+          setTableHeaderByMode(card, "CLIMA_SOIL");
 
-              // === EXCEÇÃO: CLIMA (SOIL MOISTURE) — gráfico e tabela custom (sem MM) ===
-      if (varId === "clima_soil") {
-      
-        // ----- TABELA (Data | SWVL3 | Stress_6m) -----
-        const rows = raw.slice().sort((a,b)=> String(a.date || a.Data || a.data).localeCompare(String(b.date || b.Data || b.data)));
-      
-        // pega os últimos N registros para não ficar gigante (ajuste se quiser)
-        const N = 24;
-        const tail = rows.slice(-N).reverse(); // mais recente em cima
+          const rows = raw
+            .map(p => ({
+              date: (p.date || p.Data || p.data),
+              swvl3: (p.close ?? p.Close ?? p.value ?? null),
+              stress_6m: (p.stress_6m ?? null)
+            }))
+            .filter(p => !!p.date)
+            .sort((a,b)=> String(a.date).localeCompare(String(b.date)));
 
-        const thead = card.querySelector("thead");
-          if (thead) {
-            thead.innerHTML = `
-              <tr>
-                <th>Data</th>
-                <th>SWVL3</th>
-                <th>Stress_6m</th>
-              </tr>
-            `;
+          // tabela: últimos 24 (mais recente em cima)
+          const tail = rows.slice(-24).reverse();
+          tbody.innerHTML = "";
+
+          if(tail.length === 0){
+            tbody.innerHTML = `<tr><td colspan="3" class="muted">Série vazia.</td></tr>`;
+          } else {
+            for(const r of tail){
+              const tr = document.createElement("tr");
+              tr.innerHTML = `
+                <td>${fmtDateBR(r.date)}</td>
+                <td class="right">${fmtNumber(Number(r.swvl3))}</td>
+                <td class="right">${(r.stress_6m === null || r.stress_6m === undefined) ? "—" : fmtNumber(Number(r.stress_6m))}</td>
+              `;
+              tbody.appendChild(tr);
+            }
           }
 
-      
-        tbody.innerHTML = tail.map(p=>{
-  const d = (p.date || p.Data || p.data);
-  const swvl3 = (p.close ?? p.Close ?? null);
-  const s6 = (p.stress_6m ?? null);
+          // gráfico: Stress_6m contínuo (linha única)
+          const ptsChart = rows
+            .map(r => ({ date: r.date, close: Number(r.stress_6m), mm50: NaN, mm252: NaN }))
+            .filter(p => !Number.isNaN(p.close));
 
-  const fmt = (v)=> (v === null || v === undefined || Number.isNaN(Number(v) )) ? "-" : fmtNumber(Number(v));
+          drawMultiLine(canvas, ptsChart, {
+            showMM50:false,
+            showMM252:false,
+            labelClose:"Stress_6m"
+          });
 
-  return `
-    <tr>
-      <td>${d}</td>
-      <td>${fmt(swvl3)}</td>
-      <td>${fmt(s6)}</td>
-    </tr>
-  `;
-}).join("");
-}
-        `;
-      
-        // ----- GRÁFICO (Stress_6m contínuo) -----
-        const ptsChart = rows
-          .map(p => ({
-            date: (p.date || p.Data || p.data),
-            close: (p.stress_6m ?? null),
-            mm50: null,
-            mm252: null
-          }))
-          .filter(p => p.close !== null && !Number.isNaN(Number(p.close)));
-      
-        drawMultiLine(canvas, ptsChart, {
-          showMM50: false,
-          showMM252: false,
-          labelClose: "Stress_6m"
-        });
-      
-        return;
-      }
+          return;
+        }
 
-
-
-
-        pts.sort((a,b)=> String(a.date).localeCompare(String(b.date)));
-
-        // --- TABELA ESPECIAL: FUNDAMENTAL STU (decomp) ---
+        // =========================
+        // FUNDAMENTAL_STU (decomp)
+        // =========================
         if(mode === "FUNDAMENTAL_STU"){
           setTableHeaderByMode(card, mode);
           tbody.innerHTML = "";
@@ -566,11 +539,44 @@
             }
           }
 
-          // Gráfico: linha única (STU World) — usar close
-          const ptsChart = pts.map(p => ({ date: p.date, close: p.close, mm50: NaN, mm252: NaN }));
+          // gráfico: linha única (STU World) — usar close
+          const ptsChart = raw
+            .map(p => ({
+              date: (p.date || p.Data || p.data),
+              close: Number(p.close ?? p.Close ?? p.value),
+              mm50: NaN,
+              mm252: NaN
+            }))
+            .filter(p => !!p.date && !Number.isNaN(p.close))
+            .sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+
           drawMultiLine(canvas, ptsChart, { showMM50:false, showMM252:false, labelClose:"STU (World)" });
           return;
         }
+
+        // =========================
+        // MODOS PADRÃO (com mm50/mm252)
+        // =========================
+        const pts = raw.map(p => {
+          const date = (p.date || p.Data || p.data);
+          const close = (p.close ?? p.Close ?? p.basis_med5 ?? p.basis ?? p.value);
+
+          let mm50  = (p.mm12w ?? p.mm12W ?? p.mm4m ?? p.mm50 ?? p.MM50);
+          let mm252 = (p.mm252 ?? p.MM252);
+
+          if(mode === "MM12M"){
+            mm50 = (p.mm12m ?? mm50);
+            mm252 = NaN;
+          } else if(mode === "M4_M12"){
+            mm252 = (p.mm12m ?? mm252);
+          } else {
+            if(mm252 == null) mm252 = (p.mm12m ?? mm252);
+          }
+
+          return { date, close, mm50, mm252 };
+        }).filter(p => !!p.date);
+
+        pts.sort((a,b)=> String(a.date).localeCompare(String(b.date)));
 
         setTableHeaderByMode(card, mode);
 
@@ -620,34 +626,35 @@
           }
         }
 
-        // Gráfico (mesma base; ajustes condicionais por id)
+        // Gráfico
         if(mode === "CLOSE_ONLY"){
-          const ptsChart = pts.map(p => ({ date: p.date, close: p.close, mm50: NaN, mm252: NaN }));
+          const ptsChart = pts.map(p => ({ date: p.date, close: Number(p.close), mm50: NaN, mm252: NaN })).filter(p=>!Number.isNaN(p.close));
           drawMultiLine(canvas, ptsChart, { showMM50:false, showMM252:false });
 
         } else if(mode === "COT_MM12W"){
-          const ptsChart = pts.map(p => ({ date: p.date, close: p.close, mm50: p.mm50, mm252: NaN }));
+          const ptsChart = pts.map(p => ({ date: p.date, close: Number(p.close), mm50: Number(p.mm50), mm252: NaN }))
+            .filter(p=>!Number.isNaN(p.close));
           drawMultiLine(canvas, ptsChart, { showMM50:true, showMM252:false, labelMM50:"MM12W" });
 
         } else if(mode === "MM12M"){
-          const ptsChart = pts.map(p => ({ date: p.date, close: p.close, mm50: p.mm50, mm252: NaN }));
+          const ptsChart = pts.map(p => ({ date: p.date, close: Number(p.close), mm50: Number(p.mm50), mm252: NaN }))
+            .filter(p=>!Number.isNaN(p.close));
           drawMultiLine(canvas, ptsChart, { showMM50:true, showMM252:false, labelMM50:"MM12M" });
 
         } else if(mode === "M4_M12"){
-          // mm50 = M4 | mm252 = M12 (padrão do JSON da ureia)
-          drawMultiLine(canvas, pts, {
-            showMM50:true, showMM252:true,
-            labelClose:"Urea",
-            labelMM50:"M4",
-            labelMM252:"M12"
-          });
+          // mm50 = M4 | mm252 = M12
+          const ptsChart = pts.map(p => ({ date: p.date, close: Number(p.close), mm50: Number(p.mm50), mm252: Number(p.mm252) }))
+            .filter(p=>!Number.isNaN(p.close));
+          drawMultiLine(canvas, ptsChart, { showMM50:true, showMM252:true, labelClose:"Urea", labelMM50:"M4", labelMM252:"M12" });
 
         } else {
-          drawMultiLine(canvas, pts, { showMM50:true, showMM252:true, labelMM50:"MM50", labelMM252:"MM252" });
+          const ptsChart = pts.map(p => ({ date: p.date, close: Number(p.close), mm50: Number(p.mm50), mm252: Number(p.mm252) }))
+            .filter(p=>!Number.isNaN(p.close));
+          drawMultiLine(canvas, ptsChart, { showMM50:true, showMM252:true, labelMM50:"MM50", labelMM252:"MM252" });
         }
 
       }catch(err){
-        const colSpan = colSpanByMode(mode);
+        const colSpan = colSpanByMode(getSeriesModeById(card.dataset.varid || ""));
         tbody.innerHTML = `<tr><td colspan="${colSpan}" class="muted">Erro: ${String(err.message || err)}</td></tr>`;
         const ctx = canvas.getContext("2d");
         ctx.fillStyle = "rgba(255,255,255,.70)";
@@ -690,4 +697,3 @@
   </script>
 </body>
 </html>
-
