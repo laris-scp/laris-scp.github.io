@@ -236,8 +236,25 @@ def merge_revision_window(df_hist: pd.DataFrame, df_new: pd.DataFrame, window: W
     return df_all
 
 def write_json(payload_base: dict, df_all: pd.DataFrame):
+    # ========= NOVO: calcular stress_6m no histórico final =========
+    WIN_ACC = 6
+    
+    tmp = df_all.copy()
+    tmp["date"] = pd.to_datetime(tmp["date"], errors="coerce")
+    tmp["close"] = pd.to_numeric(tmp["close"], errors="coerce")
+    tmp = tmp.dropna(subset=["date", "close"]).sort_values("date").reset_index(drop=True)
+    
+    tmp["month"] = tmp["date"].dt.month
+    
+    baseline_month = tmp.groupby("month")["close"].mean()
+    tmp = tmp.merge(baseline_month.rename("baseline"), on="month", how="left")
+    
+    tmp["deficit"] = (tmp["baseline"] - tmp["close"]).clip(lower=0)
+    tmp["stress_6m"] = tmp["deficit"].rolling(WIN_ACC, min_periods=WIN_ACC).sum()
+    # ===============================================================
+
     series_out = []
-    for _, r in df_all.iterrows():
+    for _, r in tmp.iterrows():
         series_out.append({
             "date": pd.to_datetime(r["date"]).strftime("%Y-%m-%d"),
             "close": float(r["close"]),
