@@ -180,9 +180,10 @@ def main():
     snap["updated_at"] = now_str
 
     SNAPSHOT_PATH.write_text(
-        json.dumps(snap, ensure_ascii=False, separators=(",", ":")) + "\n",
+        json.dumps(snap, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8"
     )
+
 
     print("OK: painel_snapshot.json atualizado (clima_soil — NOVO conceito).")
     print("DEBUG:", "ultimo swvl3=", ultimo_valor_raw, "| z_last(crit)=", round(z_last, 4),
