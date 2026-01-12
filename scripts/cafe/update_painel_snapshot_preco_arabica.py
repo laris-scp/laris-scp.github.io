@@ -53,7 +53,7 @@ RULE_TXT = (
     "Score combina Nível, Tendência e Momento (com peso e ajuste por bloco) em um único indicador."
 )
 
-FONTE_TXT = "Yahoo Finance (KC=F) | diário | Close | MMs 50/252 | janela nível 10a"
+FONTE_TXT = "Yahoo Finance (KC=F) | diário | Close |"
 
 def main():
     series_payload = json.loads(SERIES_PATH.read_text(encoding="utf-8"))
