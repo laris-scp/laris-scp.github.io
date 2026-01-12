@@ -34,7 +34,7 @@ REGRA_DE_SINAL = (
     "Score baseado no STU World (nível/tendência/momento) com inversão do bloco 2 "
     "(STU baixo = bullish). Tabela mostra decomposição por países (peso produção 5y × Δprodução YoY)."
 )
-FONTE = "USDA/FAS PSD API — Coffee, Green (World STU + produção dos principais países)"
+FONTE = "USDA/FAS PSD API — Coffee, Green"
 
 
 def now_str() -> str:
