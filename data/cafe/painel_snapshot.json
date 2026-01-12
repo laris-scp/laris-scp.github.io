@@ -1,6 +1,6 @@
 {
   "commodity": "cafe",
-  "updated_at": "2026-01-12 10:35:09",
+  "updated_at": "2026-01-12 10:36:24",
   "rows": [
     {
       "id": "preco_arabica",
@@ -47,7 +47,7 @@
       "bloco": 1,
       "variavel": "USD/BRL",
       "ultimo_valor": 5.3707,
-      "percentil": 0.1517,
+      "percentil": 0.1514,
       "nivel": "MUITO BAIXO",
       "valor_nivel": -1.0,
       "tendencia": "QUEDA",
@@ -58,7 +58,7 @@
       "peso": 2.0,
       "score_ponderado": -5.0,
       "frequencia": "Diária",
-      "ultima_atualizacao": "2026-01-11 18:58:05",
+      "ultima_atualizacao": "2026-01-12 10:36:24",
       "regra_de_sinal": "Nível indica se o dólar está baixo ou alto versus seu comportamento histórico recente; Tendência mostra a direção atual comparando o valor com médias de curto e longo prazo; Momento indica se essa tendência está ganhando ou perdendo força ao observar a evolução mensal da média de curto prazo; Score combina Nível, Tendência e Momento (com peso) em um único indicador.",
       "fonte": "BCB SGS (série 1) – USD/BRL"
     },
