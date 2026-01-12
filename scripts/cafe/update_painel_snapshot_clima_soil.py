@@ -156,9 +156,8 @@ def main():
     )
 
     fonte_txt = (
-        "ERA5-Land (ECMWF/Copernicus) — swvl3 (Volumetric soil water layer 3), "
-        f"média regional Brasil cafeeiro (bbox {AREA}). Último mês={ultimo_date}."
-    )
+        "ERA5-Land (ECMWF/Copernicus) — swvl3 (Volumetric soil water layer 3)."
+         )
 
     row.update({
         "ultimo_valor": ultimo_valor_raw,                 # swvl3
