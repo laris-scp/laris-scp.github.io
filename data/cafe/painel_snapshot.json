@@ -144,7 +144,7 @@
     },
     {
       "id": "clima_soil",
-      "bloco": 2,
+      "bloco": 1,
       "variavel": "CLIMA (SOIL MOISTURE)",
       "ultimo_valor": 0.3229788541793823,
       "percentil": 0.6129,
