@@ -12,6 +12,25 @@
     header h1{margin:0;font-size:18px;font-weight:700;letter-spacing:.2px}
     header .meta{font-size:12px;color:var(--muted)}
     main{padding:16px 20px;max-width:1200px;margin:0 auto}
+
+    /* NAV (botões do topo) */
+    .nav{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+    .nav a{
+      text-decoration:none;
+      color:var(--text);
+      padding:10px 14px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.03);
+      font-size:13px;
+      font-weight:600;
+    }
+    .nav a:hover{background:rgba(255,255,255,.06)}
+    .nav a.active{
+      border-color:rgba(155,208,255,.45);
+      box-shadow:0 0 0 2px rgba(155,208,255,.10) inset;
+    }
+
     .grid{display:grid;grid-template-columns:1fr;gap:12px}
     @media (min-width: 980px){.grid{grid-template-columns:1fr}}
     .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
@@ -42,9 +61,15 @@
   <header>
     <div>
       <h1>Painel do Café</h1>
-      <div class="meta">Dados gerados automaticamente via workflows (JSON) e consumidos pelo site.</div>
+      <div class="meta">Este painel faz um compilado de variáveis que impactam o preço do café arábica internacional (contrato ICEUS: KC). Por meio de um score que pode variar de -1 a 1, sendo -1 para tendência à depreciação do preço e +1 para apreciação, este painel procura ajudar o usuário a embasar sua decisão na hora de negociar a commodity.</div>
     </div>
-    <div class="meta" id="updatedAt">—</div>
+
+    <div class="nav">
+      <a href="index.html">Home</a>
+      <a class="active" href="painel.html">Painel</a>
+      <a href="variaveis.html">Variáveis</a>
+      <div class="meta" id="updatedAt" style="margin-left:8px">—</div>
+    </div>
   </header>
 
   <main>
@@ -109,17 +134,17 @@
       if(!x) return "";
       return String(x);
     }
-    function pillFromScore(score){
-      const n = Number(score);
-      if(!Number.isFinite(n)) return `<span class="pill neu">—</span>`;
-      if(n >= 0.25) return `<span class="pill good">${n.toFixed(2)}</span>`;
-      if(n <= -0.25) return `<span class="pill bad">${n.toFixed(2)}</span>`;
-      return `<span class="pill neu">${n.toFixed(2)}</span>`;
-    }
     function showError(msg){
       const box = document.getElementById("errBox");
       box.style.display = "block";
       box.textContent = msg;
+    }
+    function normBloco(x){
+      const n = Number(x);
+      return Number.isFinite(n) ? n : 999;
+    }
+    function normName(r){
+      return String(r.variavel ?? r.id ?? "").toUpperCase();
     }
 
     async function load(){
@@ -135,7 +160,14 @@
         document.getElementById("t2").textContent = (t.bloco_2 ?? "—");
         document.getElementById("tg").textContent = (t.geral ?? "—");
 
-        const rows = Array.isArray(data.rows) ? data.rows : [];
+        const rows0 = Array.isArray(data.rows) ? data.rows : [];
+        // ORDENAÇÃO: Bloco 1 primeiro, depois Bloco 2 (e dentro do bloco por nome)
+        const rows = rows0.slice().sort((a,b)=>{
+          const da = normBloco(a.bloco), db = normBloco(b.bloco);
+          if(da !== db) return da - db;
+          return normName(a).localeCompare(normName(b), "pt-BR");
+        });
+
         const tbody = document.getElementById("tbody");
         tbody.innerHTML = "";
 
