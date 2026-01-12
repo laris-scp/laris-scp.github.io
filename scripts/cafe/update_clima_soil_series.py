@@ -189,9 +189,33 @@ def netcdf_to_series_df(nc_path: Path) -> pd.DataFrame:
     # Padroniza para 1º dia do mês (YYYY-MM-01), conforme seu JSON atual
     df["date"] = df["date"].apply(month_floor)
 
-    # Mantém apenas coluna final esperada no JSON (close = swvl3)
+   # close = swvl3
     out = df[["date", "swvl3"]].rename(columns={"swvl3": "close"}).drop_duplicates(subset=["date"], keep="last")
     out = out.sort_values("date").reset_index(drop=True)
+    
+    # ========= NOVO: stress hídrico 6m (contínuo) =========
+    WIN_ACC = 6  # meses no acumulado
+    
+    tmp = out.copy()
+    tmp["date"] = pd.to_datetime(tmp["date"])
+    tmp = tmp.sort_values("date").reset_index(drop=True)
+    
+    # baseline mensal (média histórica do mês)
+    tmp["month"] = tmp["date"].dt.month
+    baseline_month = tmp.groupby("month")["close"].mean()
+    tmp = tmp.merge(baseline_month.rename("baseline"), on="month", how="left")
+    
+    # deficit = baseline - swvl3 (truncado em 0)
+    tmp["deficit"] = (tmp["baseline"] - tmp["close"]).clip(lower=0)
+    
+    # stress_6m = soma do deficit nos últimos 6 meses
+    tmp["stress_6m"] = tmp["deficit"].rolling(WIN_ACC, min_periods=WIN_ACC).sum()
+    
+    # devolve só o que importa
+    out = tmp[["date", "close", "stress_6m"]].copy()
+    out = out.sort_values("date").reset_index(drop=True)
+    # ======================================================
+
 
     if out.empty:
         raise RuntimeError("Série nova ficou vazia após processamento do NetCDF.")
@@ -217,7 +241,9 @@ def write_json(payload_base: dict, df_all: pd.DataFrame):
         series_out.append({
             "date": pd.to_datetime(r["date"]).strftime("%Y-%m-%d"),
             "close": float(r["close"]),
+            "stress_6m": None if pd.isna(r.get("stress_6m")) else float(r["stress_6m"]),
         })
+
 
     payload = {
         "id": SERIES_ID,
@@ -232,7 +258,8 @@ def write_json(payload_base: dict, df_all: pd.DataFrame):
     }
 
     SERIES_PATH.parent.mkdir(parents=True, exist_ok=True)
-    SERIES_PATH.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
+    SERIES_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
 
 def main():
     ensure_cdsapirc_from_env()
