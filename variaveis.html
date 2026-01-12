@@ -480,27 +480,57 @@
         return { date, close, mm50, mm252 };
       });
 
-        // === EXCEÇÃO: CLIMA (SOIL MOISTURE) — gráfico deve usar Stress_6m ===
-        if (varId === "clima_soil") {
-          const ptsChart = raw
-            .map(p => ({
-              date: (p.date || p.Data || p.data),
-              close: (p.stress_6m ?? null),
-              mm50: null,
-              mm252: null
-            }))
-            .filter(p => p.close !== null && !Number.isNaN(Number(p.close)));
-        
-          ptsChart.sort((a,b)=> String(a.date).localeCompare(String(b.date)));
-        
-          drawMultiLine(canvas, ptsChart, {
-            showMM50: false,
-            showMM252: false,
-            labelClose: "Stress_6m"
-          });
-        
-          return; // <-- IMPORTANTE: impede o fluxo padrão
-        }
+              // === EXCEÇÃO: CLIMA (SOIL MOISTURE) — gráfico e tabela custom (sem MM) ===
+      if (varId === "clima_soil") {
+      
+        // ----- TABELA (Data | SWVL3 | Stress_6m) -----
+        const rows = raw.slice().sort((a,b)=> String(a.date || a.Data || a.data).localeCompare(String(b.date || b.Data || b.data)));
+      
+        // pega os últimos N registros para não ficar gigante (ajuste se quiser)
+        const N = 24;
+        const tail = rows.slice(-N).reverse(); // mais recente em cima
+      
+        tbody.innerHTML = `
+          <tr>
+            <th>Data</th>
+            <th>SWVL3</th>
+            <th>Stress_6m</th>
+          </tr>
+          ${tail.map(p=>{
+            const d = (p.date || p.Data || p.data);
+            const swvl3 = (p.close ?? p.Close ?? null);
+            const s6 = (p.stress_6m ?? null);
+      
+            const fmt = (v)=> (v === null || v === undefined || Number.isNaN(Number(v))) ? "-" : fmtNumber(Number(v));
+            return `
+              <tr>
+                <td>${d}</td>
+                <td>${fmt(swvl3)}</td>
+                <td>${fmt(s6)}</td>
+              </tr>
+            `;
+          }).join("")}
+        `;
+      
+        // ----- GRÁFICO (Stress_6m contínuo) -----
+        const ptsChart = rows
+          .map(p => ({
+            date: (p.date || p.Data || p.data),
+            close: (p.stress_6m ?? null),
+            mm50: null,
+            mm252: null
+          }))
+          .filter(p => p.close !== null && !Number.isNaN(Number(p.close)));
+      
+        drawMultiLine(canvas, ptsChart, {
+          showMM50: false,
+          showMM252: false,
+          labelClose: "Stress_6m"
+        });
+      
+        return;
+      }
+
 
 
 
