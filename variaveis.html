@@ -483,6 +483,27 @@
         return { date, close, mm50, mm252 };
       });
 
+        // === EXCEÇÃO: CLIMA (SOIL MOISTURE) — gráfico deve usar Stress_6m ===
+        if (varId === "clima_soil") {
+          const ptsChart = raw
+            .map(p => ({
+              date: (p.date || p.Data || p.data),
+              close: (p.stress_6m ?? null),
+              mm50: null,
+              mm252: null
+            }))
+            .filter(p => p.close !== null && !Number.isNaN(Number(p.close)));
+        
+          ptsChart.sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+        
+          drawMultiLine(canvas, ptsChart, {
+            showMM50: false,
+            showMM252: false,
+            labelClose: "Stress_6m"
+          });
+        
+          return; // <-- IMPORTANTE: impede o fluxo padrão
+        }
 
 
 
