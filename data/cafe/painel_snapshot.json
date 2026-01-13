@@ -1,6 +1,6 @@
 {
   "commodity": "cafe",
-  "updated_at": "2026-01-13 14:31:27",
+  "updated_at": "2026-01-13 15:08:59",
   "rows": [
     {
       "id": "preco_arabica",
@@ -18,9 +18,10 @@
       "peso": 0.5,
       "score_ponderado": -1.25,
       "frequencia": "Diária",
-      "ultima_atualizacao": "2026-01-13 14:31:27",
-      "regra_de_sinal": "Nível indica se o preço está baixo ou alto versus o histórico recente; Tendência mostra a direção atual comparando o preço com médias de curto e longo prazo; Momento indica se essa tendência está ganhando ou perdendo força ao observar a evolução mensal da média; Score combina Nível, Tendência e Momento (com peso e ajuste por bloco) em um único indicador.",
-      "fonte": "Yahoo Finance (KC=F) | diário | Close |"
+      "ultima_atualizacao": "2026-01-13 15:08:59",
+      "regra_de_sinal": "Nível indica se o preço está baixo ou alto versus o histórico recente; Tendência mostra a direção atual comparando o preço com médias de curto e longo prazo; Momento indica se essa tendência está ganhando ou perdendo força ao observar a evolução mensal da média de curto prazo; Score combina Nível, Tendência e Momento (com peso) em um único indicador.",
+      "fonte": "Yahoo Finance (KC=F).",
+      "ultima_data_serie": "2026-01-13"
     },
     {
       "id": "cot_report",
