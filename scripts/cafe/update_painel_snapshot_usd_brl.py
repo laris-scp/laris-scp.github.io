@@ -9,6 +9,10 @@ SNAPSHOT_PATH = Path("data/cafe/painel_snapshot.json")
 MM_LONG = 252
 MM_SHORT = 50
 
+# Campo novo (extra; não deve quebrar o site)
+SERIES_LAST_DATE_FIELD = "ultima_data_serie"
+
+
 def pct_to_level_and_value(p: float):
     if p < 0.20:
         return "MUITO BAIXO", -1.0
@@ -18,34 +22,35 @@ def pct_to_level_and_value(p: float):
         return "NEUTRO", 0.0
     elif p < 0.80:
         return "ALTO", 0.5
-    else:
-        return "MUITO ALTO", 1.0
+    return "MUITO ALTO", 1.0
+
 
 def tendencia_to_value(t: str) -> float:
-    t = t.strip().upper()
-    if t == "QUEDA":
-        return -1.0
     if t == "ALTA":
         return 1.0
+    if t == "QUEDA":
+        return -1.0
     return 0.0
 
+
 def momento_to_value(m: str) -> float:
-    m = " ".join(m.strip().upper().replace("-", " ").split())
+    if m == "ALTA ACELERANDO":
+        return 1.0
+    if m == "ALTA DESACELERANDO":
+        return 0.5
     if m == "QUEDA ACELERANDO":
         return -1.0
     if m == "QUEDA DESACELERANDO":
         return -0.5
-    if m == "ALTA DESACELERANDO":
-        return 0.5
-    if m == "ALTA ACELERANDO":
-        return 1.0
     return 0.0
+
 
 def percentile_rank(series: pd.Series, value: float) -> float:
     s = pd.to_numeric(series, errors="coerce").dropna()
     if len(s) == 0:
         return float("nan")
     return float((s <= value).sum() / len(s))
+
 
 RULE_TXT = (
     "Nível indica se o dólar está baixo ou alto versus seu comportamento histórico recente; "
@@ -54,18 +59,46 @@ RULE_TXT = (
     "Score combina Nível, Tendência e Momento (com peso) em um único indicador."
 )
 
-FONTE_TXT = "BCB SGS (série 1) – USD/BRL"
+FONTE_TXT = "Banco Central do Brasil (SGS série 1)."
+
 
 def main():
-    # --- Ler série já automatizada ---
+    # --- Ler série ---
     series_payload = json.loads(SERIES_PATH.read_text(encoding="utf-8"))
     pts = series_payload["series"]
+    if not pts:
+        raise RuntimeError("usd_brl.json sem pontos em 'series'.")
 
+    series_last_date = pts[-1].get("date")
+    if not series_last_date:
+        raise RuntimeError("Não encontrei a última data em usd_brl.json (series[-1].date).")
+
+    # --- Ler snapshot e localizar usd_brl ---
+    snapshot = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))
+    if not (isinstance(snapshot, dict) and "rows" in snapshot and isinstance(snapshot["rows"], list)):
+        raise RuntimeError("Formato inesperado em painel_snapshot.json: esperado dict com chave 'rows' (lista).")
+
+    rows = snapshot["rows"]
+
+    item = None
+    for r in rows:
+        if r.get("id") == "usd_brl":
+            item = r
+            break
+    if item is None:
+        raise RuntimeError("Não encontrei id='usd_brl' em painel_snapshot.json (rows).")
+
+    # --- Early exit: não atualiza se a série não mudou ---
+    prev_series_last_date = item.get(SERIES_LAST_DATE_FIELD)
+    if prev_series_last_date is not None and str(prev_series_last_date) == str(series_last_date):
+        print(f"Sem dados novos para usd_brl no snapshot. Última data: {series_last_date}")
+        return
+
+    # --- DF ---
     df = pd.DataFrame(pts)
     df["date"] = pd.to_datetime(df["date"], errors="coerce")
     df = df.dropna().sort_values("date").reset_index(drop=True)
 
-    # Garantir colunas
     for c in ["close", "mm50", "mm252"]:
         df[c] = pd.to_numeric(df[c], errors="coerce")
     df = df.dropna().reset_index(drop=True)
@@ -73,96 +106,76 @@ def main():
     if len(df) < MM_LONG + 60:
         raise RuntimeError(f"Poucos dados após MM: {len(df)}")
 
-    # Últimos valores
     ult = float(df.iloc[-1]["close"])
     last_mm252 = float(df.iloc[-1]["mm252"])
     last_mm50 = float(df.iloc[-1]["mm50"])
 
-    # Nível: percentil do dist vs MM252
+    # Nível
     df["dist_mm252"] = df["close"] - df["mm252"]
     percentil = percentile_rank(df["dist_mm252"], ult - last_mm252)
     nivel_txt, valor_nivel = pct_to_level_and_value(percentil)
 
-    # Tendência: close vs MM50/MM252
+    # Tendência
     if ult > last_mm50 and ult > last_mm252:
         tendencia = "ALTA"
     elif ult < last_mm50 and ult < last_mm252:
         tendencia = "QUEDA"
     else:
-        tendencia = "LATERAL"
+        tendencia = "NEUTRO"
     valor_tendencia = tendencia_to_value(tendencia)
 
-    # Momento: 3 pontos mensais da MM50
-    df["mes"] = df["date"].dt.to_period("M")
-    mm50_monthly = df.groupby("mes").last().reset_index().sort_values("mes")
-
-    momento = "NEUTRO"
-    if len(mm50_monthly) >= 3:
-        m2 = float(mm50_monthly.iloc[-3]["mm50"])
-        m1 = float(mm50_monthly.iloc[-2]["mm50"])
-        m0 = float(mm50_monthly.iloc[-1]["mm50"])
-
+    # Momento (MM50 mensal)
+    df_m = df.copy()
+    df_m["ym"] = df_m["date"].dt.to_period("M").astype(str)
+    mms = df_m.groupby("ym")["mm50"].last().dropna()
+    if len(mms) < 3:
+        momento = "NEUTRO"
+    else:
+        m0, m1, m2 = float(mms.iloc[-1]), float(mms.iloc[-2]), float(mms.iloc[-3])
         d1 = m1 - m2
         d2 = m0 - m1
-
         if tendencia == "ALTA":
             momento = "ALTA ACELERANDO" if abs(d2) > abs(d1) else "ALTA DESACELERANDO"
         elif tendencia == "QUEDA":
             momento = "QUEDA ACELERANDO" if abs(d2) > abs(d1) else "QUEDA DESACELERANDO"
         else:
             momento = "NEUTRO"
-
     valor_momento = momento_to_value(momento)
 
-    # Score (sem peso)
     score = float(valor_nivel + valor_tendencia + valor_momento)
 
-        # --- Carregar snapshot e atualizar apenas o id=usd_brl ---
-    snapshot = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))
+    # Atualiza preservando peso
+    peso = float(item.get("peso", 1.0))
+    item.update(
+        {
+            "ultimo_valor": ult,
+            "percentil": float(round(percentil, 4)),
+            "nivel": nivel_txt,
+            "valor_nivel": float(valor_nivel),
+            "tendencia": tendencia,
+            "valor_tendencia": float(valor_tendencia),
+            "momento": momento,
+            "valor_momento": float(valor_momento),
+            "score": float(score),
+            "score_ponderado": float(score * peso),
+            "frequencia": "Diária",
+            "ultima_atualizacao": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "regra_de_sinal": RULE_TXT,
+            "fonte": FONTE_TXT,
+            SERIES_LAST_DATE_FIELD: str(series_last_date),
+        }
+    )
 
-    if not (isinstance(snapshot, dict) and "rows" in snapshot and isinstance(snapshot["rows"], list)):
-        raise RuntimeError("Formato inesperado em painel_snapshot.json: esperado dict com chave 'rows' (lista).")
-
-    rows = snapshot["rows"]
-
-    found = False
-    for item in rows:
-        if item.get("id") == "usd_brl":
-            peso = float(item.get("peso", 1.0))  # preserva o peso atual
-            item.update({
-                "ultimo_valor": ult,
-                "percentil": float(round(percentil, 4)),
-                "nivel": nivel_txt,
-                "valor_nivel": float(valor_nivel),
-                "tendencia": tendencia,
-                "valor_tendencia": float(valor_tendencia),
-                "momento": momento,
-                "valor_momento": float(valor_momento),
-                "score": float(score),
-                "score_ponderado": float(score * peso),
-                "frequencia": "Diária",
-                "ultima_atualizacao": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "regra_de_sinal": RULE_TXT,
-                "fonte": FONTE_TXT,
-            })
-            found = True
-            break
-
-    if not found:
-        raise RuntimeError("Não encontrei id='usd_brl' em painel_snapshot.json (rows).")
-
-    # Atualiza timestamp geral do snapshot
+    # Só atualiza updated_at quando houver atualização real
     snapshot["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     snapshot["rows"] = rows
 
-    SNAPSHOT_PATH.write_text(
-        json.dumps(snapshot, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8"
-    )
-
+    SNAPSHOT_PATH.write_text(json.dumps(snapshot, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     print("OK: painel_snapshot.json atualizado (usd_brl).")
-    print("Ult:", ult, "| Nivel:", nivel_txt, valor_nivel, "| Tend:", tendencia, valor_tendencia, "| Mom:", momento, valor_momento)
+    print("Últ:", ult, "| Nível:", nivel_txt, valor_nivel, "| Tend:", tendencia, valor_tendencia, "| Mom:", momento, valor_momento)
+    print("Última data da série:", series_last_date)
+
 
 if __name__ == "__main__":
     main()
