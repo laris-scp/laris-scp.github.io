@@ -22,6 +22,8 @@ AREA = [-15, -55, -25, -40]  # N, W, S, E (conforme seu código)
 # Revisão: reprocessar e sobrescrever os últimos N meses
 REVISION_MONTHS = 6
 
+#teste novamente.
+
 # Metadados do JSON (mantém padrão do seu arquivo)
 SERIES_ID = "clima_soil"
 SERIES_NAME = "CLIMA (SOIL MOISTURE)"
