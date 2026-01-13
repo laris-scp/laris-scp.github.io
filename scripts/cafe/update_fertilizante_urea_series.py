@@ -1,103 +1,96 @@
 import json
-import calendar
-from datetime import datetime, timezone
 from pathlib import Path
+from datetime import datetime
 
 import pandas as pd
 import requests
 
 OUT_PATH = Path("data/cafe/series/fertilizante_urea.json")
 
-# Fonte oficial (World Bank - CMO / Pink Sheet)
-URL_XLS = "https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/related/CMO-Historical-Data-Monthly.xlsx"
-SHEET_NAME = "Monthly Prices"
+URL_XLS = "https://thedocs.worldbank.org/en/doc/186749e1dbe2a9b8a5a66e62c8c3d7a4-0350012023/original/CMO-Historical-Data-Monthly.xlsx"
+
+META = {
+    "id": "fertilizante_urea",
+    "name": "FERTILIZANTE (UREIA)",
+    "unit": "US$/t",
+    "frequency": "Mensal",
+    "source": "World Bank – Commodity Markets Outlook (CMO)",
+}
 
 MM_SHORT = 4
 MM_LONG = 12
 
-def _norm(s: str) -> str:
-    return (
-        str(s)
-        .replace("\u00a0", " ")
-        .strip()
-        .upper()
-    )
 
-def yyyymm_to_eom(yyyymm: int) -> str:
-    """
-    Converte 196001 -> '1960-01-31' (fim do mês).
-    """
-    year = yyyymm // 100
-    month = yyyymm % 100
-    last_day = calendar.monthrange(year, month)[1]
-    return f"{year:04d}-{month:02d}-{last_day:02d}"
+def load_existing_last_date():
+    if not OUT_PATH.exists():
+        return None
+
+    payload = json.loads(OUT_PATH.read_text(encoding="utf-8"))
+    series = payload.get("series", [])
+    if not series:
+        return None
+
+    return series[-1].get("date")
+
 
 def main():
-    # 1) Baixa XLS
-    r = requests.get(URL_XLS, timeout=120)
+    # --- estado atual ---
+    last_saved_date = load_existing_last_date()
+
+    # --- download do XLS ---
+    r = requests.get(URL_XLS, timeout=60)
     r.raise_for_status()
 
-    # 2) Lê sheet com header robusto (igual sua lógica do Colab)
-    raw = pd.read_excel(pd.io.common.BytesIO(r.content), sheet_name=SHEET_NAME, header=None)
+    df = pd.read_excel(r.content)
 
-    # Linha 4 = nomes principais | Linha 5 = unidades (0-index)
-    h1 = raw.iloc[4].astype(str)
-    h2 = raw.iloc[5].astype(str)
-
-    cols = []
-    for a, b in zip(h1, h2):
-        name = f"{a} {b}".strip()
-        name = name.replace("nan", "").strip()
-        cols.append(name)
-
-    df = raw.iloc[6:].copy()
-    df.columns = cols
-
-    # Primeira coluna = data
+    # coluna de data
     date_col = df.columns[0]
-    df = df.rename(columns={date_col: "DATE_RAW"})
+    df[date_col] = pd.to_datetime(df[date_col], errors="coerce")
 
-    # Identifica coluna da UREIA (procura "UREA" e "$")
-    urea_cols = [c for c in df.columns if ("UREA" in _norm(c) and "$" in _norm(c))]
+    # identifica coluna da ureia
+    urea_cols = [c for c in df.columns if isinstance(c, str) and "urea" in c.lower()]
     if not urea_cols:
-        raise RuntimeError(f"Coluna de UREIA não encontrada. Exemplo colunas: {df.columns.tolist()[:25]}")
+        raise RuntimeError("Não encontrei coluna de Ureia no XLS do World Bank.")
 
-    UREA_COL = urea_cols[0]
+    col_urea = urea_cols[0]
 
-    df = df[["DATE_RAW", UREA_COL]].dropna().copy()
+    df = df[[date_col, col_urea]].dropna()
+    df.columns = ["date", "close"]
 
-    # DATE_RAW vem como '1960M01' (ou similar)
-    df["YYYYMM"] = df["DATE_RAW"].astype(str).str.replace("M", "", regex=False).astype(int)
-    df["close"] = pd.to_numeric(df[UREA_COL], errors="coerce")
-    df = df.dropna(subset=["close"]).sort_values("YYYYMM").reset_index(drop=True)
+    # fim de mês
+    df["date"] = df["date"] + pd.offsets.MonthEnd(0)
+    df["close"] = pd.to_numeric(df["close"], errors="coerce")
+    df = df.dropna().sort_values("date").reset_index(drop=True)
 
-    if len(df) < MM_LONG + 3:
-        raise RuntimeError(f"Série curta demais para MM{MM_LONG} (n={len(df)}).")
+    if df.empty:
+        raise RuntimeError("Série de ureia vazia após limpeza.")
 
-    # 3) Datas fim de mês
-    df["date"] = df["YYYYMM"].apply(yyyymm_to_eom)
-    df["date"] = pd.to_datetime(df["date"])
+    # --- early-exit por data ---
+    last_date_new = df.iloc[-1]["date"].strftime("%Y-%m-%d")
+    if last_saved_date is not None and last_saved_date == last_date_new:
+        print(f"Sem dados novos para fertilizante_urea. Última data: {last_date_new}")
+        return
 
-    # 4) Médias móveis
-    s = pd.Series(df["close"].values, index=df["date"])
-    mm4m = s.rolling(MM_SHORT).mean()
-    mm12m = s.rolling(MM_LONG).mean()
+    # --- médias móveis ---
+    df["mm4"] = df["close"].rolling(MM_SHORT).mean()
+    df["mm12"] = df["close"].rolling(MM_LONG).mean()
+    df = df.dropna().reset_index(drop=True)
 
-    out_series = []
-    for dt in df["date"]:
-        out_series.append({
-            "date": dt.strftime("%Y-%m-%d"),
-            "close": float(s.loc[dt]),
-            "mm4m": None if pd.isna(mm4m.loc[dt]) else float(mm4m.loc[dt]),
-            "mm12m": None if pd.isna(mm12m.loc[dt]) else float(mm12m.loc[dt]),
+    if len(df) < MM_LONG + 2:
+        raise RuntimeError(f"Série curta demais após MM (n={len(df)}).")
+
+    series = []
+    for _, row in df.iterrows():
+        series.append({
+            "date": row["date"].strftime("%Y-%m-%d"),
+            "close": float(row["close"]),
+            "mm4": float(row["mm4"]),
+            "mm12": float(row["mm12"]),
         })
 
     payload = {
-        "id": "fertilizante_urea",
-        "name": "FERTILIZANTE (UREA)",
-        "unit": "US$/t",
-        "updated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "series": out_series,
+        **META,
+        "series": series
     }
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -106,9 +99,10 @@ def main():
         encoding="utf-8"
     )
 
-    print("OK: fertilizante_urea.json atualizado (World Bank XLS).")
-    print("Última data:", out_series[-1]["date"])
-    print("Último close:", out_series[-1]["close"])
+    print("OK: fertilizante_urea.json atualizado.")
+    print("Última data:", series[-1]["date"])
+    print("Último valor:", series[-1]["close"])
+
 
 if __name__ == "__main__":
     main()
