@@ -12,6 +12,8 @@ OUT_PATH = Path("data/cafe/series/gscpi_fretes.json")
 # Fonte oficial (NY Fed – GSCPI)
 GSCPI_URL_XLSX = "https://www.newyorkfed.org/medialibrary/research/interactives/gscpi/downloads/gscpi_data.xlsx"
 
+#teste
+
 def to_eom(dt: pd.Timestamp) -> pd.Timestamp:
     """Converte uma data qualquer para o fim do mês (EOM), preservando ano/mês."""
     year = int(dt.year)
