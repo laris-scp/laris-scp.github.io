@@ -72,8 +72,9 @@ def main():
         return
 
     # --- médias móveis ---
-    df["mm4"] = df["close"].rolling(MM_SHORT).mean()
-    df["mm12"] = df["close"].rolling(MM_LONG).mean()
+    df["mm4m"] = df["close"].rolling(MM_SHORT).mean()
+    df["mm12m"] = df["close"].rolling(MM_LONG).mean()
+
     df = df.dropna().reset_index(drop=True)
 
     if len(df) < MM_LONG + 2:
@@ -84,8 +85,8 @@ def main():
         series.append({
             "date": row["date"].strftime("%Y-%m-%d"),
             "close": float(row["close"]),
-            "mm4": float(row["mm4"]),
-            "mm12": float(row["mm12"]),
+            "mm4m": float(row["mm4m"]),
+            "mm12m": float(row["mm12m"]),
         })
 
     payload = {
