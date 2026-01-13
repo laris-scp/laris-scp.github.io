@@ -3,6 +3,7 @@ import zipfile
 from io import BytesIO
 from datetime import datetime
 from pathlib import Path
+import time
 
 import pandas as pd
 import requests
@@ -10,8 +11,6 @@ import requests
 OUT_PATH = Path("data/cafe/series/cot_report.json")
 
 LOOKBACK_YEARS_LEVEL = 5
-
-# Média móvel usada no site do COT:
 MM_WEEKS = 12  # mm12w
 
 META = {
@@ -21,20 +20,52 @@ META = {
     "descricao": "CFTC COT Disaggregated – Coffee C (ICE) – Managed Money NET + MM12W",
 }
 
-def download_disagg_year(year: int) -> pd.DataFrame | None:
-    url = f"https://www.cftc.gov/files/dea/history/fut_disagg_txt_{year}.zip"
-    r = requests.get(url, timeout=60)
-    if r.status_code != 200:
+CFTC_URL = "https://www.cftc.gov/files/dea/history/fut_disagg_txt_{year}.zip"
+
+
+def load_existing_last_date():
+    if not OUT_PATH.exists():
         return None
 
-    z = zipfile.ZipFile(BytesIO(r.content))
-    name = [n for n in z.namelist() if n.lower().endswith(".txt")][0]
-    txt = z.read(name).decode("utf-8", errors="ignore")
+    payload = json.loads(OUT_PATH.read_text(encoding="utf-8"))
+    series = payload.get("series", [])
+    if not series:
+        return None
 
-    dfy = pd.read_csv(BytesIO(txt.encode()), sep=",")
-    return dfy
+    return series[-1].get("date")
+
+
+def download_disagg_year(year: int, retries: int = 3) -> pd.DataFrame | None:
+    url = CFTC_URL.format(year=year)
+
+    for attempt in range(1, retries + 1):
+        try:
+            r = requests.get(url, timeout=60)
+            if r.status_code != 200:
+                raise RuntimeError(f"HTTP {r.status_code}")
+
+            z = zipfile.ZipFile(BytesIO(r.content))
+
+            txt_files = [n for n in z.namelist() if n.lower().endswith(".txt")]
+            if not txt_files:
+                raise RuntimeError("Nenhum .txt encontrado no ZIP")
+
+            name = txt_files[0]
+            txt = z.read(name).decode("utf-8", errors="ignore")
+            return pd.read_csv(BytesIO(txt.encode()), sep=",")
+
+        except Exception as e:
+            if attempt == retries:
+                raise RuntimeError(f"Falha ao baixar COT {year}: {e}")
+            time.sleep(2)
+
+    return None
+
 
 def main():
+    # --- estado atual ---
+    last_saved_date = load_existing_last_date()
+
     year_now = datetime.now().year
     years = range(year_now - LOOKBACK_YEARS_LEVEL - 1, year_now + 1)
 
@@ -67,6 +98,12 @@ def main():
     if len(cot) < 20:
         raise RuntimeError(f"Série COT curta demais (n={len(cot)}).")
 
+    # Early-exit por data
+    last_date_new = cot.iloc[-1]["date"].strftime("%Y-%m-%d")
+    if last_saved_date is not None and last_saved_date == last_date_new:
+        print(f"Sem dados novos no COT Report. Última data: {last_date_new}")
+        return
+
     # MM12W
     cot["mm12w"] = cot["close"].rolling(MM_WEEKS).mean()
     cot = cot.dropna(subset=["mm12w"]).reset_index(drop=True)
@@ -94,6 +131,7 @@ def main():
     print("Última data:", series[-1]["date"])
     print("Último close:", series[-1]["close"])
     print("Último mm12w:", series[-1]["mm12w"])
+
 
 if __name__ == "__main__":
     main()
