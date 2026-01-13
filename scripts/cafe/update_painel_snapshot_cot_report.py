@@ -12,9 +12,13 @@ WEEKS_A = (25, 36)
 WEEKS_B = (13, 24)
 WEEKS_C = (0, 12)
 
+SERIES_LAST_DATE_FIELD = "ultima_data_serie"
+
+
 def percentile_rank(series, value):
     s = pd.to_numeric(series, errors="coerce").dropna()
     return float((s <= value).sum() / len(s)) if len(s) else float("nan")
+
 
 def pct_to_level_and_value(p):
     if pd.isna(p):
@@ -29,12 +33,14 @@ def pct_to_level_and_value(p):
         return "ALTO", 0.5
     return "MUITO ALTO", 1.0
 
+
 def tendencia_to_value(t):
     if t == "ALTA":
         return 1.0
     if t == "QUEDA":
         return -1.0
     return 0.0
+
 
 def momento_to_value(m):
     if m == "QUEDA ACELERANDO":
@@ -47,21 +53,52 @@ def momento_to_value(m):
         return 1.0
     return 0.0
 
+
 def window_mean_weeks(df, end_date, w_start, w_end):
     ini = end_date - pd.DateOffset(weeks=w_start)
     fim = end_date - pd.DateOffset(weeks=w_end)
     s = df.loc[(df["date"] > ini) & (df["date"] <= fim), "close"]
     return float(s.mean()) if len(s) else float("nan")
 
+
 def main():
     # ---- Load series ----
     series_json = json.loads(SERIES_PATH.read_text(encoding="utf-8"))
-    df = pd.DataFrame(series_json["series"])
-    df["date"] = pd.to_datetime(df["date"])
-    df = df.sort_values("date").reset_index(drop=True)
+    pts = series_json.get("series", [])
+    if not pts:
+        raise RuntimeError("cot_report.json sem dados em 'series'.")
+
+    df = pd.DataFrame(pts)
+    df["date"] = pd.to_datetime(df["date"], errors="coerce")
+    df["close"] = pd.to_numeric(df["close"], errors="coerce")
+    df = df.dropna().sort_values("date").reset_index(drop=True)
+
+    if df.empty:
+        raise RuntimeError("cot_report.json não possui pontos válidos após limpeza.")
 
     ult = float(df.iloc[-1]["close"])
     last_date = df.iloc[-1]["date"]
+    series_last_date = last_date.date().isoformat()
+
+    # ---- Load snapshot e localizar cot_report ----
+    snapshot = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))
+    rows = snapshot.get("rows")
+    if not isinstance(rows, list):
+        raise RuntimeError("painel_snapshot.json esperado com chave 'rows' (lista).")
+
+    row = None
+    for r in rows:
+        if r.get("id") == "cot_report":
+            row = r
+            break
+    if row is None:
+        raise RuntimeError("Não encontrei id='cot_report' em painel_snapshot.json (rows).")
+
+    # ---- Early exit: não atualiza se a série não mudou ----
+    prev_series_last_date = row.get(SERIES_LAST_DATE_FIELD)
+    if prev_series_last_date is not None and str(prev_series_last_date) == str(series_last_date):
+        print(f"Sem dados novos para cot_report no snapshot. Última data: {series_last_date}")
+        return
 
     # ---- Nível (percentil 5y) ----
     cutoff = last_date - pd.DateOffset(years=LOOKBACK_YEARS_LEVEL)
@@ -97,26 +134,21 @@ def main():
     valor_momento = momento_to_value(momento)
 
     # ---- Score ----
-    score = valor_nivel + valor_tendencia + valor_momento
-
-    # ---- Load snapshot ----
-    snapshot = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))
-
-    row = next(r for r in snapshot["rows"] if r["id"] == "cot_report")
+    score = float(valor_nivel + valor_tendencia + valor_momento)
 
     peso = float(row.get("peso", 1.0))
-    score_ponderado = score * peso
+    score_ponderado = float(score * peso)
 
     row.update({
         "ultimo_valor": ult,
-        "percentil": round(percentil, 4),
+        "percentil": round(float(percentil), 4),
         "nivel": nivel_txt,
-        "valor_nivel": valor_nivel,
+        "valor_nivel": float(valor_nivel),
         "tendencia": tendencia,
-        "valor_tendencia": valor_tendencia,
+        "valor_tendencia": float(valor_tendencia),
         "momento": momento,
-        "valor_momento": valor_momento,
-        "score": score,
+        "valor_momento": float(valor_momento),
+        "score": float(score),
         "score_ponderado": score_ponderado,
         "frequencia": "Semanal",
         "ultima_atualizacao": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -126,16 +158,19 @@ def main():
             "Tendência indica se esse posicionamento vem aumentando, diminuindo ou ficando estável ao comparar médias de períodos mais antigos e mais recentes; "
             "Momento mostra se essa tendência está ganhando ou perdendo força ao comparar a mudança entre as janelas; "
             "Score combina Nível, Tendência e Momento (com peso) em um indicador único."
-        )
+        ),
+        SERIES_LAST_DATE_FIELD: str(series_last_date),
     })
 
+    snapshot["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     SNAPSHOT_PATH.write_text(
         json.dumps(snapshot, ensure_ascii=False, separators=(",", ":")) + "\n",
         encoding="utf-8"
     )
 
     print("OK: painel_snapshot.json atualizado (COT Report).")
-    print("Última data:", last_date.date(), "| Último valor:", ult)
+    print("Última data:", series_last_date, "| Último valor:", ult)
+
 
 if __name__ == "__main__":
     main()
