@@ -7,7 +7,7 @@ import requests
 
 OUT_PATH = Path("data/cafe/series/fertilizante_urea.json")
 
-URL_XLS = "https://thedocs.worldbank.org/en/doc/186749e1dbe2a9b8a5a66e62c8c3d7a4-0350012023/original/CMO-Historical-Data-Monthly.xlsx"
+URL_XLS = "https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/related/CMO-Historical-Data-Monthly.xlsx"
 
 META = {
     "id": "fertilizante_urea",
