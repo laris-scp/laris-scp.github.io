@@ -28,8 +28,6 @@ SERIES_NAME = "CLIMA (SOIL MOISTURE)"
 UNIT = "m³/m³"
 FREQUENCY = "Mensal"
 
-#teste
-
 @dataclass
 class Window:
     start: pd.Timestamp
