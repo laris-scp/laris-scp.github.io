@@ -2,9 +2,9 @@ name: 02 - Update Painel Snapshot (USD/BRL only)
 
 on:
   workflow_dispatch:
-  schedule:
-    # Rodar logo após o USD/BRL (ex: 10:05 UTC)
-    - cron: "5 10 * * *"
+  workflow_run:
+    workflows: ["01 - Update USD/BRL (series/usd_brl.json)"]
+    types: [completed]
 
 permissions:
   contents: write
