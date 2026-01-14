@@ -2,6 +2,17 @@ name: 16_painel_thermometros
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows:
+      - "02 - Update Painel Snapshot (USD/BRL only)"
+      - "04 - Update Painel Snapshot (Preço Arábica)"
+      - "06 - Update Painel Snapshot (COT Report)"
+      - "08 - Update Painel Snapshot (Fertilizante Ureia)"
+      - "10 - Update painel_snapshot (GSCPI)"
+      - "13 - Update painel_snapshot (CLIMA soil)"
+      - "15_painel_snapshot_fundamental_stu"
+      - "18 - Update painel_snapshot (Estoques Certificados)"
+    types: [completed]
 
 permissions:
   contents: write
