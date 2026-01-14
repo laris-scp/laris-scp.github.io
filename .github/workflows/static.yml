@@ -4,7 +4,7 @@ name: Deploy static content to Pages
 on:
   workflow_dispatch:
   schedule:
-    - cron: "30 11 * * *"
+    - cron: "30 22 * * *"
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
