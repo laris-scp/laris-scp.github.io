@@ -3,8 +3,7 @@ name: 16_hist_termometro
 on:
   workflow_dispatch:
   workflow_run:
-    # Dispara sempre que QUALQUER snapshot rodar e terminar com sucesso.
-    # Ajuste a lista se você quiser restringir.
+    # Dispara sempre que "16_painel_thermometros" rodar
     workflows:
      - "16_painel_thermometros"
 
