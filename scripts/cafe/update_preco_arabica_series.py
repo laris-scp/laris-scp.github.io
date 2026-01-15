@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from pathlib import Path
 
 import pandas as pd
@@ -25,22 +25,66 @@ META = {
 RECALC_BUFFER_DAYS = 420
 PROBE_DAYS = 14
 
+# Se o último dado vier mais velho que isso, considera truncado/stale no Actions
+MAX_AGE_DAYS = 10
+
+# Se o JSON existente estiver muito desatualizado, ignora incremental e faz bootstrap
+FORCE_BOOTSTRAP_IF_OLDER_THAN_DAYS = 60
+
+
+def _today_utc() -> date:
+    return datetime.utcnow().date()
+
+
+def assert_series_is_fresh(s: pd.Series, label: str) -> None:
+    if s is None or s.empty:
+        raise RuntimeError(f"{label}: série vazia.")
+
+    last = pd.to_datetime(s.index.max()).date()
+    age = (_today_utc() - last).days
+    if age > MAX_AGE_DAYS:
+        raise RuntimeError(
+            f"{label}: dado desatualizado (stale). "
+            f"Última data={last} | hoje(UTC)={_today_utc()} | age_days={age}"
+        )
+
 
 def get_close_series(df: pd.DataFrame) -> pd.Series:
-    if df.empty:
+    if df is None or df.empty:
         raise RuntimeError("Yahoo retornou vazio para KC=F.")
 
-    close = df["Close"] if "Close" in df else None
+    # Pode vir MultiIndex
+    if isinstance(df.columns, pd.MultiIndex):
+        if "Close" in df.columns.get_level_values(0):
+            close_obj = df["Close"]
+        else:
+            close_cols = [c for c in df.columns if str(c[0]).lower() == "close"]
+            if not close_cols:
+                raise RuntimeError(f"Não achei Close no MultiIndex. Colunas: {df.columns}")
+            close_obj = df[close_cols]
+    else:
+        if "Close" not in df.columns:
+            raise RuntimeError(f"Coluna Close não encontrada. Colunas: {list(df.columns)}")
+        close_obj = df["Close"]
 
-    if isinstance(close, pd.DataFrame):
-        close = close.iloc[:, 0]
+    # Se vier DataFrame, pega 1ª coluna
+    if isinstance(close_obj, pd.DataFrame):
+        if close_obj.shape[1] < 1:
+            raise RuntimeError("Close retornou DataFrame vazio.")
+        close_obj = close_obj.iloc[:, 0]
 
-    if close is None:
-        raise RuntimeError("Coluna Close não encontrada.")
-
-    s = close.dropna().copy()
+    s = close_obj.dropna().copy()
     s.index = pd.to_datetime(s.index)
     return s
+
+
+def series_to_df(s: pd.Series) -> pd.DataFrame:
+    df = s.rename("close").to_frame().reset_index()
+    df = df.rename(columns={df.columns[0]: "date"})
+    df["date"] = pd.to_datetime(df["date"], errors="coerce")
+    df["close"] = pd.to_numeric(df["close"], errors="coerce")
+    df = df.dropna(subset=["date", "close"]).sort_values("date").reset_index(drop=True)
+    return df
 
 
 def load_existing():
@@ -49,71 +93,122 @@ def load_existing():
 
     payload = json.loads(OUT_PATH.read_text(encoding="utf-8"))
     pts = payload.get("series", [])
-
     if not pts:
         return pd.DataFrame(columns=["date", "close"]), None
 
     df = pd.DataFrame(pts)
-    df["date"] = pd.to_datetime(df["date"])
+    df["date"] = pd.to_datetime(df["date"], errors="coerce")
     df["close"] = pd.to_numeric(df["close"], errors="coerce")
     df = df.dropna(subset=["date", "close"]).sort_values("date").reset_index(drop=True)
-
     return df[["date", "close"]], df["date"].max().date().isoformat()
 
 
-def download_range(start: datetime, end: datetime) -> pd.Series:
+def fetch_close_history(start: datetime, end: datetime) -> pd.Series:
+    t = yf.Ticker(TICKER)
+    hist = t.history(
+        start=start.strftime("%Y-%m-%d"),
+        end=(end + timedelta(days=1)).strftime("%Y-%m-%d"),
+        interval="1d",
+        auto_adjust=False,
+        actions=False,
+    )
+    return get_close_series(hist)
+
+
+def fetch_close_download(start: datetime, end: datetime) -> pd.Series:
     raw = yf.download(
         TICKER,
         start=start.strftime("%Y-%m-%d"),
-        end=end.strftime("%Y-%m-%d"),
+        end=(end + timedelta(days=1)).strftime("%Y-%m-%d"),
         interval="1d",
         auto_adjust=False,
         progress=False,
+        group_by="column",
+        threads=False,
     )
     return get_close_series(raw)
+
+
+def download_range_with_fallback(start: datetime, end: datetime) -> pd.Series:
+    # 1) tenta history()
+    s = fetch_close_history(start, end)
+    assert_series_is_fresh(s, "history()")
+    return s
+
+
+def probe_last_date(end_dt: datetime) -> str:
+    start = end_dt - timedelta(days=PROBE_DAYS)
+
+    # tenta history()
+    try:
+        s = fetch_close_history(start, end_dt)
+        assert_series_is_fresh(s, "probe history()")
+        return pd.to_datetime(s.index.max()).date().isoformat()
+    except Exception as e1:
+        # fallback: download()
+        s = fetch_close_download(start, end_dt)
+        assert_series_is_fresh(s, "probe download()")
+        return pd.to_datetime(s.index.max()).date().isoformat()
 
 
 def main():
     df_existing, last_date_existing = load_existing()
     end_dt = datetime.today()
 
-    # -------- Probe curto --------
-    s_probe = download_range(end_dt - timedelta(days=PROBE_DAYS), end_dt)
-    if s_probe.empty:
-        raise RuntimeError("Yahoo retornou vazio no probe.")
-
-    last_yahoo = s_probe.index.max().date().isoformat()
+    # --- Probe curto: existe dado novo? (com validação real) ---
+    last_yahoo = probe_last_date(end_dt)
+    print("DEBUG | last_yahoo:", last_yahoo, "| last_existing:", last_date_existing)
 
     if last_date_existing and last_yahoo <= last_date_existing:
         print("Sem dados novos.")
         return
 
-    # -------- Coleta principal --------
-    if df_existing.empty:
-        start_dt = end_dt - pd.DateOffset(years=LEVEL_YEARS + 1)
-        s_all = download_range(start_dt, end_dt)
-        df_all = s_all.rename("close").to_frame().reset_index().rename(columns={"index": "date"})
+    # --- Decide incremental vs bootstrap ---
+    force_bootstrap = False
+    if last_date_existing:
+        age_existing = (_today_utc() - datetime.fromisoformat(last_date_existing).date()).days
+        if age_existing > FORCE_BOOTSTRAP_IF_OLDER_THAN_DAYS:
+            force_bootstrap = True
+
+    if df_existing.empty or force_bootstrap:
+        # Bootstrap: baixa 11 anos para garantir MM252 dentro dos 10 anos finais
+        start_dt = (end_dt - pd.DateOffset(years=LEVEL_YEARS + 1)).to_pydatetime()
+
+        # tenta history() com fallback para download() se necessário
+        try:
+            s_all = fetch_close_history(start_dt, end_dt)
+            assert_series_is_fresh(s_all, "bootstrap history()")
+        except Exception as e_hist:
+            s_all = fetch_close_download(start_dt, end_dt)
+            assert_series_is_fresh(s_all, "bootstrap download()")
+
+        df_all = series_to_df(s_all)
     else:
         last_dt = pd.to_datetime(last_date_existing)
-        start_dt = last_dt - timedelta(days=RECALC_BUFFER_DAYS)
+        start_dt = (last_dt - timedelta(days=RECALC_BUFFER_DAYS)).to_pydatetime()
 
-        s_tail = download_range(start_dt, end_dt)
-        df_tail = s_tail.rename("close").to_frame().reset_index().rename(columns={"index": "date"})
+        try:
+            s_tail = fetch_close_history(start_dt, end_dt)
+            assert_series_is_fresh(s_tail, "tail history()")
+        except Exception as e_hist:
+            s_tail = fetch_close_download(start_dt, end_dt)
+            assert_series_is_fresh(s_tail, "tail download()")
 
-        df_prefix = df_existing[df_existing["date"] < start_dt]
+        df_tail = series_to_df(s_tail)
+        df_prefix = df_existing[df_existing["date"] < pd.to_datetime(start_dt)]
         df_all = pd.concat([df_prefix, df_tail], ignore_index=True)
 
     df_all = df_all.drop_duplicates(subset=["date"]).sort_values("date").reset_index(drop=True)
 
-    # -------- Médias móveis (SEM remover linhas) --------
+    # --- Médias móveis (SEM remover linhas) ---
     df_all["mm50"] = df_all["close"].rolling(MM_SHORT).mean()
     df_all["mm252"] = df_all["close"].rolling(MM_LONG).mean()
 
-    # -------- Corte FINAL para 10 anos --------
+    # --- Corte FINAL para 10 anos ---
     cutoff = df_all["date"].max() - pd.DateOffset(years=LEVEL_YEARS)
     df_all = df_all[df_all["date"] >= cutoff].reset_index(drop=True)
 
-    # -------- JSON --------
+    # --- JSON ---
     series = []
     for _, row in df_all.iterrows():
         series.append({
