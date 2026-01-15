@@ -31,6 +31,10 @@ def get_close_series(df: pd.DataFrame) -> pd.Series:
         raise RuntimeError("Yahoo retornou vazio para KC=F.")
 
     close = df["Close"] if "Close" in df else None
+
+    if isinstance(close, pd.DataFrame):
+        close = close.iloc[:, 0]
+
     if close is None:
         raise RuntimeError("Coluna Close não encontrada.")
 
