@@ -28,7 +28,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pandas yfinance
+          pip install "pandas==2.2.2" "yfinance==0.2.66"
+
 
       - name: Run updater
         run: |
