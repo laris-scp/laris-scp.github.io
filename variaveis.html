@@ -91,10 +91,26 @@
       "clima_soil": "data/cafe/series/clima_soil.json"
     };
 
-    function fmtNumber(n){
+    const DECIMALS_BY_ID = {
+      clima_soil: 2,
+      cot_report: 0,
+      fertilizante_urea: 2,
+      gscpi: 2,
+      preco_arabica: 2,
+      usd_brl: 2,
+      estoques_certificados: 0,
+      fundamental_stu: 4,
+    };
+
+    function fmtNumber(n, decimals = 2){
       if(n === null || n === undefined || Number.isNaN(n)) return "—";
-      return new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 }).format(n);
+      const d = Number(decimals);
+      return new Intl.NumberFormat("pt-BR", {
+        minimumFractionDigits: d,
+        maximumFractionDigits: d
+      }).format(n);
     }
+
     function fmtPercent(p){
       if(p === null || p === undefined || Number.isNaN(p)) return "—";
       return new Intl.NumberFormat("pt-BR", { style:"percent", maximumFractionDigits: 2 }).format(p);
@@ -342,6 +358,7 @@
 
     function buildCard(snapshotRow){
       const id = snapshotRow.id;
+      const dec = DECIMALS_BY_ID[id] ?? 2;
       const mode = getSeriesModeById(id);
 
       const card = document.createElement("div");
@@ -383,7 +400,7 @@
         <div class="stats">
           <div class="stat">
             <div class="k">Último valor</div>
-            <div class="v">${fmtNumber(snapshotRow.ultimo_valor)}</div>
+            <div class="v">${fmtNumber(Number(snapshotRow.ultimo_valor), dec)}</div>
           </div>
           <div class="stat">
             <div class="k">Nível</div>
@@ -399,7 +416,7 @@
           </div>
           <div class="stat">
             <div class="k">Score ponderado</div>
-            <div class="v ${scoreClass(Number(snapshotRow.score_ponderado))}">${fmtNumber(Number(snapshotRow.score_ponderado))}</div>
+            <div class="v ${scoreClass(Number(snapshotRow.score_ponderado))}">${fmtNumber(Number(snapshotRow.score_ponderado), 2)}</div>
           </div>
         </div>
 
@@ -454,6 +471,7 @@
       const tbody = card.querySelector('[data-tbody="1"]');
 
       const varId = card.dataset.varid || "";
+      const dec = DECIMALS_BY_ID[varId] ?? 2;
       const mode = getSeriesModeById(varId);
 
       try{
@@ -494,8 +512,8 @@
               const tr = document.createElement("tr");
               tr.innerHTML = `
                 <td>${fmtDateBR(r.date)}</td>
-                <td class="right">${fmtNumber(Number(r.swvl3))}</td>
-                <td class="right">${(r.stress_6m === null || r.stress_6m === undefined) ? "—" : fmtNumber(Number(r.stress_6m))}</td>
+                <td class="right">${fmtNumber(Number(r.swvl3), dec)}</td>
+                <td class="right">${(r.stress_6m === null || r.stress_6m === undefined) ? "—" : fmtNumber(Number(r.stress_6m), dec)}</td>
               `;
               tbody.appendChild(tr);
             }
@@ -592,33 +610,33 @@
             if(mode === "CLOSE_ONLY"){
               tr.innerHTML = `
                 <td>${fmtDateBR(p.date)}</td>
-                <td class="right">${fmtNumber(Number(p.close))}</td>
+                <td class="right">${fmtNumber(Number(p.close), dec)}</td>
               `;
             } else if(mode === "COT_MM12W"){
               tr.innerHTML = `
                 <td>${fmtDateBR(p.date)}</td>
-                <td class="right">${fmtNumber(Number(p.close))}</td>
-                <td class="right">${fmtNumber(Number(p.mm50))}</td>
+                <td class="right">${fmtNumber(Number(p.close), dec)}</td>
+                <td class="right">${fmtNumber(Number(p.mm50), 2)}</td>
               `;
             } else if(mode === "MM12M"){
               tr.innerHTML = `
                 <td>${fmtDateBR(p.date)}</td>
-                <td class="right">${fmtNumber(Number(p.close))}</td>
-                <td class="right">${fmtNumber(Number(p.mm50))}</td>
+                <td class="right">${fmtNumber(Number(p.close), dec)}</td>
+                <td class="right">${fmtNumber(Number(p.mm50), 2)}</td>
               `;
             } else if(mode === "M4_M12"){
               tr.innerHTML = `
                 <td>${fmtDateBR(p.date)}</td>
-                <td class="right">${fmtNumber(Number(p.close))}</td>
-                <td class="right">${fmtNumber(Number(p.mm50))}</td>
-                <td class="right">${fmtNumber(Number(p.mm252))}</td>
+                <td class="right">${fmtNumber(Number(p.close), dec)}</td>
+                <td class="right">${fmtNumber(Number(p.mm50), 2)}</td>
+                <td class="right">${fmtNumber(Number(p.mm252), 2)}</td>
               `;
             } else {
               tr.innerHTML = `
                 <td>${fmtDateBR(p.date)}</td>
-                <td class="right">${fmtNumber(Number(p.close))}</td>
-                <td class="right">${fmtNumber(Number(p.mm50))}</td>
-                <td class="right">${fmtNumber(Number(p.mm252))}</td>
+                <td class="right">${fmtNumber(Number(p.close), dec)}</td>
+                <td class="right">${fmtNumber(Number(p.mm50), 2)}</td>
+                <td class="right">${fmtNumber(Number(p.mm252), 2)}</td>
               `;
             }
 
