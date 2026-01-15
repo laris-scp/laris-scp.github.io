@@ -123,13 +123,26 @@
 
   <script>
     const SNAPSHOT_URL = "data/cafe/painel_snapshot.json";
+    const DECIMALS_BY_ID = {
+      clima_soil: 2,
+      cot_report: 0,
+      fertilizante_urea: 2,
+      gscpi: 2,
+      preco_arabica: 2,
+      usd_brl: 2,
+      estoques_certificados: 0,
+      fundamental_stu: 4,
+    };
 
-    function fmtNumber(x){
+
+    function fmtNumber(x, decimals = 2){
       if(x===null || x===undefined || x==="") return "";
       const n = Number(x);
       if(!Number.isFinite(n)) return "";
-      return n.toLocaleString("pt-BR",{maximumFractionDigits:4});
+      const d = Number(decimals);
+      return n.toLocaleString("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d });
     }
+
     function fmtDate(x){
       if(!x) return "";
       return String(x);
@@ -180,7 +193,7 @@
                 <div class="row-title">${r.variavel ?? r.id ?? ""}</div>
                 <div class="src">${(r.fonte ?? "").slice(0, 80)}${(r.fonte ?? "").length>80?"…":""}</div>
               </td>
-              <td class="right">${fmtNumber(r.ultimo_valor)}</td>
+              <td class="right">${fmtNumber(r.ultimo_valor, DECIMALS_BY_ID[r.id] ?? 2)}</td>
               <td>${r.nivel ?? ""}</td>
               <td>${r.tendencia ?? ""}</td>
               <td>${r.momento ?? ""}</td>
