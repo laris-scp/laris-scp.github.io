@@ -128,6 +128,8 @@ def fetch_close_history(start: datetime, end: datetime) -> pd.Series:
         auto_adjust=False,
         actions=False,
     )
+    print("DEBUG hist.tail(5):")
+    print(hist.tail(5).to_string())
     return get_close_series(hist)
 
 
@@ -142,6 +144,8 @@ def fetch_close_download(start: datetime, end: datetime) -> pd.Series:
         group_by="column",
         threads=False,
     )
+    print("DEBUG raw.tail(5):")
+    print(raw.tail(5).to_string())
     return get_close_series(raw)
 
 
