@@ -1,6 +1,6 @@
 {
   "commodity": "cafe",
-  "updated_at": "2026-01-16 12:18:50",
+  "updated_at": "2026-01-16 13:24:10",
   "rows": [
     {
       "id": "preco_arabica",
@@ -102,7 +102,7 @@
       "peso": 1.0,
       "score_ponderado": 1.0,
       "frequencia": "Mensal",
-      "ultima_atualizacao": "2026-01-16 12:18:49",
+      "ultima_atualizacao": "2025-12-31",
       "regra_de_sinal": "Nível = percentil do GSCPI no histórico completo. Tendência usa os 3 últimos pontos com eps=0.05: ALTA (d1,d2>eps), QUEDA (d1,d2<-eps), LATERAL (|d1|,|d2|<=eps), senão INDEFINIDA. Momento compara d2 vs d1 (acelera/desacelera). Score ajustado por BLOCO e multiplicado pelo PESO.",
       "fonte": "NY Fed – Global Supply Chain Pressure Index (GSCPI)"
     },
@@ -122,7 +122,7 @@
       "peso": 2.5,
       "score_ponderado": 2.5,
       "frequencia": "Mensal",
-      "ultima_atualizacao": "2026-01-16 12:18:50",
+      "ultima_atualizacao": "2025-12-31",
       "regra_de_sinal": "Nível indica se os estoques certificados da ICE estão baixos ou altos versus os últimos anos; Tendência compara a média de 1 ano com 2 e 3 anos para dizer se os estoques vêm subindo, caindo ou andando de lado; Momento mostra se essa tendência está acelerando ou perdendo força; Score combina Nível, Tendência e Momento (com ajuste de bloco e peso) em um único indicador.",
       "fonte": "ICE – Certified Stocks (EOM)"
     },
@@ -142,7 +142,7 @@
       "peso": 3.0,
       "score_ponderado": 7.5,
       "frequencia": "Anual",
-      "ultima_atualizacao": "2026-01-16 12:18:50",
+      "ultima_atualizacao": "2025-01-01",
       "regra_de_sinal": "Score baseado no STU World (nível/tendência/momento) com inversão do bloco 2 (STU baixo = bullish). Tabela mostra decomposição por países (peso produção 5y × Δprodução YoY).",
       "fonte": "USDA/FAS PSD API — Coffee, Green"
     },
@@ -162,7 +162,7 @@
       "peso": 1.0,
       "score_ponderado": 1.0,
       "frequencia": "Mensal",
-      "ultima_atualizacao": "2026-01-16 12:18:50",
+      "ultima_atualizacao": "2025-12-01",
       "regra_de_sinal": "CLIMA – Soil Moisture (ERA5-Land, swvl3). 1) Dessazonaliza por baseline mensal (média histórica do mês). 2) Déficit = max(baseline - swvl3, 0). 3) Stress_6m = soma do déficit nos últimos 6 meses. 4) Normaliza stress_6m via z-score global. 5) Score/tendência/momento usam apenas meses críticos (Jan–Jul, Set–Nov). Quanto maior o z-score, maior o estresse hídrico e mais bullish.",
       "fonte": "ERA5-Land (ECMWF/Copernicus) — swvl3 (Volumetric soil water layer 3)."
     }
