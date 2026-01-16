@@ -175,7 +175,7 @@ def main():
         "fonte": fonte_txt,
     })
 
-    snap["updated_at"] = now_str
+    snap["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     SNAPSHOT_PATH.write_text(
         json.dumps(snap, ensure_ascii=False, indent=2) + "\n",
