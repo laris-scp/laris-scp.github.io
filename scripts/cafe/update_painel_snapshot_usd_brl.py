@@ -92,23 +92,22 @@ def main():
     prev_series_last_date = item.get(SERIES_LAST_DATE_FIELD)
     if prev_series_last_date is not None and str(prev_series_last_date) == str(series_last_date):
 
-    # corrige legado: ultima_atualizacao com hora (timestamp antigo)
-    if str(item.get("ultima_atualizacao")) != str(series_last_date):
-        item["ultima_atualizacao"] = str(series_last_date)
-        item[SERIES_LAST_DATE_FIELD] = str(series_last_date)
+        # corrige legado: ultima_atualizacao com hora (timestamp antigo)
+        if str(item.get("ultima_atualizacao")) != str(series_last_date):
+            item["ultima_atualizacao"] = str(series_last_date)
+            item[SERIES_LAST_DATE_FIELD] = str(series_last_date)
 
-        snapshot["updated_at"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-        SNAPSHOT_PATH.write_text(
-            json.dumps(snapshot, ensure_ascii=False, indent=2) + "\n",
-            encoding="utf-8"
-        )
+            snapshot["updated_at"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+            SNAPSHOT_PATH.write_text(
+                json.dumps(snapshot, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8"
+            )
 
-        print(f"Sem dados novos para usd_brl, mas corrigi ultima_atualizacao para {series_last_date}.")
+            print(f"Sem dados novos para usd_brl, mas corrigi ultima_atualizacao para {series_last_date}.")
+            return
+
+        print(f"Sem dados novos para usd_brl no snapshot. Última data: {series_last_date}")
         return
-
-    print(f"Sem dados novos para usd_brl no snapshot. Última data: {series_last_date}")
-    return
-
 
     # --- DF ---
     df = pd.DataFrame(pts)
@@ -175,6 +174,7 @@ def main():
             "score": float(score),
             "score_ponderado": float(score * peso),
             "frequencia": "Diária",
+            # PADRÃO: somente data (YYYY-MM-DD)
             "ultima_atualizacao": str(series_last_date),
             "regra_de_sinal": RULE_TXT,
             "fonte": FONTE_TXT,
@@ -182,7 +182,7 @@ def main():
         }
     )
 
-    # Só atualiza updated_at quando houver atualização real
+    # Mantém updated_at do snapshot como timestamp (não mexer)
     snapshot["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     snapshot["rows"] = rows
 
