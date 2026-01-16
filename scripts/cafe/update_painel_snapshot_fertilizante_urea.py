@@ -101,10 +101,29 @@ def main():
     # -------------------------
     # 3) Early exit: se não mudou a data da série, loga e sai
     # -------------------------
-    prev_last = row.get(SERIES_LAST_DATE_FIELD)
+        prev_last = row.get(SERIES_LAST_DATE_FIELD)
     if prev_last is not None and str(prev_last) == str(series_last_date):
+    
+        # corrige legado: ultima_atualizacao com timestamp
+        if str(row.get("ultima_atualizacao")) != str(series_last_date):
+            row["ultima_atualizacao"] = str(series_last_date)
+            row[SERIES_LAST_DATE_FIELD] = str(series_last_date)
+    
+            snapshot["updated_at"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+            SNAPSHOT_PATH.write_text(
+                json.dumps(snapshot, ensure_ascii=False, separators=(",", ":")) + "\n",
+                encoding="utf-8"
+            )
+    
+            print(
+                f"Sem dados novos para fertilizante_urea, "
+                f"mas corrigi ultima_atualizacao para {series_last_date}."
+            )
+            return
+    
         print(f"Sem dados novos para fertilizante_urea no snapshot. Última data: {series_last_date}")
         return
+
 
     # -------------------------
     # 4) NÍVEL (percentil histórico total)
