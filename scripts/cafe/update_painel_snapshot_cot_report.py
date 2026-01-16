@@ -151,7 +151,7 @@ def main():
         "score": float(score),
         "score_ponderado": score_ponderado,
         "frequencia": "Semanal",
-        "ultima_atualizacao": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "ultima_atualizacao": str(series_last_date),
         "fonte": "CFTC COT (Disaggregated) | Coffee C (ICE) | Managed Money (net long - short)",
         "regra_de_sinal": (
             "Nível mostra se o posicionamento líquido dos fundos (Managed Money) está baixo ou alto em relação aos últimos 5 anos; "
