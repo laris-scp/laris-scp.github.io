@@ -97,8 +97,24 @@ def main():
     # ---- Early exit: não atualiza se a série não mudou ----
     prev_series_last_date = row.get(SERIES_LAST_DATE_FIELD)
     if prev_series_last_date is not None and str(prev_series_last_date) == str(series_last_date):
+    
+        # corrige legado: ultima_atualizacao com timestamp
+        if str(row.get("ultima_atualizacao")) != str(series_last_date):
+            row["ultima_atualizacao"] = str(series_last_date)
+            row[SERIES_LAST_DATE_FIELD] = str(series_last_date)
+    
+            snapshot["updated_at"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+            SNAPSHOT_PATH.write_text(
+                json.dumps(snapshot, ensure_ascii=False, separators=(",", ":")) + "\n",
+                encoding="utf-8"
+            )
+    
+            print(f"Sem dados novos para cot_report, mas corrigi ultima_atualizacao para {series_last_date}.")
+            return
+    
         print(f"Sem dados novos para cot_report no snapshot. Última data: {series_last_date}")
         return
+
 
     # ---- Nível (percentil 5y) ----
     cutoff = last_date - pd.DateOffset(years=LOOKBACK_YEARS_LEVEL)
