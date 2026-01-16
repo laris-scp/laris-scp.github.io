@@ -84,12 +84,12 @@ def main():
     if item is None:
         raise RuntimeError("Não encontrei id='preco_arabica' no snapshot.")
 
-    # --- Early exit se série não mudou ---
+    # --- Early exit se série não mudou (data + valor) ---
     prev_series_last_date = item.get(SERIES_LAST_DATE_FIELD)
     prev_last_value = item.get("ultimo_valor")
     
-    # último valor REAL da série
-    series_last_value = float(df.iloc[-1]["close"])
+    # último valor REAL da série (sem depender do df)
+    series_last_value = float(pts[-1].get("close"))
     
     # early-exit só se data E valor forem iguais
     if (
@@ -103,6 +103,7 @@ def main():
             f"Última data: {series_last_date} | Último valor: {series_last_value}"
         )
         return
+
 
 
     # --- DataFrame ---
