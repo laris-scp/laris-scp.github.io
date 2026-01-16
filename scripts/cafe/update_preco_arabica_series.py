@@ -182,7 +182,7 @@ def main():
     # --- Se NÃO tem data nova, ainda assim pode ter revisão no último close ---
     if last_date_existing and last_yahoo <= last_date_existing:
         # pega o close mais recente do Yahoo (janela curta)
-        start_probe = (end_dt - timedelta(days=PROBE_DAYS)).to_pydatetime()
+        start_probe = end_dt - timedelta(days=PROBE_DAYS)
         try:
             s_probe = fetch_close_history(start_probe, end_dt)
             assert_series_is_fresh(s_probe, "probe history()")
