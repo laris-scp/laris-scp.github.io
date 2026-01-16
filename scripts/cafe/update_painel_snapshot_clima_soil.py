@@ -143,8 +143,7 @@ def main():
     score = (float(val_nivel) + float(val_tend) + float(val_mom)) * float(mult_bloco)
     score_ponderado = float(score) * float(peso)
 
-    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
+    
     rule_txt = (
         "CLIMA – Soil Moisture (ERA5-Land, swvl3). "
         "1) Dessazonaliza por baseline mensal (média histórica do mês). "
@@ -171,7 +170,7 @@ def main():
         "score": float(score),
         "score_ponderado": float(score_ponderado),
         "frequencia": "Mensal",
-        "ultima_atualizacao": now_str,
+        "ultima_atualizacao": ultimo_date,
         "regra_de_sinal": rule_txt,
         "fonte": fonte_txt,
     })
