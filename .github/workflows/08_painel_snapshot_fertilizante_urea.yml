@@ -1,6 +1,7 @@
 name: 08 - Update Painel Snapshot (Fertilizante Ureia)
 
 on:
+  workflow_dispatch:
   workflow_run:
     workflows: ["07 - Update Fertilizante (Ureia) (series/fertilizante_urea.json)"]
     types:
