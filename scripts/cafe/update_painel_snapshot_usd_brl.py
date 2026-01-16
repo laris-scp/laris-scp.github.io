@@ -159,7 +159,7 @@ def main():
             "score": float(score),
             "score_ponderado": float(score * peso),
             "frequencia": "Diária",
-            "ultima_atualizacao": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "ultima_atualizacao": str(series_last_date),
             "regra_de_sinal": RULE_TXT,
             "fonte": FONTE_TXT,
             SERIES_LAST_DATE_FIELD: str(series_last_date),
