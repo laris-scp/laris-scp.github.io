@@ -164,7 +164,7 @@ def main():
         "score": float(score),
         "score_ponderado": score_ponderado,
         "frequencia": "Mensal",
-        "ultima_atualizacao": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "ultima_atualizacao": str(series_last_date),
         "fonte": "World Bank – Commodity Markets Outlook (Pink Sheet, Urea $/mt)",
         "regra_de_sinal": (
             "Nível indica se o preço da ureia está baixo ou alto no histórico. "
