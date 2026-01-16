@@ -110,6 +110,7 @@ def main() -> None:
 
     # ordena por date (string ISO)
     pts = sorted(pts, key=lambda x: str(x.get("date", "")))
+    series_last_date = str(pts[-1].get("date"))
 
     # extrair valores válidos
     vals = []
@@ -179,7 +180,7 @@ def main() -> None:
         "peso": float(peso),
         "score_ponderado": float(score_pond),
         "frequencia": FREQUENCIA,
-        "ultima_atualizacao": now_str(),
+        "ultima_atualizacao": series_last_date,
         "regra_de_sinal": REGRA_DE_SINAL,
         "fonte": FONTE,
     })
