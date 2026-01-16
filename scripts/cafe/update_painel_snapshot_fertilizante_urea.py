@@ -101,7 +101,7 @@ def main():
     # -------------------------
     # 3) Early exit: se não mudou a data da série, loga e sai
     # -------------------------
-        prev_last = row.get(SERIES_LAST_DATE_FIELD)
+    prev_last = row.get(SERIES_LAST_DATE_FIELD)
     if prev_last is not None and str(prev_last) == str(series_last_date):
     
         # corrige legado: ultima_atualizacao com timestamp
