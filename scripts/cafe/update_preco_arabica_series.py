@@ -179,9 +179,36 @@ def main():
     last_yahoo = probe_last_date(end_dt)
     print("DEBUG | last_yahoo:", last_yahoo, "| last_existing:", last_date_existing)
 
+    # --- Se NÃO tem data nova, ainda assim pode ter revisão no último close ---
     if last_date_existing and last_yahoo <= last_date_existing:
-        print("Sem dados novos.")
-        return
+        # pega o close mais recente do Yahoo (janela curta)
+        start_probe = (end_dt - timedelta(days=PROBE_DAYS)).to_pydatetime()
+        try:
+            s_probe = fetch_close_history(start_probe, end_dt)
+            assert_series_is_fresh(s_probe, "probe history()")
+        except Exception:
+            s_probe = fetch_close_download(start_probe, end_dt)
+            assert_series_is_fresh(s_probe, "probe download()")
+    
+        s_probe = s_probe.dropna()
+        yahoo_last_date = pd.to_datetime(s_probe.index.max()).date().isoformat()
+        yahoo_last_close = float(s_probe.loc[s_probe.index.max()])
+    
+        # pega o último close gravado no JSON existente
+        existing_last_close = None
+        if not df_existing.empty:
+            mask = df_existing["date"].dt.date == datetime.fromisoformat(last_date_existing).date()
+            if mask.any():
+                existing_last_close = float(df_existing.loc[mask, "close"].iloc[-1])
+    
+        # se é o mesmo dia e o close mudou, NÃO sai; força refresh do tail
+        if (yahoo_last_date == last_date_existing) and (existing_last_close is not None) and (abs(yahoo_last_close - existing_last_close) > 1e-6):
+            print(f"DEBUG | mesma data ({yahoo_last_date}), mas close mudou: existing={existing_last_close} yahoo={yahoo_last_close}. Forçando refresh.")
+            # deixa passar (não retorna) para reconstruir df_all
+        else:
+            print("Sem dados novos.")
+            return
+
 
     # --- Decide incremental vs bootstrap ---
     force_bootstrap = False
