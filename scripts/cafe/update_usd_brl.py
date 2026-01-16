@@ -69,7 +69,6 @@ def fetch_bcb_sgs(start: str, end: str, session: requests.Session) -> pd.DataFra
     url = _bcb_url(start, end)
     headers = {"Accept": "application/json", "User-Agent": "Mozilla/5.0"}
     r = session.get(url, headers=headers, timeout=HTTP_TIMEOUT)
-    # você prefere que derrube se falhar: então aqui é raise mesmo
     r.raise_for_status()
 
     df = pd.DataFrame(r.json())
@@ -85,7 +84,7 @@ def fetch_bcb_sgs(start: str, end: str, session: requests.Session) -> pd.DataFra
 def fetch_bcb_chunked(start_dt: datetime, end_dt: datetime, session: requests.Session) -> pd.DataFrame:
     """
     Opção B: quebra a coleta em blocos para reduzir payload e risco de timeout.
-    Blocos de ~180 dias (bem conservador).
+    Blocos de ~180 dias.
     """
     if end_dt < start_dt:
         return pd.DataFrame(columns=["data", "valor"])
@@ -110,11 +109,6 @@ def fetch_bcb_chunked(start_dt: datetime, end_dt: datetime, session: requests.Se
 
 
 def _load_existing() -> tuple[pd.DataFrame, str | None]:
-    """
-    Retorna:
-      - df_existing: colunas ['date','close'] (date em datetime)
-      - last_date_str: string 'YYYY-MM-DD' da última data no JSON, ou None se não existir
-    """
     if not OUT_PATH.exists():
         return pd.DataFrame(columns=["date", "close"]), None
 
@@ -137,8 +131,11 @@ def main():
     # --- 1) Estado atual ---
     df_existing, last_date_existing_str = _load_existing()
 
-    # --- 2) Probe pequeno: existe dado novo? (evita processamento inútil) ---
-    end_dt = datetime.today()
+    # --- 2) Define end_dt como D-1 (não inclui o dia corrente) ---
+    # D-1 em UTC evita pegar dados "no meio do dia"
+    end_dt = datetime.utcnow() - timedelta(days=1)
+
+    # --- 3) Probe pequeno: existe dado novo? ---
     probe_start_dt = end_dt - timedelta(days=PROBE_DAYS)
 
     df_probe = fetch_bcb_chunked(probe_start_dt, end_dt, session)
@@ -151,16 +148,16 @@ def main():
         print(f"Sem dados novos. Última data no JSON: {last_date_existing_str} | Última data no BCB: {last_date_bcb}")
         return
 
-    # --- 3) Coleta principal ---
+    # --- 4) Coleta principal ---
     if last_date_existing_str is None:
-        # Bootstrap: sem JSON -> puxa LOOKBACK_YEARS (em chunks)
+        # Bootstrap
         start_dt = end_dt - timedelta(days=LOOKBACK_YEARS * 365 - 5)
         df_bcb = fetch_bcb_chunked(start_dt, end_dt, session)
         if df_bcb.empty:
             raise RuntimeError("BCB retornou vazio no bootstrap.")
         df_all = df_bcb.rename(columns={"data": "date", "valor": "close"})
     else:
-        # Incremental: recalcula só a cauda para manter MM corretas
+        # Incremental (recalcula cauda)
         last_dt = datetime.fromisoformat(last_date_existing_str)
         start_dt = last_dt - timedelta(days=RECALC_BUFFER_DAYS)
 
@@ -176,7 +173,7 @@ def main():
         df_all["close"] = pd.to_numeric(df_all["close"], errors="coerce")
         df_all = df_all.dropna().drop_duplicates(subset=["date"]).sort_values("date").reset_index(drop=True)
 
-    # --- 4) Médias móveis ---
+    # --- 5) Médias móveis ---
     df_all["mm252"] = df_all["close"].rolling(MM_LONG).mean()
     df_all["mm50"] = df_all["close"].rolling(MM_SHORT).mean()
 
