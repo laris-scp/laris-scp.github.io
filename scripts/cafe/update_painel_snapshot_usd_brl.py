@@ -91,8 +91,24 @@ def main():
     # --- Early exit: não atualiza se a série não mudou ---
     prev_series_last_date = item.get(SERIES_LAST_DATE_FIELD)
     if prev_series_last_date is not None and str(prev_series_last_date) == str(series_last_date):
-        print(f"Sem dados novos para usd_brl no snapshot. Última data: {series_last_date}")
+
+    # corrige legado: ultima_atualizacao com hora (timestamp antigo)
+    if str(item.get("ultima_atualizacao")) != str(series_last_date):
+        item["ultima_atualizacao"] = str(series_last_date)
+        item[SERIES_LAST_DATE_FIELD] = str(series_last_date)
+
+        snapshot["updated_at"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        SNAPSHOT_PATH.write_text(
+            json.dumps(snapshot, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8"
+        )
+
+        print(f"Sem dados novos para usd_brl, mas corrigi ultima_atualizacao para {series_last_date}.")
         return
+
+    print(f"Sem dados novos para usd_brl no snapshot. Última data: {series_last_date}")
+    return
+
 
     # --- DF ---
     df = pd.DataFrame(pts)
