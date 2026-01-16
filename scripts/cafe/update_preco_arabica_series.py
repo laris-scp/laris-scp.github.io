@@ -74,8 +74,24 @@ def get_close_series(df: pd.DataFrame) -> pd.Series:
         close_obj = close_obj.iloc[:, 0]
 
     s = close_obj.dropna().copy()
-    s.index = pd.to_datetime(s.index)
+
+    idx = pd.to_datetime(s.index)
+    
+    # Se vier com timezone (tz-aware), remove o timezone para ficar tz-naive
+    # (padroniza para evitar "Cannot compare tz-naive and tz-aware timestamps")
+    try:
+        if getattr(idx, "tz", None) is not None:
+            idx = idx.tz_convert("UTC").tz_localize(None)
+    except TypeError:
+        # Em alguns casos o idx pode não suportar tz_convert; remove tz diretamente
+        try:
+            idx = idx.tz_localize(None)
+        except Exception:
+            pass
+    
+    s.index = idx
     return s
+
 
 
 def series_to_df(s: pd.Series) -> pd.DataFrame:
@@ -153,7 +169,7 @@ def probe_last_date(end_dt: datetime) -> str:
 
 def main():
     df_existing, last_date_existing = load_existing()
-    end_dt = datetime.today()
+    end_dt = datetime.utcnow() - timedelta(days=1)
 
     # --- Probe curto: existe dado novo? (com validação real) ---
     last_yahoo = probe_last_date(end_dt)
