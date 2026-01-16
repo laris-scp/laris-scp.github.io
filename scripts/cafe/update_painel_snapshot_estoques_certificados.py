@@ -56,6 +56,7 @@ def main():
     df = pd.DataFrame(series["series"])
     df["date"] = pd.to_datetime(df["date"])
     df = df.sort_values("date").reset_index(drop=True)
+    ultimo_date = df.iloc[-1]["date"].strftime("%Y-%m-%d")
 
     if len(df) < 3:
         raise RuntimeError("Histórico insuficiente para snapshot (mín. 3 pontos).")
@@ -84,8 +85,7 @@ def main():
     score = (val_nivel + val_tend + val_mom) * mult_bloco
     score_pond = score * peso
 
-    now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-
+   
     row.update({
         "ultimo_valor": v0,
         "percentil": percentil,
@@ -95,7 +95,7 @@ def main():
         "score": score,
         "score_ponderado": score_pond,
         "frequencia": "Mensal",
-        "ultima_atualizacao": now,
+        "ultima_atualizacao": ultimo_date,
         "fonte": "ICE – Certified Stocks (EOM)",
     })
 
