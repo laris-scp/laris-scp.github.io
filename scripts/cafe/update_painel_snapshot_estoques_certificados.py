@@ -99,7 +99,7 @@ def main():
         "fonte": "ICE – Certified Stocks (EOM)",
     })
 
-    snap["updated_at"] = now
+    snap["updated_at"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     
     save_json(SNAPSHOT_PATH, snap)
     print("OK: painel_snapshot atualizado (estoques certificados).")
