@@ -86,9 +86,24 @@ def main():
 
     # --- Early exit se série não mudou ---
     prev_series_last_date = item.get(SERIES_LAST_DATE_FIELD)
-    if prev_series_last_date is not None and str(prev_series_last_date) == str(series_last_date):
-        print(f"Sem dados novos para preco_arabica. Última data: {series_last_date}")
+    prev_last_value = item.get("ultimo_valor")
+    
+    # último valor REAL da série
+    series_last_value = float(df.iloc[-1]["close"])
+    
+    # early-exit só se data E valor forem iguais
+    if (
+        prev_series_last_date is not None
+        and str(prev_series_last_date) == str(series_last_date)
+        and prev_last_value is not None
+        and abs(float(prev_last_value) - series_last_value) < 1e-6
+    ):
+        print(
+            f"Sem dados novos para preco_arabica. "
+            f"Última data: {series_last_date} | Último valor: {series_last_value}"
+        )
         return
+
 
     # --- DataFrame ---
     df = pd.DataFrame(pts)
