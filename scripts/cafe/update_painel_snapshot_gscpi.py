@@ -49,6 +49,7 @@ def main():
     df["date"] = pd.to_datetime(df["date"], errors="coerce")
     df["close"] = pd.to_numeric(df["close"], errors="coerce")
     df = df.dropna(subset=["date", "close"]).sort_values("date").reset_index(drop=True)
+    ultimo_date = df.iloc[-1]["date"].strftime("%Y-%m-%d")
 
     if len(df) < 3:
         raise RuntimeError("Histórico insuficiente para GSCPI (mínimo 3 pontos).")
@@ -97,8 +98,7 @@ def main():
     peso = float(row.get("peso", 1.0))
     score_ponderado = float(score) * float(peso)
 
-    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
+    
     rule_txt = (
         "Nível = percentil do GSCPI no histórico completo. "
         f"Tendência usa os 3 últimos pontos com eps={EPS_TREND:.2f}: "
@@ -119,7 +119,7 @@ def main():
         "score": float(score),
         "score_ponderado": float(score_ponderado),
         "frequencia": "Mensal",
-        "ultima_atualizacao": now_str,
+        "ultima_atualizacao": ultimo_date,
         "regra_de_sinal": rule_txt,
         "fonte": "NY Fed – Global Supply Chain Pressure Index (GSCPI)",
     })
