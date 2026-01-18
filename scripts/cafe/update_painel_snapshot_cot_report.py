@@ -64,7 +64,7 @@ def window_mean_weeks(df, end_idx, w_start, w_end, col="close"):
     i1 = end_idx - w_end
     if i0 < 0 or i1 < 0 or i0 > i1:
         return float("nan")
-    s = pd.to_numeric(df[col].iloc[i0:i1+1], errors="coerce").dropna()
+    s = pd.to_numeric(df[col].iloc[i0:i1 + 1], errors="coerce").dropna()
     return float(s.mean()) if len(s) else float("nan")
 
 
@@ -101,27 +101,34 @@ def main():
     if row is None:
         raise RuntimeError("Não encontrei id='cot_report' em painel_snapshot.json (rows).")
 
+    # ---- DEBUG (A/B/C) ANTES DO EARLY-EXIT ----
+    # (apenas para verificar NaN; não altera regra, score ou update)
+    last_idx = len(df) - 1
+    A_dbg = window_mean_weeks(df, last_idx, WEEKS_A[1], WEEKS_A[0], col="close")  # 36..25
+    B_dbg = window_mean_weeks(df, last_idx, WEEKS_B[1], WEEKS_B[0], col="close")  # 24..13
+    C_dbg = window_mean_weeks(df, last_idx, WEEKS_C[1], WEEKS_C[0], col="close")  # 12..0
+    print("DEBUG A,B,C:", A_dbg, B_dbg, C_dbg, "| last_idx:", last_idx, "| last_date:", last_date)
+
     # ---- Early exit: não atualiza se a série não mudou ----
     prev_series_last_date = row.get(SERIES_LAST_DATE_FIELD)
     if prev_series_last_date is not None and str(prev_series_last_date) == str(series_last_date):
-    
+
         # corrige legado: ultima_atualizacao com timestamp
         if str(row.get("ultima_atualizacao")) != str(series_last_date):
             row["ultima_atualizacao"] = str(series_last_date)
             row[SERIES_LAST_DATE_FIELD] = str(series_last_date)
-    
+
             snapshot["updated_at"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
             SNAPSHOT_PATH.write_text(
                 json.dumps(snapshot, ensure_ascii=False, separators=(",", ":")) + "\n",
                 encoding="utf-8"
             )
-    
+
             print(f"Sem dados novos para cot_report, mas corrigi ultima_atualizacao para {series_last_date}.")
             return
-    
+
         print(f"Sem dados novos para cot_report no snapshot. Última data: {series_last_date}")
         return
-
 
     # ---- Nível (percentil 5y) ----
     cutoff = last_date - pd.DateOffset(years=LOOKBACK_YEARS_LEVEL)
@@ -131,12 +138,10 @@ def main():
 
     # ---- Tendência & Momento ----
     last_idx = len(df) - 1
-    
+
     A = window_mean_weeks(df, last_idx, WEEKS_A[1], WEEKS_A[0], col="close")  # 36..25
     B = window_mean_weeks(df, last_idx, WEEKS_B[1], WEEKS_B[0], col="close")  # 24..13
     C = window_mean_weeks(df, last_idx, WEEKS_C[1], WEEKS_C[0], col="close")  # 12..0
-
-    print("DEBUG A,B,C:", A, B, C, "| last_idx:", last_idx, "| last_date:", last_date)
 
     tendencia = "INDEFINIDA"
     momento = "NEUTRO"
