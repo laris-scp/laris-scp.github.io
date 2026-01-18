@@ -102,6 +102,7 @@ def main():
         raise RuntimeError("Não encontrei id='cot_report' em painel_snapshot.json (rows).")
 
     # ---- Early exit: não atualiza se a série não mudou ----
+    print("DEBUG A,B,C:", A, B, C, "| last_idx:", last_idx, "| last_date:", last_date)
     prev_series_last_date = row.get(SERIES_LAST_DATE_FIELD)
     if prev_series_last_date is not None and str(prev_series_last_date) == str(series_last_date):
     
