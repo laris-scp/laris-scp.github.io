@@ -136,7 +136,7 @@ def main():
     B = window_mean_weeks(df, last_idx, WEEKS_B[1], WEEKS_B[0], col="close")  # 24..13
     C = window_mean_weeks(df, last_idx, WEEKS_C[1], WEEKS_C[0], col="close")  # 12..0
 
-
+    print("DEBUG A,B,C:", A, B, C, "| last_idx:", last_idx, "| last_date:", last_date)
 
     tendencia = "INDEFINIDA"
     momento = "NEUTRO"
