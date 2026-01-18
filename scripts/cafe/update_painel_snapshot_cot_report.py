@@ -54,10 +54,17 @@ def momento_to_value(m):
     return 0.0
 
 
-def window_mean_weeks(df, end_date, w_start, w_end):
-    ini = end_date - pd.DateOffset(weeks=w_start)
-    fim = end_date - pd.DateOffset(weeks=w_end)
-    s = df.loc[(df["date"] > ini) & (df["date"] <= fim), "close"]
+def window_mean_weeks(df, end_idx, w_start, w_end, col="close"):
+    """
+    Média do bloco olhando para trás por OBSERVACOES (linhas),
+    mantendo a mesma ideia da regra atual (A/B/C).
+    Ex.: w_start=36, w_end=25 => pega end_idx-36 .. end_idx-25
+    """
+    i0 = end_idx - w_start
+    i1 = end_idx - w_end
+    if i0 < 0 or i1 < 0 or i0 > i1:
+        return float("nan")
+    s = pd.to_numeric(df[col].iloc[i0:i1+1], errors="coerce").dropna()
     return float(s.mean()) if len(s) else float("nan")
 
 
@@ -123,9 +130,13 @@ def main():
     nivel_txt, valor_nivel = pct_to_level_and_value(percentil)
 
     # ---- Tendência & Momento ----
-    A = window_mean_weeks(df, last_date, *WEEKS_A)
-    B = window_mean_weeks(df, last_date, *WEEKS_B)
-    C = window_mean_weeks(df, last_date, *WEEKS_C)
+    last_idx = len(df) - 1
+    
+    A = window_mean_weeks(df, last_idx, WEEKS_A[1], WEEKS_A[0], col="close")  # 36..25
+    B = window_mean_weeks(df, last_idx, WEEKS_B[1], WEEKS_B[0], col="close")  # 24..13
+    C = window_mean_weeks(df, last_idx, WEEKS_C[1], WEEKS_C[0], col="close")  # 12..0
+
+
 
     tendencia = "INDEFINIDA"
     momento = "NEUTRO"
