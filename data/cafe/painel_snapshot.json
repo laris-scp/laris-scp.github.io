@@ -1,6 +1,6 @@
 {
   "commodity": "cafe",
-  "updated_at": "2026-01-19 14:09:18",
+  "updated_at": "2026-01-19 14:11:35",
   "rows": [
     {
       "id": "preco_arabica",
@@ -154,7 +154,7 @@
       "percentil": 0.9258,
       "nivel": "MUITO ALTO",
       "valor_nivel": 1.0,
-      "tendencia": "INDEFINIDA",
+      "tendencia": "LATERAL",
       "valor_tendencia": 0.0,
       "momento": "NEUTRO",
       "valor_momento": 0.0,
