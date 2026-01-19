@@ -239,26 +239,40 @@ def main():
         return u
 
     def try_download(url: str) -> bytes:
-    headers = {"User-Agent": "Mozilla/5.0"}
-
-    # 1) tentativa normal (com verificação SSL)
-    try:
-        r = requests.get(url, timeout=90, headers=headers, allow_redirects=True)
-        r.raise_for_status()
-        return r.content
-    except SSLError:
-        # 2) fallback: desliga verify APENAS se for erro de certificado
-        warnings.filterwarnings("ignore", message="Unverified HTTPS request")
-
-        r = requests.get(url, timeout=90, headers=headers, allow_redirects=True, verify=False)
-        r.raise_for_status()
-        content = r.content
-
-        # validação mínima: garantir que é um PDF
-        if not content.startswith(b"%PDF-"):
-            raise RuntimeError("Fallback SSL foi usado, mas o conteúdo baixado não parece ser um PDF válido.")
-        return content
-
+        headers = {"User-Agent": "Mozilla/5.0"}
+    
+        # 1) tentativa normal (com verificação SSL)
+        try:
+            r = requests.get(
+                url,
+                timeout=90,
+                headers=headers,
+                allow_redirects=True
+            )
+            r.raise_for_status()
+            return r.content
+    
+        except SSLError:
+            # 2) fallback: desliga verify APENAS se for erro de certificado
+            warnings.filterwarnings("ignore", message="Unverified HTTPS request")
+    
+            r = requests.get(
+                url,
+                timeout=90,
+                headers=headers,
+                allow_redirects=True,
+                verify=False
+            )
+            r.raise_for_status()
+            content = r.content
+    
+            # validação mínima: garantir que é um PDF real
+            if not content.startswith(b"%PDF-"):
+                raise RuntimeError(
+                    "Fallback SSL foi usado, mas o conteúdo baixado não parece ser um PDF válido."
+                )
+    
+            return content
 
     latest_pdf_norm = normalize_ico_pdf_url(latest_pdf)
 
