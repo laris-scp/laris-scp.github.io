@@ -17,6 +17,9 @@ CRITICAL_MONTHS = {1, 2, 3, 4, 5, 6, 7, 9, 10, 11}  # Jan–Jul e Set–Nov
 EPS = 1e-12
 AREA = [-15, -55, -25, -40]
 
+# ===== NOVO: tendência apenas em nível EXTREMO =====
+EXTREME_VAL_NIVEL = 1.0  # "MUITO ALTO" no seu mapping atual de nível via z-score
+
 def map_z_to_nivel(z: float | None):
     if z is None or pd.isna(z):
         return ("NEUTRO", 0.0)
@@ -108,11 +111,21 @@ def main():
     d1 = float(v2 - v1)
     d2 = float(v3 - v2)
 
-    tendencia, val_tend = tendencia_3p(d1, d2)
-    momento, val_mom = momento_from_trend(tendencia, d1, d2)
-
     z_last = float(last_valid["score_input"].iloc[-1])
     nivel_cat, val_nivel = map_z_to_nivel(z_last)
+
+    # =========================================================
+    # 6.1) TENDÊNCIA (NOVA REGRA): só calcula se nível for EXTREMO
+    # - Fora do extremo: tendência = LATERAL (0.0)
+    # - No extremo: usa a regra atual (2 deltas consecutivos)
+    # =========================================================
+    if float(val_nivel) == EXTREME_VAL_NIVEL:
+        tendencia, val_tend = tendencia_3p(d1, d2)
+    else:
+        tendencia, val_tend = ("LATERAL", 0.0)
+
+    # Momento: mantém a lógica do painel, aplicada sobre a tendência final
+    momento, val_mom = momento_from_trend(tendencia, d1, d2)
 
     # percentil (opcional) — percentil do z-score dentro dos meses críticos
     zcrit = df["score_input"].dropna().astype(float).values
@@ -143,20 +156,14 @@ def main():
     score = (float(val_nivel) + float(val_tend) + float(val_mom)) * float(mult_bloco)
     score_ponderado = float(score) * float(peso)
 
-    
     rule_txt = (
-        "CLIMA – Soil Moisture (ERA5-Land, swvl3). "
-        "1) Dessazonaliza por baseline mensal (média histórica do mês). "
-        "2) Déficit = max(baseline - swvl3, 0). "
-        "3) Stress_6m = soma do déficit nos últimos 6 meses. "
-        "4) Normaliza stress_6m via z-score global. "
-        "5) Score/tendência/momento usam apenas meses críticos (Jan–Jul, Set–Nov). "
-        "Quanto maior o z-score, maior o estresse hídrico e mais bullish."
+        "Este indicador mede o nível de estresse hídrico do solo nas principais regiões produtoras de café. Valores mais altos indicam solo mais seco, o que pode reduzir a produtividade.
+O painel avalia o nível do estresse em relação ao histórico e só gera sinal de tendência quando a seca atinge níveis extremos, momento em que variações passam a ter impacto relevante sobre a oferta. Fora desses episódios, o clima é considerado neutro para a análise direcional."
     )
 
     fonte_txt = (
         "ERA5-Land (ECMWF/Copernicus) — swvl3 (Volumetric soil water layer 3)."
-         )
+    )
 
     row.update({
         "ultimo_valor": ultimo_valor_raw,                 # swvl3
@@ -182,10 +189,9 @@ def main():
         encoding="utf-8"
     )
 
-
-    print("OK: painel_snapshot.json atualizado (clima_soil — NOVO conceito).")
+    print("OK: painel_snapshot.json atualizado (clima_soil — tendência apenas em nível extremo).")
     print("DEBUG:", "ultimo swvl3=", ultimo_valor_raw, "| z_last(crit)=", round(z_last, 4),
-          "| tendencia=", tendencia, "| momento=", momento)
+          "| nivel=", nivel_cat, val_nivel, "| tendencia=", tendencia, "| momento=", momento)
     print("DEBUG:", "score=", score, "| peso=", peso, "| score_ponderado=", score_ponderado)
 
 if __name__ == "__main__":
