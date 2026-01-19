@@ -1,6 +1,6 @@
 {
   "commodity": "cafe",
-  "updated_at": "2026-01-19 13:48:37",
+  "updated_at": "2026-01-19 13:54:59",
   "rows": [
     {
       "id": "preco_arabica",
@@ -163,8 +163,8 @@
       "score_ponderado": 1.0,
       "frequencia": "Mensal",
       "ultima_atualizacao": "2025-12-01",
-      "regra_de_sinal": "CLIMA – Soil Moisture (ERA5-Land, swvl3). 1) Dessazonaliza por baseline mensal (média histórica do mês). 2) Déficit = max(baseline - swvl3, 0). 3) Stress_6m = soma do déficit nos últimos 6 meses. 4) Normaliza stress_6m via z-score global. 5) Score/tendência/momento usam apenas meses críticos (Jan–Jul, Set–Nov). Quanto maior o z-score, maior o estresse hídrico e mais bullish.",
-      "fonte": "ERA5-Land (ECMWF/Copernicus) — swvl3 (Volumetric soil water layer 3)."
+      "regra_de_sinal": "Este indicador mede o nivel de estresse hidrico do solo nas principais regioes produtoras de cafe.\n    Valores mais altos indicam solo mais seco, o que pode reduzir a produtividade.\n    O painel compara o estresse atual com o historico e so gera sinal de tendencia quando a seca atinge niveis extremos.\n    Fora desses episodios, o clima e considerado neutro para a analise direcional.",
+      "fonte": "ERA5-Land (ECMWF/Copernicus) - swvl3 (Volumetric soil water layer 3)."
     }
   ],
   "thermometers": {
