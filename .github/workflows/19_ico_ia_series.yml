@@ -28,6 +28,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install --upgrade openai pdfplumber requests
 
+      - name: Update CA certificates
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ca-certificates
+          sudo update-ca-certificates
+          python -m pip install --upgrade certifi
+
       - name: Run ICO IA series updater
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
