@@ -53,7 +53,8 @@ jobs:
           python scripts/cafe/update_gscpi_fretes_series.py
           python scripts/cafe/update_clima_soil_series.py
           python scripts/cafe/update_fundamental_stu_series.py
-          python scripts/cafe/update_estoques_certificados_series.py 
+          python scripts/cafe/update_estoques_certificados_series.py
+          python scripts/cafe/update_ico_ia_series.py
 
 
       # =========================
@@ -69,6 +70,7 @@ jobs:
           python scripts/cafe/update_painel_snapshot_clima_soil.py
           python scripts/cafe/update_painel_snapshot_fundamental_stu.py
           python scripts/cafe/update_painel_snapshot_estoques_certificados.py
+          python scripts/cafe/update_painel_snapshot_ico_ia.py
 
       # =========================
       # 3) TERMÔMETROS + HIST
