@@ -12,6 +12,7 @@ on:
       - "13 - Update painel_snapshot (CLIMA soil)"
       - "15_painel_snapshot_fundamental_stu"
       - "18 - Update painel_snapshot (Estoques Certificados)"
+      - "20 - Painel Snapshot - ICO (IA)"
     types: [completed]
 
 permissions:
