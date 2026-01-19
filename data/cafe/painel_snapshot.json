@@ -1,6 +1,6 @@
 {
   "commodity": "cafe",
-  "updated_at": "2026-01-19 14:19:09",
+  "updated_at": "2026-01-19 16:17:08",
   "rows": [
     {
       "id": "preco_arabica",
@@ -165,6 +165,27 @@
       "ultima_atualizacao": "2025-12-01",
       "regra_de_sinal": "Este indicador mede o nivel de estresse hidrico do solo nas principais regioes produtoras de cafe.\n    Valores mais altos indicam solo mais seco, o que pode reduzir a produtividade.\n    O painel compara o estresse atual com o historico e so gera sinal de tendencia quando a seca atinge niveis extremos.\n    Fora desses episodios, o clima e considerado neutro para a analise direcional.",
       "fonte": "ERA5-Land (ECMWF/Copernicus) - swvl3 (Volumetric soil water layer 3)."
+    },
+    {
+      "id": "ico_ia",
+      "bloco": 1,
+      "variavel": "ICO (IA)",
+      "peso": 1.0,
+      "ultimo_valor": 0.0,
+      "percentil": null,
+      "nivel": "NEUTRAL",
+      "valor_nivel": 0.0,
+      "tendencia": "NEUTRO",
+      "valor_tendencia": 0.0,
+      "momento": "NEUTRO",
+      "valor_momento": 0.0,
+      "score": 0.0,
+      "score_ponderado": 0.0,
+      "frequencia": "Mensal",
+      "ultima_atualizacao": "2025-12-01",
+      "regra_de_sinal": "Este indicador lê o relatório mensal do ICO e classifica o impacto para o preço do café. Quando o relatório sugere mais oferta (produção maior / revisão positiva), o sinal tende a ser BEARISH. Quando sugere aperto de oferta (estoques baixos / riscos de quebra / restrições), tende a ser BULLISH. Se os sinais forem mistos, fica NEUTRAL.",
+      "fonte": "International Coffee Organization (ICO) — Monthly Coffee Market Report (CMR).",
+      "ultima_data_serie": "2025-12-01"
     }
   ],
   "thermometers": {
