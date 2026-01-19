@@ -252,9 +252,9 @@ def main():
     except Exception:
         pdf_urls = []
 
-            print(f"DEBUG: PDFs encontrados via scraping (filtrados): {len(pdf_urls)}")
-        for u in pdf_urls[:20]:
-            print("DEBUG_PDF:", u)
+    print(f"DEBUG: PDFs encontrados via scraping (filtrados): {len(pdf_urls)}")
+    for u in pdf_urls[:20]:
+        print("DEBUG_PDF:", u)
 
 
     # fallback se scraping falhar
