@@ -2,8 +2,13 @@ name: 19 - Update ICO (IA) (series/ico_ia.json)
 
 on:
   workflow_dispatch:
+    inputs:
+      backfill_n:
+        description: "Quantos relatórios mais recentes processar (1 = só o último)"
+        required: true
+        default: "1"
   schedule:
-    - cron: "0 10 5 * *"   # Dia 5, 10:00 UTC (07:00 BRT)
+    - cron: "0 10 5 * *"
 
 permissions:
   contents: write
@@ -38,8 +43,10 @@ jobs:
       - name: Run ICO IA series updater
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ICO_BACKFILL_N: ${{ github.event.inputs.backfill_n || '1' }}
         run: |
           python scripts/cafe/update_ico_ia_series.py
+
 
       - name: Commit changes (if any)
         run: |
