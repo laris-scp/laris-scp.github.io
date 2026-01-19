@@ -14,7 +14,7 @@ from urllib.parse import urljoin
 import requests
 import pdfplumber
 from openai import OpenAI
-from requests.exceptions import SSLError
+from requests.exceptions import SSLError, HTTPError
 
 SERIES_PATH = Path("data/cafe/series/ico_ia.json")
 
@@ -109,6 +109,9 @@ Retorne APENAS o JSON abaixo, sem texto adicional:
 """.strip()
 
 
+# -------------------------
+# Helpers
+# -------------------------
 def sha256_bytes(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
 
@@ -134,9 +137,8 @@ def shrink_text(text: str) -> str:
 
 def find_pdf_links_from_html(html: str, base_url: str) -> list[str]:
     """
-    Versão robusta:
-    - Captura qualquer ocorrência de cmr-####-e.pdf no HTML (absoluta ou relativa)
-    - Não depende de href terminar com .pdf
+    Tenta extrair qualquer ocorrência de cmr-####-e.pdf no HTML (absoluta ou relativa).
+    Observação: no GitHub Actions, pode vir vazio (conteúdo carregado via JS / bloqueio).
     """
     abs_matches = re.findall(
         r'(https?://[^\s"\'<>]*cmr-\d{4}-e\.pdf[^\s"\'<>]*)',
@@ -167,6 +169,59 @@ def pdf_mmyy_to_date(url: str) -> str:
     yy = int(m.group(2))
     year = 2000 + yy
     return f"{year:04d}-{mm:02d}-01"
+
+
+def cy_folder_for_year_month(year: int, month: int) -> str:
+    """
+    Pela evidência que você trouxe:
+      - Oct-Dec/2025 => cy2025-26
+      - Sep/2025     => cy2024-25
+    Logo, o 'coffee year' vira em Outubro.
+    """
+    if month >= 10:
+        y1 = year
+        y2 = year + 1
+    else:
+        y1 = year - 1
+        y2 = year
+    return f"cy{y1}-{str(y2)[-2:]}"
+
+
+def build_ico_cmr_url(year: int, month: int) -> str:
+    cy = cy_folder_for_year_month(year, month)
+    mmyy = f"{month:02d}{str(year)[-2:]}"
+    return f"http://www.ico.org/documents/{cy}/cmr-{mmyy}-e.pdf"
+
+
+def generate_candidate_cmr_urls(n_months: int, anchor: datetime | None = None) -> list[str]:
+    """
+    Gera URLs dos últimos n_months a partir de anchor (default: hoje UTC),
+    do mais antigo para o mais recente.
+    """
+    if anchor is None:
+        anchor = datetime.utcnow()
+
+    y = anchor.year
+    m = anchor.month
+
+    # primeiro mês (mais antigo)
+    y0, m0 = y, m
+    for _ in range(n_months - 1):
+        m0 -= 1
+        if m0 == 0:
+            m0 = 12
+            y0 -= 1
+
+    out = []
+    yy, mm = y0, m0
+    for _ in range(n_months):
+        out.append(build_ico_cmr_url(yy, mm))
+        mm += 1
+        if mm == 13:
+            mm = 1
+            yy += 1
+
+    return out
 
 
 def load_series():
@@ -228,9 +283,8 @@ def call_openai(document_text: str) -> dict:
 
 
 def normalize_ico_pdf_url(u: str) -> str:
-    u = u.replace("https://www.ico.org", "http://ico.org")
-    u = u.replace("http://www.ico.org", "http://ico.org")
-    u = u.replace("https://ico.org", "http://ico.org")
+    u = u.replace("https://www.ico.org", "http://www.ico.org")
+    u = u.replace("https://ico.org", "http://www.ico.org")
     return u
 
 
@@ -250,44 +304,43 @@ def try_download(url: str) -> bytes:
         return content
 
 
+# -------------------------
+# Main
+# -------------------------
 def main():
     payload, series = load_series()
+
+    # Backfill: por padrão roda 1 (último). Em workflow_dispatch você passa ICO_BACKFILL_N.
+    backfill_n = int(os.environ.get("ICO_BACKFILL_N", "1").strip() or "1")
+    backfill_n = max(1, min(backfill_n, 48))  # teto de segurança
 
     # 1) Descobrir PDFs disponíveis
     pdf_urls = []
     try:
-        r = requests.get(ICO_LIST_URL, timeout=30)
+        r = requests.get(ICO_LIST_URL, timeout=30, headers={"User-Agent": "Mozilla/5.0"})
         r.raise_for_status()
         pdf_urls = find_pdf_links_from_html(r.text, ICO_LIST_URL)
     except Exception:
         pdf_urls = []
 
     print(f"DEBUG: PDFs encontrados via scraping: {len(pdf_urls)}")
-    for u in pdf_urls[:20]:
-        print("DEBUG_PDF:", u)
 
-    # fallback
+    # Se scraping vier vazio (caso do Actions), gera candidatos por regra
+    if not pdf_urls:
+        pdf_urls = generate_candidate_cmr_urls(backfill_n)
+        print(f"DEBUG: usando geração por regra. candidatos={len(pdf_urls)}")
+
+    # adiciona fallback fixo
     for u in FALLBACK_PDFS:
         if u not in pdf_urls:
             pdf_urls.append(u)
 
     # mantém apenas PDFs do CMR
-    pdf_urls = [
-        u for u in pdf_urls
-        if re.search(r"cmr-\d{4}-e\.pdf", u, flags=re.IGNORECASE)
-    ]
-
-    if not pdf_urls:
-        raise RuntimeError("Não encontrei nenhum PDF do CMR para processar (scraping+fallback falharam).")
-
-    # 2) Ordena por data derivada do filename
+    pdf_urls = [u for u in pdf_urls if re.search(r"cmr-\d{4}-e\.pdf", u, flags=re.IGNORECASE)]
     pdf_urls = sorted(set(pdf_urls), key=pdf_mmyy_to_date)
 
-    # Backfill: por padrão roda 1 (último). Se ICO_BACKFILL_N existir, roda até N mais recentes.
-    backfill_n = int(os.environ.get("ICO_BACKFILL_N", "1").strip() or "1")
-    backfill_n = max(1, min(backfill_n, len(pdf_urls)))
-
-    targets = pdf_urls[-backfill_n:]
+    # processa só os N mais recentes (backfill)
+    targets = pdf_urls[-min(backfill_n, len(pdf_urls)) :]
     print(f"INFO: backfill_n={backfill_n} | encontrados={len(pdf_urls)} | processando={len(targets)}")
 
     added = 0
@@ -300,7 +353,16 @@ def main():
 
         pdf_url_norm = normalize_ico_pdf_url(pdf_url)
 
-        pdf_bytes = try_download(pdf_url_norm)
+        # download resiliente: se o PDF não existir, pula
+        try:
+            pdf_bytes = try_download(pdf_url_norm)
+        except HTTPError as e:
+            print(f"SKIP: HTTP ao baixar {pdf_url_norm} | erro={e}")
+            continue
+        except Exception as e:
+            print(f"SKIP: falha ao baixar {pdf_url_norm} | erro={e}")
+            continue
+
         pdf_sha = sha256_bytes(pdf_bytes)
 
         if already_has_sha(series, pdf_sha):
@@ -340,7 +402,7 @@ def main():
         print("INFO: nenhum ponto novo para adicionar.")
         return
 
-    # dedup por date (mantém o último) e ordena
+    # dedup por date e ordena
     tmp = {}
     for p in series:
         tmp[str(p.get("date"))] = p
