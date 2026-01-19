@@ -5,6 +5,308 @@
   "frequency": "Mensal",
   "series": [
     {
+      "date": "2024-02-01",
+      "close": 1.0,
+      "signal": 1.0,
+      "label": "BULLISH",
+      "evidencias": [
+        "Fonte: ICO",
+        "Fatos: exportações globais de green beans em jan/24 recordes (+35.8% a 11.55 mi sacas) com Robustas +50.3% (Vietnã +66%, recorde mensal) e Brasil recorde de janeiro; estoques certificados London caem 16.8% para 0.40 mi sacas (mínimos desde 2014), enquanto estoques certificados de Arábica (NY) sobem 28.5% para 0.35 mi sacas; produção 23/24 prevista +5.8% (178 mi), com Arábica +8.8% e Robusta +2.1%.",
+        "Regras/Impacto: exportações acelerando → BULLISH; queda de estoques (London) → BULLISH; aumento de estoques (NY Arabica) → BEARISH; aumento de produção 23/24 → BEARISH; conjunto aponta BULLISH para o preço do café (fluxos fortes e baixa de estoques Robusta superam a alta de produção e a reposição de certificados de Arábica)."
+      ],
+      "pdf_url": "http://www.ico.org/documents/cy2023-24/cmr-0224-e.pdf",
+      "pdf_sha256": "7049ce5cf2b62a372ac2d8cb4d7e2790f8a5e542a54d4cfad90b0f6400fc1485",
+      "model": "gpt-5",
+      "prompt_version": "v1"
+    },
+    {
+      "date": "2024-03-01",
+      "close": -1.0,
+      "signal": -1.0,
+      "label": "BEARISH",
+      "evidencias": [
+        "Fato: Produção 2023/24 estimada em 178,0 mi sacas (+5,8% a/a); Arabica +8,8%, Robusta +2,1%; balanço global +1,0 mi sacas. Regra: Aumento de produção → BEARISH. Impacto: Maior oferta líquida pressiona preços.",
+        "Fato: Estoques certificados subiram: NY Arabica 0,63 mi sacas (+80,8% m/m) e Londres Robusta 0,49 mi (+22,1% m/m). Regra: Aumento de estoques → BEARISH. Impacto: Alivia aperto físico e pesa nas cotações.",
+        "Fato: Exportações globais de green em fev/24 atingiram 10,43 mi sacas (+9,5% a/a; recorde de fevereiro), puxadas pelo Brasil (+36,6% Naturals; SA +41,7%). Regra: Exportações acelerando → BULLISH. Impacto: Mais fluxo disponível, mas insuficiente para neutralizar alta de produção/estoques."
+      ],
+      "pdf_url": "http://www.ico.org/documents/cy2023-24/cmr-0324-e.pdf",
+      "pdf_sha256": "64494cbd0db216a89cc057e761884407ebfa7e8392b736d772a05e32ecb64fbe",
+      "model": "gpt-5",
+      "prompt_version": "v1"
+    },
+    {
+      "date": "2024-04-01",
+      "close": 0.0,
+      "signal": 0.0,
+      "label": "NEUTRAL",
+      "evidencias": [
+        "Fonte: ICO; Fato: Produção global 2023/24 estimada em 178,0 mi sacas (+5,8% a/a; Arábica +8,8%, Robusta +2,1%); Regra: Aumento de produção → BEARISH; Impacto: Pressiona preços para baixo",
+        "Fonte: ICO; Fato: Estoques certificados: Londres +27,4% (0,63 mi sacas) e NY (Arábica) +1,7% (0,64 mi sacas) m/m; Regra: Aumento de estoques → BEARISH; Impacto: Alivia aperto e pesa sobre preços",
+        "Fonte: ICO; Fato: Choques de oferta em Robusta (Vietnã -20% proj. 23/24; Indonésia safra 23/24 ~10,0 vs 12,0 mi sacas) reduzem Ásia (-9,7% exp.), enquanto exportações globais de verde aceleram (+9,4% y/y em março) puxadas pelo Brasil; Regra: Queda por falta de produto → BULLISH; Exportações acelerando → BULLISH; Impacto: Sustenta preços, compensando parte do viés baixista dos estoques e da produção"
+      ],
+      "pdf_url": "http://www.ico.org/documents/cy2023-24/cmr-0424-e.pdf",
+      "pdf_sha256": "a11edb2489cda5475aced2d452764a285b1426eda422983e296b1c0b06fe773c",
+      "model": "gpt-5",
+      "prompt_version": "v1"
+    },
+    {
+      "date": "2024-05-01",
+      "close": 0.0,
+      "signal": 0.0,
+      "label": "NEUTRAL",
+      "evidencias": [
+        "Fonte: ICO; Fato: Produção global 2023/24 estimada em 178.0 mi sacas (+5,8%), com Arábica +8,8% e Robusta +2,1%; Regra: Aumento de produção → BEARISH; Impacto: Pressão baixista pela maior oferta, especialmente em Arábica.",
+        "Fonte: ICO; Fato: Estoques certificados subiram (NY Arabica 0,84 mi; Londres 0,78 mi; +30,3% e +24,9% m/m), ainda abaixo da média 22/23; Regra: Aumento de estoques → BEARISH; Impacto: Alivia aperto físico no curto prazo, pesando nos preços.",
+        "Fonte: ICO; Fato: Exportações aceleraram em abril (verde +15,3% a/a; YTD +11,4%); altas em Naturais do Brasil (+44,9%), Robustas (+12,8%), Col. Milds (+5,4%); quedas em Ásia/Vietnã e Mesoamérica por restrições de oferta (ciclo/choques); Regra: Exportações acelerando → BULLISH; quedas por restrição de oferta → BULLISH; Impacto: Suporte altista por fluxo forte e sinais de gargalos regionais."
+      ],
+      "pdf_url": "http://www.ico.org/documents/cy2023-24/cmr-0524-e.pdf",
+      "pdf_sha256": "fb9ef55eb7d5eeda1ae3ec9d7e598dbdf4ac092c0547eafa090bb6e15cfff37d",
+      "model": "gpt-5",
+      "prompt_version": "v1"
+    },
+    {
+      "date": "2024-06-01",
+      "close": 1.0,
+      "signal": 1.0,
+      "label": "BULLISH",
+      "evidencias": [
+        "Fonte: ICO",
+        "Fato principal: Queda forte dos embarques de Robusta na Ásia por restrição de oferta (Vietnã -46,9% por estoques internos baixos; Indonésia -67,1% por safra fraca); Regra aplicada: Exportações desacelerando por restrição de oferta → BULLISH; Impacto esperado no preço: aperto de oferta em Robusta sustenta o complexo do café.",
+        "Fato principal: Exportações acelerando (globais +12% a/a; Brazilian Naturals +56,1%; América do Sul +59,6% com recorde histórico do Brasil); Regra aplicada: Exportações acelerando → BULLISH; Impacto esperado no preço: maior tração de demanda/sourcing e menor folga física elevam preços.",
+        "Fato principal: Estoques certificados em alta (Londres +24,3% para 0,97 mi; NY Arábica +2,8% para 0,86 mi) e produção 2023/24 estimada +5,8% (Arábica +8,8%); Regra aplicada: Aumento de estoques/produção → BEARISH; Impacto esperado no preço: limita a alta de curto prazo, mas não reverte viés de aperto."
+      ],
+      "pdf_url": "http://www.ico.org/documents/cy2023-24/cmr-0624-e.pdf",
+      "pdf_sha256": "252f82edd9646771d01626f74ddeae1277f053a10b87f73752cbf9b81633723e",
+      "model": "gpt-5",
+      "prompt_version": "v1"
+    },
+    {
+      "date": "2024-07-01",
+      "close": 0.0,
+      "signal": 0.0,
+      "label": "NEUTRAL",
+      "evidencias": [
+        "Fonte: ICO",
+        "Bullish: quedas de exportações por restrição de oferta (Ásia & Oceania -33% em jun/24; Vietnã -50% por estoques internos baixos; Robustas -12,7% em jun/24, 2º mês de queda) → regra: exportações desacelerando por falta de produto = BULLISH → tende a sustentar preços",
+        "Bearish: estoques certificados subiram (Londres +1,7% para 0,99 mi sc; Arábica certificados +0,9% para 0,87 mi sc) e produção maior no Brasil (boas safras 22/23 e 23/24: +8,4% e +9,2%) apoiando forte aceleração de exportações da América do Sul (+34,7% em jun/24) → regras: aumento de estoques = BEARISH; aumento de produção = BEARISH → efeitos opostos resultam em sinal neutro"
+      ],
+      "pdf_url": "http://www.ico.org/documents/cy2023-24/cmr-0724-e.pdf",
+      "pdf_sha256": "0e423367e561d888e79c5de8d99b1cb4673724019b64a3015f3c05da3d9880ac",
+      "model": "gpt-5",
+      "prompt_version": "v1"
+    },
+    {
+      "date": "2024-08-01",
+      "close": 1.0,
+      "signal": 1.0,
+      "label": "BULLISH",
+      "evidencias": [
+        "Vietnã: exportações -29,1% em julho e -12,2% no acumulado do ano por estoques internos esgotados/espera da nova safra (restrição de oferta) → BULLISH",
+        "Exportações globais de green beans +9,6% em julho (Arabicas liderando: Brazilian Naturals +18%, Colombian Milds +17,7%) → aceleração de embarques → BULLISH",
+        "Estoques certificados: Londres (Robusta) +2,3% para 1,01 mi sacas e Nova York (Arábica) +4,5% para 0,91 mi sacas → aumento de estoques → BEARISH"
+      ],
+      "pdf_url": "http://www.ico.org/documents/cy2023-24/cmr-0824-e.pdf",
+      "pdf_sha256": "dbfa1014982393433ea5410b3021c8c9307342ab0716b83b6ffa307263c43b4a",
+      "model": "gpt-5",
+      "prompt_version": "v1"
+    },
+    {
+      "date": "2024-10-01",
+      "close": 1.0,
+      "signal": 1.0,
+      "label": "BULLISH",
+      "evidencias": [
+        "Fonte: ICO",
+        "Fato principal: Aceleração ampla dos embarques em set/24 (+25,2% a/a de green beans) e forte alta anual nas exportações 2023/24; ao mesmo tempo, estoques certificados de Robusta em Londres caíram 11,7% (0,66 mi sacas), enquanto os estoques certificados de Arábica em NY subiram 4,7% (0,91 mi).",
+        "Regra aplicada: Exportações acelerando → BULLISH; Queda de estoques → BULLISH; Aumento de estoques → BEARISH; Desaceleração por restrição de oferta (Vietnã 2023/24 -11,7% por clima/estoques locais) → BULLISH.",
+        "Impacto esperado no preço: Sinal líquido positivo para preços, com aperto em Robusta e restrições de oferta no Vietnã superando o efeito bearish do aumento de estoques certificados de Arábica."
+      ],
+      "pdf_url": "http://www.ico.org/documents/cy2024-25/cmr-1024-e.pdf",
+      "pdf_sha256": "ef30be1b10cd4d1ce0d87f74f8dca231561a7eeb69a2f63c6b8310944fe52ac7",
+      "model": "gpt-5",
+      "prompt_version": "v1"
+    },
+    {
+      "date": "2024-11-01",
+      "close": 1.0,
+      "signal": 1.0,
+      "label": "BULLISH",
+      "evidencias": [
+        "Fonte: ICO; Fato principal: USDA projeta produção do Brasil -5% (~3,5 mi sacas) e colheita de Robusta no Vietnã atrasada por clima; Regra aplicada: Queda/atraso de produção → BULLISH; Impacto esperado no preço: restringe oferta de curto prazo, sustentando altas em Arábica e Robusta.",
+        "Fonte: ICO; Fato principal: Gargalos logísticos (atrasos em Santos, conflitos no Mar Vermelho, baixos níveis no Canal do Panamá) e Tempestade Sara na América Central com risco de interrupções; Regra aplicada: Desaceleração de embarques por restrição de oferta/logística → BULLISH; Impacto esperado no preço: menor disponibilidade imediata, prêmios mais altos e arbitragem ampliada.",
+        "Fonte: ICO; Fato principal: Estoques certificados de Robusta em Londres caem 1,8% para 0,65 mi sacas (nov/24); Regra aplicada: Queda de estoques → BULLISH; Impacto esperado no preço: suporte aos diferenciais de Robusta e à alta dos futuros em Londres."
+      ],
+      "pdf_url": "http://www.ico.org/documents/cy2024-25/cmr-1124-e.pdf",
+      "pdf_sha256": "dc59cb080aeb030f7231045d945343e6d3f43ff68ebd5f165a2ea56edc2b609e",
+      "model": "gpt-5",
+      "prompt_version": "v1"
+    },
+    {
+      "date": "2024-12-01",
+      "close": 1.0,
+      "signal": 1.0,
+      "label": "BULLISH",
+      "evidencias": [
+        "Robusta em forte aperto: exportações de Robustas caíram 17,3% em nov/24, com Vietnã -47,1% (estoques domésticos quase zerados) e queda regional Ásia & Oceania -12,0% — Regra: exportações desacelerando por restrição de oferta → BULLISH → pressiona preços para cima",
+        "Logística/fluxos travados: atrasos no Suez elevam 4–5 milhões de sacas ‘em trânsito’ e Colombia enfrenta falta de contêineres/espaço — Regra: ritmo de embarques mais lento por gargalos físicos → BULLISH → suboferta nos destinos, sustenta prêmios",
+        "Contrapeso limitado: estoques certificados subiram em dez/24 (NY Arábica +7,8% para 1,03 mi, Londres Robusta +13,3% para 0,73 mi) — Regra: aumento de estoques → BEARISH → porém insuficiente diante do aperto de Robustas e atrasos"
+      ],
+      "pdf_url": "http://www.ico.org/documents/cy2024-25/cmr-1224-e.pdf",
+      "pdf_sha256": "27505c2c6c60568f6f8ce7f608f88203ff86fa635d4cfa9482ab3b257158a066",
+      "model": "gpt-5",
+      "prompt_version": "v1"
+    },
+    {
+      "date": "2025-01-01",
+      "close": 1.0,
+      "signal": 1.0,
+      "label": "BULLISH",
+      "evidencias": [
+        "Conab reduziu a estimativa de oferta do Brasil 2024/25 em 600 mil sacas (revisão de safra negativa) → Regra: Revisão negativa de safra = BULLISH → Pressiona preços para cima",
+        "Estoques certificados de Arábica na ICE NY caíram 11,7% para 0,91 mi sacas (enquanto Robusta Londres +3,8% para 0,76 mi) → Regra: Queda de estoques = BULLISH → Sustenta altas no Arábica",
+        "Exportações globais de verde -10,5% em dez/24; Robustas -19% com Vietnã -39,5% por oferta doméstica apertada; Ásia & Oceania -31,2% pelo mesmo motivo → Regra: Exportações desacelerando por restrição de oferta = BULLISH → Menor fluxo físico disponível eleva preços"
+      ],
+      "pdf_url": "http://www.ico.org/documents/cy2024-25/cmr-0125-e.pdf",
+      "pdf_sha256": "4ca638f5e8008e70e08259cd051a18afdbe996764f4002341c213deeafbd3846",
+      "model": "gpt-5",
+      "prompt_version": "v1"
+    },
+    {
+      "date": "2025-02-01",
+      "close": 1.0,
+      "signal": 1.0,
+      "label": "BULLISH",
+      "evidencias": [
+        "Estoques certificados caíram: Arabica NY -7,5% para 0,84 mi sacas e Robusta Londres -4,9% para 0,72 mi (fev/25) → Regra: queda de estoques = BULLISH → Aperto físico imediato sustenta preços.",
+        "Exportações desaceleraram: green beans jan/25 -14,2% a/a e total -13,3% a/a, com Ásia/Oceania -31,9% e Vietnã afetado por oferta doméstica apertada → Regra: queda de embarques por restrição de oferta = BULLISH → Menor fluxo disponível ao consumidor.",
+        "Revisão positiva da safra do Vietnã 24/25 (+10% para 28–29 mi sacas) e perspectiva climática favorável (La Niña) → Regra: revisão/produção ↑ = BEARISH → Melhora o quadro de oferta futura, mas não neutraliza o aperto atual."
+      ],
+      "pdf_url": "http://www.ico.org/documents/cy2024-25/cmr-0225-e.pdf",
+      "pdf_sha256": "40dbb323664eb2a2fcc6f772b5f706efba8c8c4abe9afb0921152f72e1d4acbd",
+      "model": "gpt-5",
+      "prompt_version": "v1"
+    },
+    {
+      "date": "2025-03-01",
+      "close": 1.0,
+      "signal": 1.0,
+      "label": "BULLISH",
+      "evidencias": [
+        "Fonte: ICO; Inventários de consumidores caíram para 15,9 mi sacas (−8,0 mi vs pico) e estoques certificados de Arábica NY recuaram 4,6% m/m; Regra: quedas de estoques → BULLISH; Impacto: aperto físico sustenta preços.",
+        "Fonte: ICO; Riscos na safra Brasil 2025/26 (chuvas abaixo do normal, baixa umidade do solo, maior risco de geada) e logística no Mar Vermelho adicionando atrasos; Regra: risco/queda de produção e restrição logística → BULLISH; Impacto: menor oferta efetiva e prêmios de entrega mais altos.",
+        "Fonte: ICO; Exportações de verde aceleraram (+6,6% YoY; Robustas +10,7% com Vietnam/Indonésia), enquanto a América do Sul caiu 6,9% por estoques baixos no Brasil; Regra: exportações acelerando → BULLISH; queda de embarques por falta de produto → BULLISH; Impacto: reposiciona fluxos mas a escassez regional sustenta preços."
+      ],
+      "pdf_url": "http://www.ico.org/documents/cy2024-25/cmr-0325-e.pdf",
+      "pdf_sha256": "acfdcd209adbbd189656c6593268855c5cd2ae1a14b450d228f4bac63b5a38eb",
+      "model": "gpt-5",
+      "prompt_version": "v1"
+    },
+    {
+      "date": "2025-04-01",
+      "close": 1.0,
+      "signal": 1.0,
+      "label": "BULLISH",
+      "evidencias": [
+        "Estoques certificados de Robusta (Londres) caíram 3,1% m/m para 0,71 milhão de sacas → queda de estoques → BULLISH (aperto em Robusta).",
+        "Estoques certificados de Arábica (NY) subiram 6,4% m/m para 0,85 milhão de sacas → aumento de estoques → BEARISH (alívio de oferta de Arábica).",
+        "Exportações de green beans recuaram 0,9% a/a em março (YTD -3,2%), com Robustas -8,4% puxado por normalização da oferta do Brasil → exportações desacelerando por restrição/oferta → BULLISH (estreita o balanço, sobretudo em Robusta)."
+      ],
+      "pdf_url": "http://www.ico.org/documents/cy2024-25/cmr-0425-e.pdf",
+      "pdf_sha256": "efe3c00d29eff1e93476e575524d158de7a337df271e5ecba2c88a9eec208ef1",
+      "model": "gpt-5",
+      "prompt_version": "v1"
+    },
+    {
+      "date": "2025-05-01",
+      "close": -1.0,
+      "signal": -1.0,
+      "label": "BEARISH",
+      "evidencias": [
+        "Estoques certificados: Londres (Robusta) +28,1% para 0,92 mi sacas e NY (Arábica) +9,4% para 0,93 mi em mai/25 → Regra: aumento de estoques = BEARISH → Maior oferta disponível pressiona preços.",
+        "Oferta/safra: USDA projeta mais produção (Brasil +0,2% 24/25; Peru +8,0% 25/26) e ENSO neutro até out/25 sugere melhor perspectiva de colheita → Regra: revisão/condição positiva de safra = BEARISH → Tendência de alívio na escassez.",
+        "Fluxos/logística: suspensão de ataques dos Houthis melhora trânsito via Suez, reduz café ‘on water’ e custos → Regra: melhora no ritmo de embarques/fluxos aumenta oferta efetiva = BEARISH → Pressão baixista de curto prazo."
+      ],
+      "pdf_url": "http://www.ico.org/documents/cy2024-25/cmr-0525-e.pdf",
+      "pdf_sha256": "e89c5b33fa7799aa042ce0097f37c1bd48b2878772dfcc9d49c84e1d01425cc3",
+      "model": "gpt-5",
+      "prompt_version": "v1"
+    },
+    {
+      "date": "2025-06-01",
+      "close": -1.0,
+      "signal": -1.0,
+      "label": "BEARISH",
+      "evidencias": [
+        "USDA projeta superávit global de 9,32 mi sacas em 2025/26 (após 7,88 mi em 2024/25) → revisão positiva de oferta/produção > consumo = BEARISH → pressiona preços.",
+        "Origem com colheitas fortes: Indonésia ‘melhor que o esperado’; Etiópia em on-year (+0,5 mi sacas estimadas pelo mercado); Uganda com boa safra → aumento de produção = BEARISH.",
+        "Estoques certificados ICE chegaram a 1,85 mi sacas no fim de maio (máxima de 9 meses) antes de caírem a 1,78 mi em junho → aumento prévio de estoques reforça folga de oferta = BEARISH."
+      ],
+      "pdf_url": "http://www.ico.org/documents/cy2024-25/cmr-0625-e.pdf",
+      "pdf_sha256": "8a710c535d409535756dd59a322e55a00b30df15280c3e716f636b8a9fe56364",
+      "model": "gpt-5",
+      "prompt_version": "v1"
+    },
+    {
+      "date": "2025-07-01",
+      "close": -1.0,
+      "signal": -1.0,
+      "label": "BEARISH",
+      "evidencias": [
+        "Fonte: ICO — Fato: 2024/25 estimado em superávit; colheita do Brasil adiantada (84% vs 81%); safras melhores em Indonésia, Etiópia, Honduras, Peru, Uganda e projeção maior na Nicarágua — Regra: aumento de produção/revisão positiva de safra → BEARISH — Impacto: maior oferta pressionando preços para baixo",
+        "Fonte: ICO — Fato: estoques certificados de Robusta em Londres +35,8% (1,18 mi sacas, máx. desde jun/23) e estoques certificados de Arábica em NY -8,1% (0,83 mi) — Regra: estoques ↑ → BEARISH; estoques ↓ → BULLISH — Impacto: efeito líquido baixista dada a forte alta em Robusta",
+        "Fonte: ICO — Fato: exportações aceleraram em jun/25 (green total +3,3%; Robustas +16,9%; Other Milds +14,8%; Colombian Milds +9,0%; Ásia/Oceania +38,6%; África +28,1%) — Regra: exportações acelerando → BULLISH — Impacto: suporte tático, porém insuficiente para compensar o choque de oferta"
+      ],
+      "pdf_url": "http://www.ico.org/documents/cy2024-25/cmr-0725-e.pdf",
+      "pdf_sha256": "8468b226b463ad3e9b841b385c2bfa9955c5dc724d8baf1d4996199337a97b3e",
+      "model": "gpt-5",
+      "prompt_version": "v1"
+    },
+    {
+      "date": "2025-08-01",
+      "close": 1.0,
+      "signal": 1.0,
+      "label": "BULLISH",
+      "evidencias": [
+        "Estoques certificados caíram: Arábica NY -7.9% para 0.77m (mínimo desde abr/2024) e Robusta Londres -4.6% para 1.13m — Regra: Queda de estoques → BULLISH — Impacto: aperto de oferta imediata sustenta preços.",
+        "Brasil com 99% colhido mas ~35% comercializado; tarifa EUA de 50%, Funcafé e logística em Santos retardam vendas; exportações da América do Sul -18.5% a/a — Regra: Desaceleração por restrição de oferta/logística → BULLISH — Impacto: menor fluxo físico no curto prazo eleva prêmio.",
+        "Revisão leve para baixo da safra brasileira (baixa densidade) + geada menor (até 0.5m sacas) — Regra: Queda/Revisão negativa de produção → BULLISH — Impacto: reduz disponibilidade e reforça tensão no balanço."
+      ],
+      "pdf_url": "http://www.ico.org/documents/cy2024-25/cmr-0825-e.pdf",
+      "pdf_sha256": "d3971966efbed3cf4071d83f0d2f6f93f97634d6ad4aaeaf2b59edf1e461f521",
+      "model": "gpt-5",
+      "prompt_version": "v1"
+    },
+    {
+      "date": "2025-09-01",
+      "close": 1.0,
+      "signal": 1.0,
+      "label": "BULLISH",
+      "evidencias": [
+        "Fonte: ICO; Estoques certificados caíram: NY/Arábica -19.3% m/m (~0.66m bags) e Londres/Robusta -4.3% (1.08m); Regra: Queda de estoques → BULLISH; Impacto: aperto físico, suporte aos preços",
+        "Exportações desaceleraram em ago/25 (green -2.0%, all forms -3.7%), puxadas por queda dos Brazilian Naturals e problemas logísticos em Santos; Regra: Desaceleração por restrição de oferta/logística → BULLISH; Impacto: menos oferta spot, alta em Arábica",
+        "Vietnã em recuperação: produção 24/25 estimada 29.19m bags e Robustas +174.9% m/m em ago/25; Regra: Aumento de produção → BEARISH; Exportações acelerando → BULLISH; Impacto: alívio no Robusta, mas não compensa o aperto em Arábica"
+      ],
+      "pdf_url": "http://www.ico.org/documents/cy2024-25/cmr-0925-e.pdf",
+      "pdf_sha256": "e8e7532afe22f3cf12df65eb0c8c068e76aa38163dd667b2c9c6a311ff07e79c",
+      "model": "gpt-5",
+      "prompt_version": "v1"
+    },
+    {
+      "date": "2025-10-01",
+      "close": 0.0,
+      "signal": 0.0,
+      "label": "NEUTRAL",
+      "evidencias": [
+        "Estoques certificados: NY Arabica -24.2% m/m (0.47 mi sacas) e Londres Robusta -6.2% m/m (1.01 mi) — queda de estoques = BULLISH → suporte ao preço no curto prazo",
+        "Exportações: América do Sul -12.3% a/a em 2024/25 (Brasil em off-year + gargalos em Santos) — queda por restrição de oferta/logística = BULLISH → menor disponibilidade nos destinos",
+        "Oferta global: produção 2024/25 +5.2% (Robusta +6.2%) e superávit de 2.44 mi sacas — aumento de produção/saldo positivo = BEARISH → alivia aperto adiante"
+      ],
+      "pdf_url": "http://www.ico.org/documents/cy2025-26/cmr-1025-e.pdf",
+      "pdf_sha256": "b8208e48fe648fb6b5cbfe321c28c06bad44cf2068bbb4ecc36a452885b34a2d",
+      "model": "gpt-5",
+      "prompt_version": "v1"
+    },
+    {
       "date": "2025-11-01",
       "close": 0.0,
       "signal": 0.0,
@@ -36,5 +338,5 @@
     }
   ],
   "source": "International Coffee Organization (ICO) — Monthly Coffee Market Report (CMR).",
-  "updated_at": "2026-01-19T17:03:13Z"
+  "updated_at": "2026-01-19T18:01:50Z"
 }
