@@ -88,7 +88,8 @@
       "estoques_certificados": "data/cafe/series/estoques_certificados.json",
       "fertilizante_urea": "data/cafe/series/fertilizante_urea.json",
       "fundamental_stu": "data/cafe/series/fundamental_stu.json",
-      "clima_soil": "data/cafe/series/clima_soil.json"
+      "clima_soil": "data/cafe/series/clima_soil.json",
+      "ico_ia": "data/cafe/series/ico_ia.json"
     };
 
     const DECIMALS_BY_ID = {
@@ -100,6 +101,7 @@
       usd_brl: 2,
       estoques_certificados: 0,
       fundamental_stu: 4,
+      ico_ia: 0,
     };
 
     function fmtNumber(n, decimals = 2){
@@ -275,6 +277,7 @@
       if(varId === "fertilizante_urea") return "M4_M12";
       if(varId === "fundamental_stu") return "FUNDAMENTAL_STU";
       if(varId === "clima_soil") return "CLIMA_SOIL";
+      if(varId === "ico_ia") return "ICO_IA";
       return "DEFAULT";
     }
 
@@ -285,6 +288,7 @@
       if(mode === "M4_M12") return 4;
       if(mode === "FUNDAMENTAL_STU") return 5;
       if(mode === "CLIMA_SOIL") return 3;
+      if(mode === "ICO_IA") return 3;
       return 4;
     }
 
@@ -344,6 +348,15 @@
           <th>Data</th>
           <th class="right">SWVL3</th>
           <th class="right">Stress_6m</th>
+        `;
+        return;
+      }
+
+      if(mode === "ICO_IA"){
+        theadRow.innerHTML = `
+          <th>Data</th>
+          <th class="right">Score</th>
+          <th>Diagnóstico</th>
         `;
         return;
       }
@@ -532,6 +545,53 @@
 
           return;
         }
+        // =========================
+        // ICO (IA) — Qualitativa (Score + Label)
+        // =========================
+        if(mode === "ICO_IA"){
+          setTableHeaderByMode(card, mode);
+
+          const rows = raw
+            .map(p => ({
+              date: (p.date || p.Data || p.data),
+              score: (p.close ?? p.signal ?? null),
+              label: (p.label ?? "")
+            }))
+            .filter(p => !!p.date)
+            .sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+
+          // tabela: últimos 24 (mais recente em cima)
+          const tail = rows.slice(-24).reverse();
+          tbody.innerHTML = "";
+
+          if(tail.length === 0){
+            tbody.innerHTML = `<tr><td colspan="3" class="muted">Série vazia.</td></tr>`;
+          } else {
+            for(const r of tail){
+              const tr = document.createElement("tr");
+              tr.innerHTML = `
+                <td>${fmtDateBR(r.date)}</td>
+                <td class="right">${fmtNumber(Number(r.score), dec)}</td>
+                <td>${String(r.label || "—")}</td>
+              `;
+              tbody.appendChild(tr);
+            }
+          }
+
+          // gráfico: linha do score (sem MMs)
+          const ptsChart = rows
+            .map(r => ({ date: r.date, close: Number(r.score), mm50: NaN, mm252: NaN }))
+            .filter(p => !Number.isNaN(p.close));
+
+          drawMultiLine(canvas, ptsChart, {
+            showMM50:false,
+            showMM252:false,
+            labelClose:"Score"
+          });
+
+          return;
+        }
+
 
         // =========================
         // FUNDAMENTAL_STU (decomp)
