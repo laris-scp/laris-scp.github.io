@@ -31,8 +31,11 @@ VAR_NAME = "FUNDAMENTAL S&D (STU Global)"
 FREQUENCIA = "Anual"
 
 REGRA_DE_SINAL = (
-    "Score baseado no STU World (nível/tendência/momento) com inversão do bloco 2 "
-    "(STU baixo = bullish). Tabela mostra decomposição por países (peso produção 5y × Δprodução YoY)."
+    "Este indicador mostra a relacao entre os estoques globais de cafe e o consumo mundial (stock-to-use). "
+    "Valores mais baixos indicam um mercado mais apertado, com menos cafe disponivel em relacao a demanda, "
+    "o que tende a ser positivo para os precos. "
+    "O painel avalia o nivel atual em relacao ao historico e a direcao recente dessa relacao "
+    "para identificar se o equilibrio entre oferta e demanda esta melhorando ou se deteriorando."
 )
 FONTE = "USDA/FAS PSD API — Coffee, Green"
 
