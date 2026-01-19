@@ -252,6 +252,11 @@ def main():
     except Exception:
         pdf_urls = []
 
+            print(f"DEBUG: PDFs encontrados via scraping (filtrados): {len(pdf_urls)}")
+        for u in pdf_urls[:20]:
+            print("DEBUG_PDF:", u)
+
+
     # fallback se scraping falhar
     for u in FALLBACK_PDFS:
         if u not in pdf_urls:
@@ -267,6 +272,9 @@ def main():
     # Backfill: por padrão roda 1 (último). Se ICO_BACKFILL_N existir, roda até N mais recentes.
     backfill_n = int(os.environ.get("ICO_BACKFILL_N", "1").strip() or "1")
     backfill_n = max(1, min(backfill_n, len(pdf_urls)))
+
+        print(f"DEBUG: PDFs totais após fallback/dedup: {len(pdf_urls)}")
+
 
     targets = pdf_urls[-backfill_n:]  # os N mais recentes
     print(f"INFO: backfill_n={backfill_n} | encontrados={len(pdf_urls)} | processando={len(targets)}")
