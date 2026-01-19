@@ -158,11 +158,11 @@ def main():
 
     # ===== Texto amigavel (ASCII puro, triple-quoted) =====
     rule_txt = """
-Este indicador mede o nivel de estresse hidrico do solo nas principais regioes produtoras de cafe.
-Valores mais altos indicam solo mais seco, o que pode reduzir a produtividade.
-O painel compara o estresse atual com o historico e so gera sinal de tendencia quando a seca atinge niveis extremos.
-Fora desses episodios, o clima e considerado neutro para a analise direcional.
-""".strip()
+    Este indicador mede o nivel de estresse hidrico do solo nas principais regioes produtoras de cafe.
+    Valores mais altos indicam solo mais seco, o que pode reduzir a produtividade.
+    O painel compara o estresse atual com o historico e so gera sinal de tendencia quando a seca atinge niveis extremos.
+    Fora desses episodios, o clima e considerado neutro para a analise direcional.
+    """.strip()
 
     fonte_txt = "ERA5-Land (ECMWF/Copernicus) - swvl3 (Volumetric soil water layer 3)."
 
