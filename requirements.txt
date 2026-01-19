@@ -1,0 +1,14 @@
+requests
+numpy
+pandas
+yfinance
+openpyxl
+xlrd>=2.0.1
+lxml
+python-dateutil
+pytz
+xarray
+netCDF4
+cdsapi
+pdfplumber
+openai
