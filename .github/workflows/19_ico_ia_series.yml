@@ -6,9 +6,9 @@ on:
       backfill_n:
         description: "Quantos relatórios mais recentes processar (1 = só o último)"
         required: true
-        default: "24"
+        default: "1"
   schedule:
-    - cron: "0 10 5 * *"
+    - cron: "0 10 15 * *"
 
 permissions:
   contents: write
