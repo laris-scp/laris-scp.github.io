@@ -3,8 +3,10 @@
 
 import os
 import re
+import io
 import json
 import hashlib
+import warnings
 from pathlib import Path
 from datetime import datetime
 from urllib.parse import urljoin
@@ -12,15 +14,13 @@ from urllib.parse import urljoin
 import requests
 import pdfplumber
 from openai import OpenAI
-import warnings
 from requests.exceptions import SSLError
-
 
 SERIES_PATH = Path("data/cafe/series/ico_ia.json")
 
 ICO_LIST_URL = "https://ico.org/specialized-reports/"
 
-# Fallbacks (se o HTML do ICO mudar)
+# Fallbacks (caso o HTML mude / scraping falhe)
 FALLBACK_PDFS = [
     "http://www.ico.org/documents/cy2025-26/cmr-1225-e.pdf",
     "http://www.ico.org/documents/cy2025-26/cmr-1125-e.pdf",
@@ -28,6 +28,7 @@ FALLBACK_PDFS = [
 
 # OpenAI
 MODEL = os.environ.get("OPENAI_MODEL", "gpt-5")
+
 MAX_CHARS_TOTAL = 120_000
 HEAD_CHARS = 70_000
 TAIL_CHARS = 50_000
@@ -107,12 +108,12 @@ Retorne APENAS o JSON abaixo, sem texto adicional:
 }}
 """.strip()
 
+
 def sha256_bytes(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
 
+
 def extract_pdf_text_bytes(pdf_bytes: bytes) -> str:
-    # abre PDF a partir de bytes
-    import io
     buff = io.BytesIO(pdf_bytes)
     texts = []
     with pdfplumber.open(buff) as pdf:
@@ -122,6 +123,7 @@ def extract_pdf_text_bytes(pdf_bytes: bytes) -> str:
             texts.append(f"\n\n--- PAGE {i+1} ---\n{txt}")
     return "\n".join(texts).strip()
 
+
 def shrink_text(text: str) -> str:
     if len(text) <= MAX_CHARS_TOTAL:
         return text
@@ -129,27 +131,26 @@ def shrink_text(text: str) -> str:
     tail = text[-TAIL_CHARS:]
     return head + "\n\n[...TRUNCADO PARA CABER NO CONTEXTO...]\n\n" + tail
 
+
 def find_pdf_links_from_html(html: str, base_url: str) -> list[str]:
-    # pega todos os href .pdf
     hrefs = re.findall(r'href=["\']([^"\']+\.pdf)["\']', html, flags=re.IGNORECASE)
     urls = [urljoin(base_url, h) for h in hrefs]
-    # filtra PDFs do CMR em inglês: cmr-<MMYY>-e.pdf
     out = []
     for u in urls:
         if re.search(r"/cmr-\d{4}-e\.pdf$", u, flags=re.IGNORECASE):
             out.append(u)
     return sorted(set(out))
 
+
 def pdf_mmyy_to_date(url: str) -> str:
-    # extrai mmYY do filename
     m = re.search(r"cmr-(\d{2})(\d{2})-e\.pdf$", url, flags=re.IGNORECASE)
     if not m:
         raise ValueError(f"Não consegui extrair MMYY do PDF: {url}")
     mm = int(m.group(1))
     yy = int(m.group(2))
     year = 2000 + yy
-    # padroniza para 1o dia do mês
     return f"{year:04d}-{mm:02d}-01"
+
 
 def load_series():
     if SERIES_PATH.exists():
@@ -158,22 +159,24 @@ def load_series():
         if not isinstance(series, list):
             series = []
         return payload, series
-    else:
-        payload = {
-            "id": "ico_ia",
-            "name": "ICO (IA) — Relatório Mensal",
-            "unit": "score",
-            "frequency": "Mensal",
-            "series": [],
-            "source": "International Coffee Organization (ICO) — Monthly Coffee Market Report (CMR).",
-        }
-        return payload, []
+
+    payload = {
+        "id": "ico_ia",
+        "name": "ICO (IA) — Relatório Mensal",
+        "unit": "score",
+        "frequency": "Mensal",
+        "series": [],
+        "source": "International Coffee Organization (ICO) — Monthly Coffee Market Report (CMR).",
+    }
+    return payload, []
+
 
 def already_has_sha(series: list[dict], sha: str) -> bool:
     for p in series:
         if str(p.get("pdf_sha256", "")).lower() == sha.lower():
             return True
     return False
+
 
 def call_openai(document_text: str) -> dict:
     api_key = os.environ.get("OPENAI_API_KEY", "").strip()
@@ -191,7 +194,6 @@ def call_openai(document_text: str) -> dict:
     )
     out = (resp.output_text or "").strip()
 
-    # JSON estrito ou extração do primeiro objeto
     try:
         return json.loads(out)
     except json.JSONDecodeError:
@@ -199,6 +201,39 @@ def call_openai(document_text: str) -> dict:
         if not m:
             raise RuntimeError(f"Resposta não veio em JSON válido.\n\nResposta bruta:\n{out[:2000]}")
         return json.loads(m.group(0))
+
+
+def normalize_ico_pdf_url(u: str) -> str:
+    # mantém caminho, troca host e força http (mas pode redirecionar para https)
+    u = u.replace("https://www.ico.org", "http://ico.org")
+    u = u.replace("http://www.ico.org", "http://ico.org")
+    u = u.replace("https://ico.org", "http://ico.org")
+    return u
+
+
+def try_download(url: str) -> bytes:
+    headers = {"User-Agent": "Mozilla/5.0"}
+
+    # 1) tentativa normal (com verificação SSL)
+    try:
+        r = requests.get(url, timeout=90, headers=headers, allow_redirects=True)
+        r.raise_for_status()
+        return r.content
+
+    except SSLError:
+        # 2) fallback: desliga verify APENAS se for erro de certificado
+        warnings.filterwarnings("ignore", message="Unverified HTTPS request")
+
+        r = requests.get(url, timeout=90, headers=headers, allow_redirects=True, verify=False)
+        r.raise_for_status()
+        content = r.content
+
+        # validação mínima: garantir que é um PDF real
+        if not content.startswith(b"%PDF-"):
+            raise RuntimeError("Fallback SSL foi usado, mas o conteúdo baixado não parece ser um PDF válido.")
+
+        return content
+
 
 def main():
     payload, series = load_series()
@@ -217,73 +252,18 @@ def main():
         if u not in pdf_urls:
             pdf_urls.append(u)
 
-    # sanity
     pdf_urls = [u for u in pdf_urls if re.search(r"cmr-\d{4}-e\.pdf$", u, flags=re.IGNORECASE)]
     if not pdf_urls:
         raise RuntimeError("Não encontrei nenhum PDF do CMR para processar (nem por scraping, nem por fallback).")
 
-    # 2) Ordena por data (YYYY-MM) derivada do filename e escolhe o mais recente
-    def key_date(u: str):
-        d = pdf_mmyy_to_date(u)  # YYYY-MM-01
-        return d
-    pdf_urls = sorted(set(pdf_urls), key=key_date)
+    # 2) Ordena por data derivada do filename e escolhe o mais recente
+    pdf_urls = sorted(set(pdf_urls), key=pdf_mmyy_to_date)
     latest_pdf = pdf_urls[-1]
     latest_date = pdf_mmyy_to_date(latest_pdf)
 
-        # --- FORÇA HTTP PARA DOWNLOAD DO PDF (evita SSL do runner) ---
-    def normalize_ico_pdf_url(u: str) -> str:
-        # remove www, e força http
-        u = u.replace("https://www.ico.org", "http://ico.org")
-        u = u.replace("http://www.ico.org", "http://ico.org")
-        u = u.replace("https://ico.org", "http://ico.org")
-        return u
-
-    def try_download(url: str) -> bytes:
-        headers = {"User-Agent": "Mozilla/5.0"}
-    
-        # 1) tentativa normal (com verificação SSL)
-        try:
-            r = requests.get(
-                url,
-                timeout=90,
-                headers=headers,
-                allow_redirects=True
-            )
-            r.raise_for_status()
-            return r.content
-    
-        except SSLError:
-            # 2) fallback: desliga verify APENAS se for erro de certificado
-            warnings.filterwarnings("ignore", message="Unverified HTTPS request")
-    
-            r = requests.get(
-                url,
-                timeout=90,
-                headers=headers,
-                allow_redirects=True,
-                verify=False
-            )
-            r.raise_for_status()
-            content = r.content
-    
-            # validação mínima: garantir que é um PDF real
-            if not content.startswith(b"%PDF-"):
-                raise RuntimeError(
-                    "Fallback SSL foi usado, mas o conteúdo baixado não parece ser um PDF válido."
-                )
-    
-            return content
-
+    # 3) Download PDF (com fallback SSL) e hash
     latest_pdf_norm = normalize_ico_pdf_url(latest_pdf)
-
-    try:
-        pdf_bytes = try_download(latest_pdf_norm)
-    except Exception as e:
-        raise RuntimeError(f"Falha ao baixar PDF do ICO via HTTP. url={latest_pdf_norm} erro={e}")
-
-    pdf_sha = sha256_bytes(pdf_bytes)
-    pdf_resp.raise_for_status()
-    pdf_bytes = pdf_resp.content
+    pdf_bytes = try_download(latest_pdf_norm)
     pdf_sha = sha256_bytes(pdf_bytes)
 
     if already_has_sha(series, pdf_sha):
@@ -300,6 +280,7 @@ def main():
     signal = float(result.get("signal"))
     label = str(result.get("label", "")).upper().strip()
     evid = result.get("evidencias", [])
+
     if label not in {"BULLISH", "BEARISH", "NEUTRAL"}:
         raise RuntimeError(f"Label inválido retornado: {label}")
     if signal not in (-1.0, 0.0, 1.0):
@@ -307,7 +288,7 @@ def main():
 
     point = {
         "date": latest_date,
-        "close": signal,                 # para o gráfico do site (linha única)
+        "close": signal,  # para gráfico/tabela no site
         "signal": signal,
         "label": label,
         "evidencias": evid[:5],
@@ -319,7 +300,7 @@ def main():
 
     series.append(point)
 
-    # ordena e dedup por date (mantém o último)
+    # dedup por date (mantém o último) e ordena
     tmp = {}
     for p in series:
         tmp[str(p.get("date"))] = p
@@ -332,6 +313,7 @@ def main():
     SERIES_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     print(f"OK: ico_ia.json atualizado. Último ponto={latest_date} label={label} signal={signal}")
+
 
 if __name__ == "__main__":
     main()
