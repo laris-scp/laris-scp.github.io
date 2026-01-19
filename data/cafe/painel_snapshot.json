@@ -1,6 +1,6 @@
 {
   "commodity": "cafe",
-  "updated_at": "2026-01-19 18:02:26",
+  "updated_at": "2026-01-19 18:41:30",
   "rows": [
     {
       "id": "preco_arabica",
@@ -100,7 +100,7 @@
       "valor_momento": 0.0,
       "score": 1.0,
       "peso": 2.0,
-      "score_ponderado": 1.0,
+      "score_ponderado": 2.0,
       "frequencia": "Mensal",
       "ultima_atualizacao": "2025-12-31",
       "regra_de_sinal": "Nível: compara o GSCPI atual com todo o histórico e diz se ele está baixo, normal ou alto. Tendência: olha a direção do GSCPI nos últimos meses usando uma média móvel e mede se ele vem subindo, caindo ou ficando de lado (regra mais estável: MM6 + tendência de 12 meses, com filtro de ruído). Momento: indica se essa tendência está ganhando força ou perdendo força.",
@@ -120,7 +120,7 @@
       "valor_momento": 0.0,
       "score": 1.0,
       "peso": 5.0,
-      "score_ponderado": 2.5,
+      "score_ponderado": 5.0,
       "frequencia": "Mensal",
       "ultima_atualizacao": "2025-12-31",
       "regra_de_sinal": "Nível indica se os estoques certificados da ICE estão baixos ou altos versus os últimos anos; Tendência compara a média de 1 ano com 2 e 3 anos para dizer se os estoques vêm subindo, caindo ou andando de lado; Momento mostra se essa tendência está acelerando ou perdendo força; Score combina Nível, Tendência e Momento (com ajuste de bloco e peso) em um único indicador.",
@@ -140,7 +140,7 @@
       "valor_momento": -0.5,
       "score": 2.5,
       "peso": 5.0,
-      "score_ponderado": 7.5,
+      "score_ponderado": 12.5,
       "frequencia": "Anual",
       "ultima_atualizacao": "2025-01-01",
       "regra_de_sinal": "Este indicador mostra a relacao entre os estoques globais de cafe e o consumo mundial (stock-to-use). Valores mais baixos indicam um mercado mais apertado, com menos cafe disponivel em relacao a demanda, o que tende a ser positivo para os precos. O painel avalia o nivel atual em relacao ao historico e a direcao recente dessa relacao para identificar se o equilibrio entre oferta e demanda esta melhorando ou se deteriorando.",
@@ -160,7 +160,7 @@
       "valor_momento": 0.0,
       "score": 1.0,
       "peso": 3.0,
-      "score_ponderado": 1.0,
+      "score_ponderado": 3.0,
       "frequencia": "Mensal",
       "ultima_atualizacao": "2025-12-01",
       "regra_de_sinal": "Este indicador mede o nivel de estresse hidrico do solo nas principais regioes produtoras de cafe.\n    Valores mais altos indicam solo mais seco, o que pode reduzir a produtividade.\n    O painel compara o estresse atual com o historico e so gera sinal de tendencia quando a seca atinge niveis extremos.\n    Fora desses episodios, o clima e considerado neutro para a analise direcional.",
@@ -189,8 +189,8 @@
     }
   ],
   "thermometers": {
-    "bloco_1": -0.53,
-    "bloco_2": 1.82,
-    "geral": 0.36
+    "bloco_1": -0.1,
+    "bloco_2": 1.75,
+    "geral": 0.56
   }
 }
