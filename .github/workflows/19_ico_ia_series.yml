@@ -6,7 +6,7 @@ on:
       backfill_n:
         description: "Quantos relatórios mais recentes processar (1 = só o último)"
         required: true
-        default: "1"
+        default: "24"
   schedule:
     - cron: "0 10 5 * *"
 
