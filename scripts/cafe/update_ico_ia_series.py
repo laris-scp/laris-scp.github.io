@@ -243,7 +243,7 @@ def try_download(url: str) -> bytes:
 def main():
     payload, series = load_series()
 
-    # 1) Descobrir PDFs disponíveis
+     # 1) Descobrir PDFs disponíveis
     pdf_urls = []
     try:
         r = requests.get(ICO_LIST_URL, timeout=30)
@@ -256,18 +256,28 @@ def main():
     for u in pdf_urls[:20]:
         print("DEBUG_PDF:", u)
 
-
     # fallback se scraping falhar
     for u in FALLBACK_PDFS:
         if u not in pdf_urls:
             pdf_urls.append(u)
 
-    pdf_urls = [u for u in pdf_urls if re.search(r"cmr-\d{4}-e\.pdf$", u, flags=re.IGNORECASE)]
-    if not pdf_urls:
-        raise RuntimeError("Não encontrei nenhum PDF do CMR para processar (nem por scraping, nem por fallback).")
+    # mantém apenas PDFs do CMR
+    pdf_urls = [
+        u for u in pdf_urls
+        if re.search(r"cmr-\d{4}-e\.pdf", u, flags=re.IGNORECASE)
+    ]
 
-        # 2) Ordena por data derivada do filename
+    print(f"DEBUG: PDFs totais após fallback/dedup: {len(pdf_urls)}")
+
+    if not pdf_urls:
+        raise RuntimeError(
+            "Não encontrei nenhum PDF do CMR para processar "
+            "(nem por scraping, nem por fallback)."
+        )
+
+    # 2) Ordena por data derivada do filename
     pdf_urls = sorted(set(pdf_urls), key=pdf_mmyy_to_date)
+
 
     # Backfill: por padrão roda 1 (último). Se ICO_BACKFILL_N existir, roda até N mais recentes.
     backfill_n = int(os.environ.get("ICO_BACKFILL_N", "1").strip() or "1")
