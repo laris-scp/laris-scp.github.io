@@ -1,0 +1,25 @@
+{
+  "id": "ico_ia",
+  "name": "ICO (IA) — Relatório Mensal",
+  "unit": "score",
+  "frequency": "Mensal",
+  "series": [
+    {
+      "date": "2025-12-01",
+      "close": 0.0,
+      "signal": 0.0,
+      "label": "NEUTRAL",
+      "evidencias": [
+        "Fonte: ICO | Fato: CONAB elevou a estimativa de produção do Brasil 2025 (+2,4%) e o USDA revisou a produção global de 2025 para 178,8 milhões de sacas | Regra: Revisão positiva de safra → BEARISH | Impacto: Pressão baixista por maior oferta esperada",
+        "Fonte: ICO | Fato: Estoques caíram acentuadamente: Europa 7,86 mi sacas (de 15,04 mi desde 2022/23); ICE Arábica 0,48 mi (de 0,91 mi a/a); Londres Robusta -2,7% m/m | Regra: Queda de estoques → BULLISH | Impacto: Suporte aos preços pela escassez de inventários",
+        "Fonte: ICO | Fato: Riscos de oferta: AEKI projeta queda de até 15% nas exportações da Indonésia em 2025/26 por inundações; Minas Gerais com 76% da chuva média na semana (sinal negativo para 2026/27) | Regra: Queda de produção/embarques por restrição de oferta → BULLISH | Impacto: Prêmio de risco e sustentação dos preços"
+      ],
+      "pdf_url": "http://ico.org/documents/cy2025-26/cmr-1225-e.pdf",
+      "pdf_sha256": "190918ed53aa1765de2abd17127bff4cfd0bfde01f8065c8205160010e73df93",
+      "model": "gpt-5",
+      "prompt_version": "v1"
+    }
+  ],
+  "source": "International Coffee Organization (ICO) — Monthly Coffee Market Report (CMR).",
+  "updated_at": "2026-01-19T15:35:46Z"
+}
