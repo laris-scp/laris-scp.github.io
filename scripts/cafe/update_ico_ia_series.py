@@ -176,7 +176,12 @@ def already_has_sha(series: list[dict], sha: str) -> bool:
         if str(p.get("pdf_sha256", "")).lower() == sha.lower():
             return True
     return False
-
+    
+def already_has_date(series: list[dict], date: str) -> bool:
+    for p in series:
+        if str(p.get("date", "")).strip() == str(date).strip():
+            return True
+    return False
 
 def call_openai(document_text: str) -> dict:
     api_key = os.environ.get("OPENAI_API_KEY", "").strip()
@@ -256,49 +261,70 @@ def main():
     if not pdf_urls:
         raise RuntimeError("Não encontrei nenhum PDF do CMR para processar (nem por scraping, nem por fallback).")
 
-    # 2) Ordena por data derivada do filename e escolhe o mais recente
+        # 2) Ordena por data derivada do filename
     pdf_urls = sorted(set(pdf_urls), key=pdf_mmyy_to_date)
-    latest_pdf = pdf_urls[-1]
-    latest_date = pdf_mmyy_to_date(latest_pdf)
 
-    # 3) Download PDF (com fallback SSL) e hash
-    latest_pdf_norm = normalize_ico_pdf_url(latest_pdf)
-    pdf_bytes = try_download(latest_pdf_norm)
-    pdf_sha = sha256_bytes(pdf_bytes)
+    # Backfill: por padrão roda 1 (último). Se ICO_BACKFILL_N existir, roda até N mais recentes.
+    backfill_n = int(os.environ.get("ICO_BACKFILL_N", "1").strip() or "1")
+    backfill_n = max(1, min(backfill_n, len(pdf_urls)))
 
-    if already_has_sha(series, pdf_sha):
-        print("SKIP: PDF já processado (hash igual).")
+    targets = pdf_urls[-backfill_n:]  # os N mais recentes
+    print(f"INFO: backfill_n={backfill_n} | encontrados={len(pdf_urls)} | processando={len(targets)}")
+
+    added = 0
+    for pdf_url in targets:
+        point_date = pdf_mmyy_to_date(pdf_url)
+
+        # pula se a data já existe (idempotente)
+        if already_has_date(series, point_date):
+            print(f"SKIP: date já existe no JSON: {point_date}")
+            continue
+
+        pdf_url_norm = normalize_ico_pdf_url(pdf_url)
+
+        # 3) Download PDF (com fallback SSL) e hash
+        pdf_bytes = try_download(pdf_url_norm)
+        pdf_sha = sha256_bytes(pdf_bytes)
+
+        # pula se já processou esse arquivo (idempotente por hash)
+        if already_has_sha(series, pdf_sha):
+            print(f"SKIP: hash já existe no JSON: {point_date}")
+            continue
+
+        # 4) Extrai texto e chama OpenAI
+        raw_text = extract_pdf_text_bytes(pdf_bytes)
+        doc_text = shrink_text(raw_text)
+        result = call_openai(doc_text)
+
+        # validações mínimas
+        signal = float(result.get("signal"))
+        label = str(result.get("label", "")).upper().strip()
+        evid = result.get("evidencias", [])
+
+        if label not in {"BULLISH", "BEARISH", "NEUTRAL"}:
+            raise RuntimeError(f"Label inválido retornado: {label}")
+        if signal not in (-1.0, 0.0, 1.0):
+            raise RuntimeError(f"Signal inválido retornado: {signal}")
+
+        point = {
+            "date": point_date,
+            "close": signal,
+            "signal": signal,
+            "label": label,
+            "evidencias": evid[:5],
+            "pdf_url": pdf_url_norm,
+            "pdf_sha256": pdf_sha,
+            "model": MODEL,
+            "prompt_version": "v1",
+        }
+
+        series.append(point)
+        added += 1
+        print(f"OK: add {point_date} | {label} | {signal}")
+
+    if added == 0:
+        print("INFO: nenhum ponto novo para adicionar.")
         return
-
-    # 4) Extrai texto e chama OpenAI
-    raw_text = extract_pdf_text_bytes(pdf_bytes)
-    doc_text = shrink_text(raw_text)
-
-    result = call_openai(doc_text)
-
-    # validações mínimas
-    signal = float(result.get("signal"))
-    label = str(result.get("label", "")).upper().strip()
-    evid = result.get("evidencias", [])
-
-    if label not in {"BULLISH", "BEARISH", "NEUTRAL"}:
-        raise RuntimeError(f"Label inválido retornado: {label}")
-    if signal not in (-1.0, 0.0, 1.0):
-        raise RuntimeError(f"Signal inválido retornado: {signal}")
-
-    point = {
-        "date": latest_date,
-        "close": signal,  # para gráfico/tabela no site
-        "signal": signal,
-        "label": label,
-        "evidencias": evid[:5],
-        "pdf_url": latest_pdf_norm,
-        "pdf_sha256": pdf_sha,
-        "model": MODEL,
-        "prompt_version": "v1",
-    }
-
-    series.append(point)
 
     # dedup por date (mantém o último) e ordena
     tmp = {}
@@ -312,7 +338,8 @@ def main():
     SERIES_PATH.parent.mkdir(parents=True, exist_ok=True)
     SERIES_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
-    print(f"OK: ico_ia.json atualizado. Último ponto={latest_date} label={label} signal={signal}")
+    print(f"OK: ico_ia.json atualizado. added={added} | last={series2[-1]['date']}")
+
 
 
 if __name__ == "__main__":
