@@ -156,14 +156,11 @@ def main():
     score = (float(val_nivel) + float(val_tend) + float(val_mom)) * float(mult_bloco)
     score_ponderado = float(score) * float(peso)
 
-    rule_txt = (
-    "Este indicador mede o nível de estresse hídrico do solo nas principais regiões produtoras de café. "
-    "Valores mais altos indicam solo mais seco, o que pode reduzir a produtividade. "
-    "O painel avalia o nível do estresse em relação ao histórico e só gera sinal de tendência quando a seca "
-    "atinge níveis extremos, momento em que variações passam a ter impacto relevante sobre a oferta. "
-    "Fora desses episódios, o clima é considerado neutro para a análise direcional."
-    )
-
+    rule_txt = """Este indicador mede o nivel de estresse hidrico do solo nas principais regioes produtoras de cafe.
+    Valores mais altos indicam solo mais seco, o que pode reduzir a produtividade.
+    O painel compara o estresse atual com o historico e so gera sinal de tendencia quando a seca atinge niveis extremos,
+    momento em que variacoes passam a ter impacto relevante sobre a oferta.
+    Fora desses episodios, o clima e considerado neutro para a analise direcional."""
 
     fonte_txt = (
         "ERA5-Land (ECMWF/Copernicus) — swvl3 (Volumetric soil water layer 3)."
