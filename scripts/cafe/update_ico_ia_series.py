@@ -133,17 +133,34 @@ def shrink_text(text: str) -> str:
 
 
 def find_pdf_links_from_html(html: str, base_url: str) -> list[str]:
-    hrefs = re.findall(r'href=["\']([^"\']+\.pdf)["\']', html, flags=re.IGNORECASE)
-    urls = [urljoin(base_url, h) for h in hrefs]
-    out = []
-    for u in urls:
-        if re.search(r"/cmr-\d{4}-e\.pdf$", u, flags=re.IGNORECASE):
-            out.append(u)
-    return sorted(set(out))
+    """
+    Versão robusta:
+    - Captura qualquer ocorrência de cmr-####-e.pdf no HTML (absoluta ou relativa)
+    - Não depende de href terminar com .pdf
+    """
+    abs_matches = re.findall(
+        r'(https?://[^\s"\'<>]*cmr-\d{4}-e\.pdf[^\s"\'<>]*)',
+        html,
+        flags=re.IGNORECASE,
+    )
+    rel_matches = re.findall(
+        r'["\']([^"\']*cmr-\d{4}-e\.pdf[^"\']*)["\']',
+        html,
+        flags=re.IGNORECASE,
+    )
+
+    urls = []
+    for u in abs_matches:
+        urls.append(u.strip())
+    for u in rel_matches:
+        urls.append(urljoin(base_url, u.strip()))
+
+    urls = [u for u in urls if u]
+    return sorted(set(urls))
 
 
 def pdf_mmyy_to_date(url: str) -> str:
-    m = re.search(r"cmr-(\d{2})(\d{2})-e\.pdf$", url, flags=re.IGNORECASE)
+    m = re.search(r"cmr-(\d{2})(\d{2})-e\.pdf", url, flags=re.IGNORECASE)
     if not m:
         raise ValueError(f"Não consegui extrair MMYY do PDF: {url}")
     mm = int(m.group(1))
@@ -176,12 +193,14 @@ def already_has_sha(series: list[dict], sha: str) -> bool:
         if str(p.get("pdf_sha256", "")).lower() == sha.lower():
             return True
     return False
-    
+
+
 def already_has_date(series: list[dict], date: str) -> bool:
     for p in series:
         if str(p.get("date", "")).strip() == str(date).strip():
             return True
     return False
+
 
 def call_openai(document_text: str) -> dict:
     api_key = os.environ.get("OPENAI_API_KEY", "").strip()
@@ -209,7 +228,6 @@ def call_openai(document_text: str) -> dict:
 
 
 def normalize_ico_pdf_url(u: str) -> str:
-    # mantém caminho, troca host e força http (mas pode redirecionar para https)
     u = u.replace("https://www.ico.org", "http://ico.org")
     u = u.replace("http://www.ico.org", "http://ico.org")
     u = u.replace("https://ico.org", "http://ico.org")
@@ -218,32 +236,24 @@ def normalize_ico_pdf_url(u: str) -> str:
 
 def try_download(url: str) -> bytes:
     headers = {"User-Agent": "Mozilla/5.0"}
-
-    # 1) tentativa normal (com verificação SSL)
     try:
         r = requests.get(url, timeout=90, headers=headers, allow_redirects=True)
         r.raise_for_status()
         return r.content
-
     except SSLError:
-        # 2) fallback: desliga verify APENAS se for erro de certificado
         warnings.filterwarnings("ignore", message="Unverified HTTPS request")
-
         r = requests.get(url, timeout=90, headers=headers, allow_redirects=True, verify=False)
         r.raise_for_status()
         content = r.content
-
-        # validação mínima: garantir que é um PDF real
         if not content.startswith(b"%PDF-"):
             raise RuntimeError("Fallback SSL foi usado, mas o conteúdo baixado não parece ser um PDF válido.")
-
         return content
 
 
 def main():
     payload, series = load_series()
 
-     # 1) Descobrir PDFs disponíveis
+    # 1) Descobrir PDFs disponíveis
     pdf_urls = []
     try:
         r = requests.get(ICO_LIST_URL, timeout=30)
@@ -252,11 +262,11 @@ def main():
     except Exception:
         pdf_urls = []
 
-    print(f"DEBUG: PDFs encontrados via scraping (filtrados): {len(pdf_urls)}")
+    print(f"DEBUG: PDFs encontrados via scraping: {len(pdf_urls)}")
     for u in pdf_urls[:20]:
         print("DEBUG_PDF:", u)
 
-    # fallback se scraping falhar
+    # fallback
     for u in FALLBACK_PDFS:
         if u not in pdf_urls:
             pdf_urls.append(u)
@@ -267,54 +277,40 @@ def main():
         if re.search(r"cmr-\d{4}-e\.pdf", u, flags=re.IGNORECASE)
     ]
 
-    print(f"DEBUG: PDFs totais após fallback/dedup: {len(pdf_urls)}")
-
     if not pdf_urls:
-        raise RuntimeError(
-            "Não encontrei nenhum PDF do CMR para processar "
-            "(nem por scraping, nem por fallback)."
-        )
+        raise RuntimeError("Não encontrei nenhum PDF do CMR para processar (scraping+fallback falharam).")
 
     # 2) Ordena por data derivada do filename
     pdf_urls = sorted(set(pdf_urls), key=pdf_mmyy_to_date)
-
 
     # Backfill: por padrão roda 1 (último). Se ICO_BACKFILL_N existir, roda até N mais recentes.
     backfill_n = int(os.environ.get("ICO_BACKFILL_N", "1").strip() or "1")
     backfill_n = max(1, min(backfill_n, len(pdf_urls)))
 
-    print(f"DEBUG: PDFs totais após fallback/dedup: {len(pdf_urls)}")
-
-
-    targets = pdf_urls[-backfill_n:]  # os N mais recentes
+    targets = pdf_urls[-backfill_n:]
     print(f"INFO: backfill_n={backfill_n} | encontrados={len(pdf_urls)} | processando={len(targets)}")
 
     added = 0
     for pdf_url in targets:
         point_date = pdf_mmyy_to_date(pdf_url)
 
-        # pula se a data já existe (idempotente)
         if already_has_date(series, point_date):
             print(f"SKIP: date já existe no JSON: {point_date}")
             continue
 
         pdf_url_norm = normalize_ico_pdf_url(pdf_url)
 
-        # 3) Download PDF (com fallback SSL) e hash
         pdf_bytes = try_download(pdf_url_norm)
         pdf_sha = sha256_bytes(pdf_bytes)
 
-        # pula se já processou esse arquivo (idempotente por hash)
         if already_has_sha(series, pdf_sha):
             print(f"SKIP: hash já existe no JSON: {point_date}")
             continue
 
-        # 4) Extrai texto e chama OpenAI
         raw_text = extract_pdf_text_bytes(pdf_bytes)
         doc_text = shrink_text(raw_text)
         result = call_openai(doc_text)
 
-        # validações mínimas
         signal = float(result.get("signal"))
         label = str(result.get("label", "")).upper().strip()
         evid = result.get("evidencias", [])
@@ -357,7 +353,6 @@ def main():
     SERIES_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     print(f"OK: ico_ia.json atualizado. added={added} | last={series2[-1]['date']}")
-
 
 
 if __name__ == "__main__":
