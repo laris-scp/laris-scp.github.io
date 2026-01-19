@@ -283,7 +283,7 @@ def main():
     backfill_n = int(os.environ.get("ICO_BACKFILL_N", "1").strip() or "1")
     backfill_n = max(1, min(backfill_n, len(pdf_urls)))
 
-        print(f"DEBUG: PDFs totais após fallback/dedup: {len(pdf_urls)}")
+    print(f"DEBUG: PDFs totais após fallback/dedup: {len(pdf_urls)}")
 
 
     targets = pdf_urls[-backfill_n:]  # os N mais recentes
