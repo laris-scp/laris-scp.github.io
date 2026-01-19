@@ -5,6 +5,21 @@
   "frequency": "Mensal",
   "series": [
     {
+      "date": "2025-11-01",
+      "close": 0.0,
+      "signal": 0.0,
+      "label": "NEUTRAL",
+      "evidencias": [
+        "Fonte: ICO",
+        "Fato principal: estoques certificados caíram (NY Arabica -5,9% m/m para 0,44 mi sacas; London Robusta -28,3% m/m para 0,73 mi) e clima adverso no Vietnã/Indonésia durante a colheita; porém a produção global 2024 subiu 5,2% (Arabica +4,5%; Robusta +6,2%) e as exportações de outubro aceleraram (+1,9% green; Ásia&Oceania +23,9%; África +21,9%).",
+        "Regra aplicada e impacto: estoques em queda e risco de produção → BULLISH; produção em alta → BEARISH; exportações acelerando → BULLISH; sinais conflitantes ⇒ NEUTRAL (preço tende a ficar estável/lateral)."
+      ],
+      "pdf_url": "http://ico.org/documents/cy2025-26/cmr-1125-e.pdf",
+      "pdf_sha256": "8247eec74bfd5e07fdeb8e76dbdfe951accf7092646ef2795e54e327e0dfdd5f",
+      "model": "gpt-5",
+      "prompt_version": "v1"
+    },
+    {
       "date": "2025-12-01",
       "close": 0.0,
       "signal": 0.0,
@@ -21,5 +36,5 @@
     }
   ],
   "source": "International Coffee Organization (ICO) — Monthly Coffee Market Report (CMR).",
-  "updated_at": "2026-01-19T15:35:46Z"
+  "updated_at": "2026-01-19T17:03:13Z"
 }
