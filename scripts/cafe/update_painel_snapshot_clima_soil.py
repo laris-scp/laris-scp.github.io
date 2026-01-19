@@ -37,13 +37,13 @@ def map_z_to_nivel(z: float | None):
 
 
 def tendencia_3p(d1: float, d2: float):
+    # Saida padrao do painel: apenas ALTA / QUEDA / LATERAL
     if (d1 > EPS) and (d2 > EPS):
         return ("ALTA", 1.0)
     if (d1 < -EPS) and (d2 < -EPS):
         return ("QUEDA", -1.0)
-    if (abs(d1) <= EPS) and (abs(d2) <= EPS):
-        return ("LATERAL", 0.0)
-    return ("INDEFINIDA", 0.0)
+    # Tudo que nao for alta/queda consistente vira LATERAL (inclui alternancias e micro-ruido)
+    return ("LATERAL", 0.0)
 
 
 def momento_from_trend(tendencia: str, d1: float, d2: float):
