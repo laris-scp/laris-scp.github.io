@@ -3,11 +3,19 @@ from pathlib import Path
 from datetime import datetime
 
 import pandas as pd
+import numpy as np
 
 SERIES_PATH = Path("data/cafe/series/gscpi_fretes.json")
 SNAPSHOT_PATH = Path("data/cafe/painel_snapshot.json")
 
+# Mantido (não usamos mais na tendência, mas deixei para não mexer no restante do arquivo)
 EPS_TREND = 0.05  # conforme seu Colab
+
+# ---- NOVA REGRA (tendencia_3) - parâmetros que você escolheu ----
+MM_SLOPE = 6           # MM6
+SLOPE_WIN = 12         # janela de slope (12 meses)
+SLOPE_STD_WIN = 36     # std de referência (36 meses)
+SLOPE_MULT = 0.10      # threshold (0.10 * std)
 
 def percentile_rank_leq(values, value) -> float:
     """
@@ -38,6 +46,31 @@ def map_momento_to_val(m):
     if m == "ALTA DESACELERANDO": return 0.5
     return 0.0
 
+# -----------------------------
+# Helpers NOVOS (tendencia_3)
+# -----------------------------
+def _slope_ols(y: np.ndarray) -> float:
+    n = len(y)
+    if n < 2:
+        return float("nan")
+    x = np.arange(n, dtype=float)
+    y = y.astype(float)
+    x_mean = x.mean()
+    y_mean = y.mean()
+    denom = ((x - x_mean) ** 2).sum()
+    if denom == 0:
+        return float("nan")
+    return float(((x - x_mean) * (y - y_mean)).sum() / denom)
+
+def rolling_slope(series: pd.Series, window: int) -> pd.Series:
+    # min_periods sempre <= window (evita ValueError)
+    minp = max(3, window // 2)
+    minp = min(minp, window)
+    return series.rolling(window, min_periods=minp).apply(
+        lambda x: _slope_ols(np.asarray(x, dtype=float)),
+        raw=False
+    )
+
 def main():
     # 1) Carrega série
     series_json = json.loads(SERIES_PATH.read_text(encoding="utf-8"))
@@ -55,38 +88,50 @@ def main():
         raise RuntimeError("Histórico insuficiente para GSCPI (mínimo 3 pontos).")
 
     v0 = float(df.iloc[-1]["close"])
-    v1 = float(df.iloc[-2]["close"])
-    v2 = float(df.iloc[-3]["close"])
 
-    d1 = v1 - v2
-    d2 = v0 - v1
-
-    # 2) Nível (percentil no histórico completo)
+    # 2) Nível (percentil no histórico completo) - mantido
     percentil = percentile_rank_leq(df["close"], v0)
     nivel_cat, val_nivel = map_percentil_to_nivel(percentil)
 
-    # 3) Tendência (3 pontos com EPS)
-    if (d1 > EPS_TREND) and (d2 > EPS_TREND):
-        tendencia = "ALTA"
-    elif (d1 < -EPS_TREND) and (d2 < -EPS_TREND):
-        tendencia = "QUEDA"
-    elif (abs(d1) <= EPS_TREND) and (abs(d2) <= EPS_TREND):
-        tendencia = "LATERAL"
-    else:
-        tendencia = "INDEFINIDA"
+    # =========================================================
+    # 3) TENDÊNCIA (NOVA: MM6 + slope em 12m + threshold dinâmico)
+    # =========================================================
+    s = df["close"].astype(float)
 
-    # 4) Momento
-    if tendencia == "ALTA":
-        momento = "ALTA ACELERANDO" if d2 > d1 else "ALTA DESACELERANDO"
-    elif tendencia == "QUEDA":
-        momento = "QUEDA ACELERANDO" if abs(d2) > abs(d1) else "QUEDA DESACELERANDO"
-    else:
-        momento = "NEUTRO"
+    mm6 = s.rolling(MM_SLOPE, min_periods=MM_SLOPE).mean()
+    slope = rolling_slope(mm6, SLOPE_WIN)
+
+    std = s.rolling(SLOPE_STD_WIN, min_periods=min(18, SLOPE_STD_WIN)).std()
+    thr = SLOPE_MULT * std
+
+    # último slope/threshold válidos (podem ser NaN se histórico curto)
+    sl0 = float(slope.iloc[-1]) if pd.notna(slope.iloc[-1]) else float("nan")
+    th0 = float(thr.iloc[-1]) if pd.notna(thr.iloc[-1]) else float("nan")
+
+    tendencia = "INDEFINIDA"
+    if pd.notna(sl0) and pd.notna(th0):
+        if abs(sl0) <= th0:
+            tendencia = "LATERAL"
+        elif sl0 > th0:
+            tendencia = "ALTA"
+        elif sl0 < -th0:
+            tendencia = "QUEDA"
+
+    # 4) MOMENTO (mantém o formato, mas agora baseado no slope ganhando/perdendo força)
+    #    Ideia: se a tendência é ALTA e o slope aumentou, está acelerando; se caiu, desacelerando.
+    momento = "NEUTRO"
+    sl_prev = float(slope.iloc[-2]) if len(slope) >= 2 and pd.notna(slope.iloc[-2]) else float("nan")
+
+    if tendencia == "ALTA" and pd.notna(sl_prev) and pd.notna(sl0):
+        momento = "ALTA ACELERANDO" if sl0 > sl_prev else "ALTA DESACELERANDO"
+    elif tendencia == "QUEDA" and pd.notna(sl_prev) and pd.notna(sl0):
+        # para queda, mais negativo = acelerando a queda
+        momento = "QUEDA ACELERANDO" if sl0 < sl_prev else "QUEDA DESACELERANDO"
 
     val_tend = map_tendencia_to_val(tendencia)
     val_mom = map_momento_to_val(momento)
 
-    # 5) Score ajustado por bloco e ponderado por peso (conforme seu Colab)
+    # 5) Score ajustado por bloco e ponderado por peso (mantido)
     snapshot = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))
     row = next(r for r in snapshot["rows"] if r["id"] == "gscpi")
 
@@ -98,13 +143,12 @@ def main():
     peso = float(row.get("peso", 1.0))
     score_ponderado = float(score) * float(peso)
 
-    
+    # Texto MAIS SIMPLES (pedido)
     rule_txt = (
-        "Nível = percentil do GSCPI no histórico completo. "
-        f"Tendência usa os 3 últimos pontos com eps={EPS_TREND:.2f}: "
-        "ALTA (d1,d2>eps), QUEDA (d1,d2<-eps), LATERAL (|d1|,|d2|<=eps), senão INDEFINIDA. "
-        "Momento compara d2 vs d1 (acelera/desacelera). "
-        "Score ajustado por BLOCO e multiplicado pelo PESO."
+        "Nível: compara o GSCPI atual com todo o histórico e diz se ele está baixo, normal ou alto. "
+        f"Tendência: olha a direção do GSCPI nos últimos meses usando uma média móvel e mede se ele vem subindo, caindo ou ficando de lado "
+        f"(regra mais estável: MM{MM_SLOPE} + tendência de {SLOPE_WIN} meses, com filtro de ruído). "
+        "Momento: indica se essa tendência está ganhando força ou perdendo força."
     )
 
     row.update({
@@ -130,7 +174,8 @@ def main():
     )
 
     print("OK: painel_snapshot.json atualizado (gscpi).")
-    print("Último:", v0, "| d1:", round(d1, 4), "| d2:", round(d2, 4), "| tendência:", tendencia, "| momento:", momento)
+    print("Último:", v0, "| tendência:", tendencia, "| momento:", momento)
+    print("DEBUG slope:", sl0, "| thr:", th0, "| slope_prev:", sl_prev)
     print("Score:", score, "| Peso:", peso, "| Score ponderado:", score_ponderado)
 
 if __name__ == "__main__":
