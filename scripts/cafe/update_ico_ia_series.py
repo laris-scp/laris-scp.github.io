@@ -227,46 +227,28 @@ def main():
     latest_pdf = pdf_urls[-1]
     latest_date = pdf_mmyy_to_date(latest_pdf)
 
-    # 3) Baixa PDF e calcula hash
-        # 3) Baixa PDF e calcula hash
-    # Observação: o domínio do ICO às vezes falha SSL no runner.
-    # Regra: tentar https sem www; se falhar, cair para http.
-    def normalize_ico_url(u: str) -> str:
-        u = u.replace("https://www.ico.org", "https://ico.org")
+        # --- FORÇA HTTP PARA DOWNLOAD DO PDF (evita SSL do runner) ---
+    def normalize_ico_pdf_url(u: str) -> str:
+        # remove www, e força http
+        u = u.replace("https://www.ico.org", "http://ico.org")
         u = u.replace("http://www.ico.org", "http://ico.org")
+        u = u.replace("https://ico.org", "http://ico.org")
         return u
 
     def try_download(url: str) -> bytes:
         headers = {"User-Agent": "Mozilla/5.0"}
-        r = requests.get(url, timeout=60, headers=headers, allow_redirects=True)
+        r = requests.get(url, timeout=90, headers=headers, allow_redirects=True)
         r.raise_for_status()
         return r.content
 
-    latest_pdf_norm = normalize_ico_url(latest_pdf)
+    latest_pdf_norm = normalize_ico_pdf_url(latest_pdf)
 
-    pdf_bytes = None
-    last_err = None
-
-    # tentativa 1: mantém esquema original (após normalizar www)
     try:
         pdf_bytes = try_download(latest_pdf_norm)
     except Exception as e:
-        last_err = e
-
-    # tentativa 2: força http (resolve o CERT_VERIFY_FAILED do runner)
-    if pdf_bytes is None:
-        try:
-            http_url = re.sub(r"^https://", "http://", latest_pdf_norm, flags=re.IGNORECASE)
-            pdf_bytes = try_download(http_url)
-            latest_pdf_norm = http_url
-        except Exception as e:
-            last_err = e
-
-    if pdf_bytes is None:
-        raise RuntimeError(f"Falha ao baixar PDF do ICO. Último erro: {last_err}")
+        raise RuntimeError(f"Falha ao baixar PDF do ICO via HTTP. url={latest_pdf_norm} erro={e}")
 
     pdf_sha = sha256_bytes(pdf_bytes)
-
     pdf_resp.raise_for_status()
     pdf_bytes = pdf_resp.content
     pdf_sha = sha256_bytes(pdf_bytes)
