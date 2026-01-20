@@ -68,7 +68,8 @@ def _post_general(body: dict) -> list:
             verify=True,
         )
         r.raise_for_status()
-        return r.json().get("data", [])
+        payload = r.json()
+        return _normalize_rows(payload)
     except SSLError:
         pass
 
@@ -82,7 +83,8 @@ def _post_general(body: dict) -> list:
             verify=False,
         )
         r.raise_for_status()
-        return r.json().get("data", [])
+        payload = r.json()
+        return _normalize_rows(payload)
     except Exception:
         pass
 
@@ -94,7 +96,59 @@ def _post_general(body: dict) -> list:
         timeout=120,
     )
     r.raise_for_status()
-    return r.json().get("data", [])
+    payload = r.json()
+    return _normalize_rows(payload)
+
+
+def _normalize_rows(raw):
+    """
+    Aceita:
+      - lista de dicts
+      - lista de strings JSON
+      - string JSON (que contém lista/dict)
+      - dict (com ou sem "data")
+    Retorna: list[dict]
+    """
+    if raw is None:
+        return []
+
+    # Se veio um dict, tenta extrair "data"
+    if isinstance(raw, dict):
+        raw = raw.get("data", raw)
+
+    # Se veio string, tenta parsear JSON
+    if isinstance(raw, str):
+        s = raw.strip()
+        try:
+            raw = json.loads(s)
+        except Exception:
+            raise RuntimeError(f"Resposta inesperada (string não-JSON): {s[:300]}")
+
+    # Se veio lista
+    if isinstance(raw, list):
+        if not raw:
+            return []
+
+        # Já está no formato certo
+        if isinstance(raw[0], dict):
+            return raw
+
+        # Lista de strings JSON
+        if isinstance(raw[0], str):
+            out = []
+            for item in raw:
+                try:
+                    obj = json.loads(item)
+                    if isinstance(obj, dict):
+                        out.append(obj)
+                except Exception:
+                    continue
+            if out:
+                return out
+            raise RuntimeError(f"Lista de strings, mas não consegui parsear JSON. Exemplo: {raw[0][:200]}")
+
+    raise RuntimeError(f"Formato inesperado de rows: {type(raw)} | exemplo: {str(raw)[:300]}")
+
 
 # =========================
 # MAIN
@@ -114,6 +168,7 @@ def main():
     }
 
     rows = _post_general(body)
+    print(f">> Linhas recebidas: {len(rows)} | tipo primeiro item: {type(rows[0]).__name__ if rows else 'EMPTY'}")
     if not rows:
         raise RuntimeError("MDIC retornou zero linhas.")
 
