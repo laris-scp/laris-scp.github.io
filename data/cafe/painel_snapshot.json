@@ -204,8 +204,8 @@
       "score_ponderado": -1.0,
       "frequencia": "Mensal",
       "ultima_atualizacao": "2025-12-01",
-      "regra_de_sinal": "Nível: compara a exportação do mês com a sazonalidade do mesmo mês nos últimos 5 anos (robusto). Tendência: compara o acumulado do ano (até o mês atual) com o padrão dos últimos 5 anos. Momento: mede se a exportação está acelerando vs o ano passado (YoY da média dos últimos 3 meses). Exportação acima do padrão tende a ser bullish (maior escoamento externo da oferta).",
-      "fonte": "MDIC/ComexStat – Exportação Brasil (API) | NCM 09011110 + 09011190 | Métrica: KG",
+      "regra_de_sinal": "Nível: compara a exportação do mês com a sazonalidade do mesmo mês nos últimos 5 anos. Tendência: compara o acumulado do ano (até o mês atual) com o padrão dos últimos 5 anos. Momento: mede se a exportação está acelerando vs o ano passado (YoY da média dos últimos 3 meses). Exportação acima do padrão tende a ser bullish (maior escoamento externo da oferta).",
+      "fonte": "MDIC/ComexStat – Exportação Brasil",
       "ultima_data_serie": "2025-12-01"
     }
   ],
