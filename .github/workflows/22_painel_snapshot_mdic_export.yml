@@ -1,0 +1,48 @@
+name: XX - Update Painel Snapshot (MDIC Export)
+
+on:
+  workflow_dispatch:
+  # Opcional: rodar automaticamente depois do workflow da SÉRIE do MDIC finalizar com sucesso.
+  # ATENÇÃO: o nome abaixo tem que ser exatamente igual ao "name:" do seu workflow de série do MDIC.
+  workflow_run:
+    workflows: ["XX - Update MDIC Export (series/mdic_export.json)"]
+    types:
+      - completed
+
+permissions:
+  contents: write
+
+jobs:
+  update-snapshot:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -q pandas numpy
+
+      - name: Run snapshot script
+        run: |
+          python scripts/cafe/update_painel_snapshot_mdic_export.py
+
+      - name: Commit and push (if changed)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "No changes detected. Skipping commit."
+            exit 0
+          fi
+          git add data/cafe/painel_snapshot.json
+          git commit -m "data(cafe): update painel_snapshot (mdic_export)"
+          git push
