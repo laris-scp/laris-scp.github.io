@@ -146,7 +146,10 @@
         labelClose: "Close",
         labelMM50: "MM50",
         labelMM252: "MM252",
+        xLabelFormatter: null,   // opcional: (point, idx) => "Jan"
+        yDecimals: 1             // opcional: casas no eixo Y
       }, (opts || {}));
+
 
       const ctx = canvas.getContext("2d");
       const W = canvas.width, H = canvas.height;
@@ -210,7 +213,7 @@
       for(let k=0;k<=gridY;k++){
         const v = yMax - (k/gridY)*(yMax-yMin);
         const y = padT + (k/gridY)*ih;
-        ctx.fillText(v.toFixed(1), 8, y+4);
+        ctx.fillText(v.toFixed(Number(o.yDecimals ?? 1)), 8, y+4);
       }
 
       const styles = {
@@ -246,7 +249,9 @@
       for(let i=0;i<ticks;i++){
         const idx = Math.round(i*(points.length-1)/(ticks-1));
         const x = xPix(idx);
-        const label = fmtDateBR(points[idx].date);
+        const label = (typeof o.xLabelFormatter === "function")
+          ? String(o.xLabelFormatter(points[idx], idx))
+          : fmtDateBR(points[idx].date);
         const tw = ctx.measureText(label).width;
         let xx = x - tw/2;
         if(i === 0) xx = padL;
@@ -644,6 +649,124 @@
           drawMultiLine(canvas, ptsChart, { showMM50:false, showMM252:false, labelClose:"STU (World)" });
           return;
         }
+        // =========================
+        // MDIC_EXPORT — Mensal (Ano atual vs Ano passado vs Média 5y)
+        // =========================
+        if(mode === "MDIC_EXPORT"){
+          setTableHeaderByMode(card, mode);
+        
+          const MONTHS_PT = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+        
+          // Normaliza e ordena
+          const rowsAll = raw
+            .map(p => ({
+              date: (p.date || p.Data || p.data),
+              kg: (p.kg ?? p.KG ?? null),
+              bags: (p.bags_60kg ?? p.bags ?? p.sacas ?? null)
+            }))
+            .filter(r => !!r.date)
+            .sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+        
+          // Descobrir ano atual e ano passado
+          const years = Array.from(new Set(rowsAll.map(r => Number(String(r.date).slice(0,4))).filter(n => !Number.isNaN(n))));
+          const yearCur = years.length ? Math.max(...years) : null;
+          const yearPrev = (yearCur !== null) ? (yearCur - 1) : null;
+        
+          if(yearCur === null){
+            const colSpan = colSpanByMode(mode);
+            tbody.innerHTML = `<tr><td colspan="${colSpan}" class="muted">Série vazia.</td></tr>`;
+            const ctx = canvas.getContext("2d");
+            ctx.fillStyle = "rgba(255,255,255,.70)";
+            ctx.font = "14px system-ui";
+            ctx.fillText("Série vazia.", 60, 60);
+            return;
+          }
+        
+          // Index por ano-mês
+          const byYM = new Map(); // key: "YYYY-MM" -> {kg, bags}
+          for(const r of rowsAll){
+            const y = String(r.date).slice(0,4);
+            const m = String(r.date).slice(5,7);
+            if(y && m) byYM.set(`${y}-${m}`, { kg: Number(r.kg), bags: Number(r.bags) });
+          }
+        
+          // Média 5 anos: anos yearCur-5 .. yearCur-1
+          const baseYears = [];
+          for(let y = yearCur - 5; y <= yearCur - 1; y++) baseYears.push(y);
+        
+          function getVal(y, mm){
+            const key = `${y}-${mm}`;
+            const obj = byYM.get(key);
+            if(!obj) return { kg: NaN, bags: NaN };
+            return { kg: Number(obj.kg), bags: Number(obj.bags) };
+          }
+        
+          function avgBagsForMonth(mm){
+            const vals = [];
+            for(const y of baseYears){
+              const v = getVal(y, mm).bags;
+              if(!Number.isNaN(v)) vals.push(v);
+            }
+            if(vals.length === 0) return NaN;
+            const s = vals.reduce((a,b)=>a+b,0);
+            return s / vals.length;
+          }
+        
+          // Monta pontos de 12 meses:
+          // close = ano atual (sacas)
+          // mm252 = ano passado (sacas)
+          // mm50 = média 5y (sacas)
+          const ptsMDIC = [];
+          for(let mi=1; mi<=12; mi++){
+            const mm = String(mi).padStart(2,"0");
+            const cur = getVal(yearCur, mm).bags;
+            const prev = (yearPrev !== null) ? getVal(yearPrev, mm).bags : NaN;
+            const avg5 = avgBagsForMonth(mm);
+        
+            // date precisa ser ISO pra não quebrar parse, mas vamos formatar o eixo X por mês via formatter
+            ptsMDIC.push({
+              date: `${yearCur}-${mm}-01`,
+              close: cur,
+              mm50: avg5,
+              mm252: prev
+            });
+          }
+        
+          // Tabela: ano atual (meses disponíveis), mais recente em cima
+          const rowsYearCur = rowsAll
+            .filter(r => Number(String(r.date).slice(0,4)) === yearCur)
+            .sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+        
+          tbody.innerHTML = "";
+          if(rowsYearCur.length === 0){
+            tbody.innerHTML = `<tr><td colspan="3" class="muted">Sem dados para o ano atual (${yearCur}).</td></tr>`;
+          } else {
+            for(let i=rowsYearCur.length-1; i>=0; i--){
+              const r = rowsYearCur[i];
+              const tr = document.createElement("tr");
+              tr.innerHTML = `
+                <td>${fmtDateBR(r.date)}</td>
+                <td class="right">${fmtNumber(Number(r.bags), 0)}</td>
+                <td class="right">${fmtNumber(Number(r.kg), 0)}</td>
+              `;
+              tbody.appendChild(tr);
+            }
+          }
+        
+          // Gráfico: meses no eixo X, sacas no Y (0 casas)
+          drawMultiLine(canvas, ptsMDIC, {
+            showMM50: true,
+            showMM252: true,
+            labelClose: String(yearCur),
+            labelMM50: "Média 5y",
+            labelMM252: String(yearPrev),
+            xLabelFormatter: (p, idx) => MONTHS_PT[idx] || "",
+            yDecimals: 0
+          });
+        
+          return;
+        }
+
 
         // =========================
         // MODOS PADRÃO (com mm50/mm252)
