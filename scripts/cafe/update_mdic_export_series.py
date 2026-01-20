@@ -19,9 +19,9 @@ BASE_URL_HTTP  = "http://api-comexstat.mdic.gov.br"
 
 BASE_URL = BASE_URL_HTTPS  # usamos HTTPS como padrão
 
-GENERAL_ENDPOINT = f"{BASE_URL}/general"
+HISTORICAL_ENDPOINT = f"{BASE_URL}/historical-data"
 UPDATED_ENDPOINT = f"{BASE_URL}/general/dates/updated"
-FILTER_VALUES_ENDPOINT = f"{BASE_URL}/general/filters"
+FILTER_VALUES_ENDPOINT = f"{BASE_URL}/historical-data/filters"
 
 # Config
 FLOW = "export"
@@ -127,30 +127,24 @@ def _safe_get_updated_to() -> str:
 
     raise RuntimeError(f"Não consegui interpretar /general/dates/updated: {data}")
 
-def _post_general(body: dict) -> list:
+def _post_historical(body: dict) -> list:
     """
-    Faz POST /general e retorna lista de linhas (dicts).
+    POST /historical-data
+    Retorna lista de linhas com dados mensais de exportação/importação.
     """
     data = _request_json(
         "POST",
-        GENERAL_ENDPOINT,
+        HISTORICAL_ENDPOINT,
         params={"language": "pt"},
         json_body=body,
-        timeout=120,
+        timeout=180,
     )
 
-    # a API pode retornar lista direta ou envelope
-    if isinstance(data, list):
-        return data
+    # resposta padrão vem em data[]
+    if isinstance(data, dict) and isinstance(data.get("data"), list):
+        return data["data"]
 
-    for k in ["data", "result", "results", "items"]:
-        if isinstance(data, dict) and isinstance(data.get(k), list):
-            return data[k]
-
-    if isinstance(data, dict):
-        return [data]
-
-    raise RuntimeError(f"Formato inesperado no retorno do /general: {type(data)}")
+    raise RuntimeError(f"Formato inesperado em /historical-data: {data}")
 
 def _try_cuci_filter_values_to_ids(codes: list[str]) -> list:
     """
@@ -213,16 +207,18 @@ def main():
 
     # 1) tenta consulta usando os próprios códigos como values
     body_codes = {
-        "flow": FLOW,
-        "monthDetail": MONTH_DETAIL,
-        "period": {"from": PERIOD_FROM, "to": to_ym},
-        "filters": [{"filter": "cuci", "values": CUCI_CODES}],
-        "details": [],
-        "metrics": METRICS,
+        "type": "export",
+        "filters": {
+            "cuci": cuci_ids
+        },
+        "from": from_ym,
+        "to": to_ym,
+        "frequency": "monthly"
     }
 
+
     try:
-        rows = _post_general(body_codes)
+        rows = _post_historical(body_codes)
         used_filter_mode = "cuci_codes"
     except ValueError:
         # 2) fallback: mapear CUCI para IDs e tentar de novo
