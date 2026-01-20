@@ -13,6 +13,7 @@ on:
       - "15_painel_snapshot_fundamental_stu"
       - "18 - Update painel_snapshot (Estoques Certificados)"
       - "20 - Painel Snapshot - ICO (IA)"
+      - "22 - Update Painel Snapshot (MDIC Export)"
     types: [completed]
 
 permissions:
