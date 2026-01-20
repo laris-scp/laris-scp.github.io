@@ -44,7 +44,7 @@ jobs:
           python scripts/cafe/update_fundamental_stu_series.py
           python scripts/cafe/update_estoques_certificados_series.py
           python scripts/cafe/update_ico_ia_series.py
-
+          python scripts/cafe/update_mdic_export_series.py
 
       # =========================
       # 2) SNAPSHOT (todas)
@@ -60,6 +60,7 @@ jobs:
           python scripts/cafe/update_painel_snapshot_fundamental_stu.py
           python scripts/cafe/update_painel_snapshot_estoques_certificados.py
           python scripts/cafe/update_painel_snapshot_ico_ia.py
+          python scripts/cafe/update_painel_snapshot_mdic_export.py
 
       # =========================
       # 3) TERMÔMETROS + HIST
