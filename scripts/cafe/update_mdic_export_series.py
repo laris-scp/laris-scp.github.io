@@ -16,12 +16,12 @@ OUT_PATH = Path("data/cafe/series/mdic_export.json")
 
 BASE_URL_HTTPS = "https://api-comexstat.mdic.gov.br"
 BASE_URL_HTTP  = "http://api-comexstat.mdic.gov.br"
-def _make_endpoints(base_url: str):
-    return {
-        "GENERAL": f"{base_url}/general",
-        "UPDATED": f"{base_url}/general/dates/updated",
-        "FILTERS": f"{base_url}/general/filters",
-    }
+
+BASE_URL = BASE_URL_HTTPS  # usamos HTTPS como padrão
+
+GENERAL_ENDPOINT = f"{BASE_URL}/general"
+UPDATED_ENDPOINT = f"{BASE_URL}/general/dates/updated"
+FILTER_VALUES_ENDPOINT = f"{BASE_URL}/general/filters"
 
 # Config
 FLOW = "export"
