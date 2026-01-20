@@ -12,12 +12,17 @@ import json
 from pathlib import Path
 from datetime import datetime
 from collections import defaultdict
+import urllib3
+from requests.exceptions import SSLError
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 
 # =========================
 # CONFIGURAÇÕES
 # =========================
-BASE_URL = "https://api-comexstat.mdic.gov.br"
-ENDPOINT = f"{BASE_URL}/general"
+BASE_URL_HTTPS = "https://api-comexstat.mdic.gov.br"
+BASE_URL_HTTP  = "http://api-comexstat.mdic.gov.br"
+ENDPOINT_PATH  = "/general"
 
 OUT_PATH = Path("data/cafe/series/mdic_export.json")
 
@@ -44,15 +49,44 @@ HEADERS = {
 # FUNÇÕES AUXILIARES
 # =========================
 def _post_general(body: dict) -> list:
+    # 1) tentativa padrão: HTTPS com verificação de certificado
+    try:
+        r = requests.post(
+            BASE_URL_HTTPS + ENDPOINT_PATH,
+            headers=HEADERS,
+            json=body,
+            timeout=120,
+            verify=True,
+        )
+        r.raise_for_status()
+        return r.json().get("data", [])
+    except SSLError:
+        pass  # cai para fallback abaixo
+
+    # 2) fallback: HTTPS sem verificação (evita SSL no GitHub runner)
+    try:
+        r = requests.post(
+            BASE_URL_HTTPS + ENDPOINT_PATH,
+            headers=HEADERS,
+            json=body,
+            timeout=120,
+            verify=False,
+        )
+        r.raise_for_status()
+        return r.json().get("data", [])
+    except Exception:
+        pass
+
+    # 3) último fallback: HTTP (se o host aceitar)
     r = requests.post(
-        ENDPOINT,
+        BASE_URL_HTTP + ENDPOINT_PATH,
         headers=HEADERS,
         json=body,
-        timeout=120
+        timeout=120,
     )
     r.raise_for_status()
-    data = r.json()
-    return data.get("data", [])
+    return r.json().get("data", [])
+
 
 # =========================
 # MAIN
