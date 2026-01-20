@@ -5,6 +5,12 @@ from pathlib import Path
 
 import requests
 import pandas as pd
+import certifi
+from requests.exceptions import SSLError
+import urllib3
+# evita log poluído quando cair no verify=False (opcional)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 
 OUT_PATH = Path("data/cafe/series/mdic_export.json")
 
@@ -32,6 +38,54 @@ KG_PER_BAG = 60.0
 # Período (ComexStat geral tem dados a partir de 1997)
 PERIOD_FROM = "1997-01"
 
+def _request_json(method: str, url: str, *, params=None, json_body=None, timeout=60):
+    """
+    Faz request e retorna .json().
+    Estratégia:
+      1) verify=True (padrão)
+      2) verify=certifi.where()
+      3) se ainda falhar por SSLError: verify=False (contorno)
+    """
+    # 1) padrão
+    try:
+        r = requests.request(
+            method,
+            url,
+            params=params,
+            json=json_body,
+            timeout=timeout,
+        )
+        r.raise_for_status()
+        return r.json()
+    except SSLError:
+        pass
+
+    # 2) forçar bundle do certifi
+    try:
+        r = requests.request(
+            method,
+            url,
+            params=params,
+            json=json_body,
+            timeout=timeout,
+            verify=certifi.where(),
+        )
+        r.raise_for_status()
+        return r.json()
+    except SSLError:
+        pass
+
+    # 3) contorno final
+    r = requests.request(
+        method,
+        url,
+        params=params,
+        json=json_body,
+        timeout=timeout,
+        verify=False,
+    )
+    r.raise_for_status()
+    return r.json()
 
 def _to_eom(year: int, month: int) -> str:
     last_day = calendar.monthrange(year, month)[1]
@@ -39,26 +93,33 @@ def _to_eom(year: int, month: int) -> str:
 
 
 def _safe_get_updated_to() -> str:
-    # tenta HTTPS, se falhar por SSL, tenta HTTP
-    eps = _make_endpoints(BASE_URL_HTTPS)
-    try:
-        r = requests.get(eps["UPDATED"], timeout=60)
-        r.raise_for_status()
-    except requests.exceptions.SSLError:
-        eps = _make_endpoints(BASE_URL_HTTP)
-        r = requests.get(eps["UPDATED"], timeout=60)
-        r.raise_for_status()
+    """
+    Retorna 'YYYY-MM' do último mês completo disponível na API.
+    Endpoint documentado: /general/dates/updated
+    """
+    data = _request_json("GET", UPDATED_ENDPOINT, timeout=60)
 
-    data = r.json()
+    # a doc mostra que vem assim:
+    # { "data": { "updated": "2022-11-24", "year": "2022", "monthNumber": "12" }, "success": true, ... }
+    if isinstance(data, dict) and isinstance(data.get("data"), dict):
+        inner = data["data"]
+        # preferir year + monthNumber quando existir
+        y = inner.get("year")
+        m = inner.get("monthNumber")
+        if isinstance(y, str) and isinstance(m, str) and len(y) == 4:
+            return f"{y}-{int(m):02d}"
 
-    # tenta chaves comuns
+        up = inner.get("updated")
+        if isinstance(up, str) and len(up) >= 7:
+            return up[:7]
+
+    # fallback genérico
     for k in ["updated", "date", "last", "value"]:
         if isinstance(data, dict) and k in data and isinstance(data[k], str):
             v = data[k].strip()
             if len(v) >= 7:
                 return v[:7]
 
-    # fallback: tenta achar um "YYYY-MM" em qualquer valor string
     if isinstance(data, dict):
         for v in data.values():
             if isinstance(v, str) and len(v) >= 7 and v[4] == "-":
@@ -66,56 +127,38 @@ def _safe_get_updated_to() -> str:
 
     raise RuntimeError(f"Não consegui interpretar /general/dates/updated: {data}")
 
-
 def _post_general(body: dict) -> list:
-    # tenta HTTPS, se falhar por SSL, tenta HTTP
-    eps = _make_endpoints(BASE_URL_HTTPS)
-    try:
-        r = requests.post(eps["GENERAL"], params={"language": "pt"}, json=body, timeout=120)
-    except requests.exceptions.SSLError:
-        eps = _make_endpoints(BASE_URL_HTTP)
-        r = requests.post(eps["GENERAL"], params={"language": "pt"}, json=body, timeout=120)
-    if r.status_code == 400:
-        # deixa o chamador tratar (fallback de filtro)
-        raise ValueError(r.text)
-    r.raise_for_status()
-    data = r.json()
+    """
+    Faz POST /general e retorna lista de linhas (dicts).
+    """
+    data = _request_json(
+        "POST",
+        GENERAL_ENDPOINT,
+        params={"language": "pt"},
+        json_body=body,
+        timeout=120,
+    )
 
+    # a API pode retornar lista direta ou envelope
     if isinstance(data, list):
         return data
 
-    # envelopes comuns
     for k in ["data", "result", "results", "items"]:
         if isinstance(data, dict) and isinstance(data.get(k), list):
             return data[k]
 
-    # se vier dict único, embrulha
     if isinstance(data, dict):
         return [data]
 
     raise RuntimeError(f"Formato inesperado no retorno do /general: {type(data)}")
 
-
 def _try_cuci_filter_values_to_ids(codes: list[str]) -> list:
     """
     Busca /general/filters/cuci e tenta mapear os códigos (071a/071c) para IDs numéricos,
     caso a API exija IDs no body.
-    Tenta HTTPS; se falhar por SSL, cai para HTTP.
     """
-    # tenta HTTPS
-    eps = _make_endpoints(BASE_URL_HTTPS)
-    url = f"{eps['FILTERS']}/cuci"
-    try:
-        r = requests.get(url, params={"language": "pt"}, timeout=120)
-        r.raise_for_status()
-    except requests.exceptions.SSLError:
-        # fallback HTTP
-        eps = _make_endpoints(BASE_URL_HTTP)
-        url = f"{eps['FILTERS']}/cuci"
-        r = requests.get(url, params={"language": "pt"}, timeout=120)
-        r.raise_for_status()
-
-    data = r.json()
+    url = f"{FILTER_VALUES_ENDPOINT}/cuci"
+    data = _request_json("GET", url, params={"language": "pt"}, timeout=120)
 
     values = None
     if isinstance(data, list):
@@ -149,7 +192,6 @@ def _try_cuci_filter_values_to_ids(codes: list[str]) -> list:
                 f"Não encontrei '{c}' em /general/filters/cuci. Exemplo item: {values[0] if values else None}"
             )
 
-        # extrair id numérico
         extracted = False
         for kid in ["id", "value", "co", "code"]:
             if kid in matched:
@@ -165,8 +207,6 @@ def _try_cuci_filter_values_to_ids(codes: list[str]) -> list:
             raise RuntimeError(f"Encontrei '{c}', mas não consegui extrair um ID numérico do item: {matched}")
 
     return found_ids
-
-
 
 def main():
     to_ym = _safe_get_updated_to()
