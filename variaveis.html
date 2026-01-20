@@ -90,6 +90,7 @@
       "fundamental_stu": "data/cafe/series/fundamental_stu.json",
       "clima_soil": "data/cafe/series/clima_soil.json",
       "ico_ia": "data/cafe/series/ico_ia.json"
+      "mdic_export": "data/cafe/series/mdic_export.json"
     };
 
     const DECIMALS_BY_ID = {
@@ -278,6 +279,7 @@
       if(varId === "fundamental_stu") return "FUNDAMENTAL_STU";
       if(varId === "clima_soil") return "CLIMA_SOIL";
       if(varId === "ico_ia") return "ICO_IA";
+      if(varId === "mdic_export") return "MDIC_EXPORT";
       return "DEFAULT";
     }
 
@@ -289,6 +291,7 @@
       if(mode === "FUNDAMENTAL_STU") return 5;
       if(mode === "CLIMA_SOIL") return 3;
       if(mode === "ICO_IA") return 3;
+      if(mode === "MDIC_EXPORT") return 3;
       return 4;
     }
 
@@ -357,6 +360,15 @@
           <th>Data</th>
           <th class="right">Score</th>
           <th>Diagnóstico</th>
+        `;
+        return;
+      }
+
+      if(mode === "MDIC_EXPORT"){
+        theadRow.innerHTML = `
+          <th>Data</th>
+          <th class="right">Sacas</th>
+          <th class="right">Kg</th>
         `;
         return;
       }
