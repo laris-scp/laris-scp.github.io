@@ -1,68 +1,62 @@
+# ============================================================
+# MDIC / COMEXSTAT — Exportação de Café Verde (Brasil)
+# Endpoint: POST /general
+# Produto: Café Verde (NCM 090111 + 090112)
+# Frequência: Mensal
+# Métrica: metricKG (quantidade)
+# Saída: data/cafe/series/mdic_export.json
+# ============================================================
+
+import requests
 import json
 from pathlib import Path
 from datetime import datetime
-
-import requests
-import urllib3
+from collections import defaultdict
 
 # =========================
 # CONFIGURAÇÕES
 # =========================
-
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
 BASE_URL = "https://api-comexstat.mdic.gov.br"
-HISTORICAL_ENDPOINT = f"{BASE_URL}/historical-data"
+ENDPOINT = f"{BASE_URL}/general"
 
 OUT_PATH = Path("data/cafe/series/mdic_export.json")
 
-# Café verde – decisão final (NCMs como INT)
-NCM_CAFE_VERDE = [
-    9011100,  # Café não torrado, não descafeinado
-    9011200,  # Café não torrado, descafeinado
+NCM_CAFE_VERDE = {"090111", "090112"}
+
+# Todas as UFs do Brasil (exportação brasileira)
+UF_BRASIL = [
+    11,12,13,14,15,16,17,
+    21,22,23,24,25,26,27,28,29,
+    31,32,33,35,
+    41,42,43,
+    50,51,52,53
 ]
 
-COUNTRY_BR = 76  # Brasil (INT, padrão COMEXSTAT)
+START_PERIOD = "1996-01"
+END_PERIOD = datetime.utcnow().strftime("%Y-%m")
 
-START_YM = "1996-01"
-END_YM = datetime.today().strftime("%Y-%m")
-
+HEADERS = {
+    "Content-Type": "application/json",
+    "Accept": "application/json"
+}
 
 # =========================
 # FUNÇÕES AUXILIARES
 # =========================
-
-def _request_json(method: str, url: str, **kwargs) -> dict:
-    r = requests.request(
-        method,
-        url,
-        headers={"Content-Type": "application/json"},
-        verify=False,
-        **kwargs,
+def _post_general(body: dict) -> list:
+    r = requests.post(
+        ENDPOINT,
+        headers=HEADERS,
+        json=body,
+        timeout=120
     )
     r.raise_for_status()
-    return r.json()
-
-
-def _post_historical(body: dict) -> list:
-    resp = _request_json(
-        "POST",
-        HISTORICAL_ENDPOINT,
-        params={"language": "pt"},
-        json=body,
-        timeout=120,
-    )
-
-    if not resp.get("success", False):
-        raise RuntimeError(f"Erro da API COMEXSTAT: {resp}")
-
-    return resp.get("data", [])
-
+    data = r.json()
+    return data.get("data", [])
 
 # =========================
 # MAIN
 # =========================
-
 def main():
     print(">> MDIC Export | Café Verde | Iniciando coleta")
 
@@ -70,72 +64,74 @@ def main():
         "flow": "export",
         "monthDetail": True,
         "period": {
-            "from": START_YM,
-            "to": END_YM,
+            "from": START_PERIOD,
+            "to": END_PERIOD
         },
         "filters": [
             {
-                "filter": "country",
-                "values": [COUNTRY_BR],
-            },
-            {
-                "filter": "ncm",
-                "values": NCM_CAFE_VERDE,
-            },
+                "filter": "state",
+                "values": UF_BRASIL
+            }
         ],
         "details": ["ncm"],
-        "metrics": ["metricKG"],
+        "metrics": ["metricKG"]
     }
 
-    rows = _post_historical(body)
+    rows = _post_general(body)
 
     if not rows:
-        raise RuntimeError("Nenhum dado retornado pela API MDIC")
+        raise RuntimeError("MDIC retornou zero linhas.")
 
-    # =========================
-    # AGREGAÇÃO MENSAL
-    # =========================
-    series = {}
+    # -------------------------
+    # Agregação mensal (NCM 090111 + 090112)
+    # -------------------------
+    agg = defaultdict(float)
 
     for r in rows:
+        ncm = str(r.get("ncm", "")).strip()
+        if ncm not in NCM_CAFE_VERDE:
+            continue
+
         year = r["year"]
         month = r["monthNumber"]
-        kg = float(r.get("metricKG", 0))
+        kg = float(r.get("metricKG", 0) or 0)
 
-        ym = f"{year}-{month:02d}"
+        key = f"{year}-{month:02d}"
+        agg[key] += kg
 
-        series[ym] = series.get(ym, 0.0) + kg
+    # -------------------------
+    # Construção da série final
+    # -------------------------
+    series = []
+    for ym in sorted(agg.keys()):
+        dt = datetime.strptime(ym + "-01", "%Y-%m-%d")
+        kg = agg[ym]
+        bags_60kg = kg / 60.0 if kg else 0.0
 
-    out = []
-    for ym in sorted(series.keys()):
-        kg = series[ym]
-        out.append({
-            "date": f"{ym}-01",
+        series.append({
+            "date": dt.strftime("%Y-%m-%d"),
             "kg": round(kg, 2),
-            "sacks_60kg": round(kg / 60.0, 2),
+            "bags_60kg": round(bags_60kg, 2)
         })
 
-    # =========================
-    # SALVAR JSON
-    # =========================
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
 
-    payload = {
-        "source": "MDIC / COMEXSTAT",
-        "commodity": "coffee",
-        "product": "green_coffee",
-        "ncm": NCM_CAFE_VERDE,
-        "country": "Brazil",
-        "unit": "kg",
-        "updated_at": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
-        "series": out,
-    }
-
     with open(OUT_PATH, "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=2)
+        json.dump(
+            {
+                "source": "MDIC / COMEXSTAT",
+                "product": "Café Verde",
+                "ncm": sorted(NCM_CAFE_VERDE),
+                "frequency": "monthly",
+                "updated_at": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+                "series": series
+            },
+            f,
+            ensure_ascii=False,
+            indent=2
+        )
 
-    print(f">> Arquivo gerado com sucesso: {OUT_PATH}")
-    print(f">> Meses carregados: {len(out)}")
+    print(f">> Série salva em {OUT_PATH} | {len(series)} pontos")
 
 
 if __name__ == "__main__":
