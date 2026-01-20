@@ -8,10 +8,14 @@ import pandas as pd
 
 OUT_PATH = Path("data/cafe/series/mdic_export.json")
 
-BASE_URL = "https://api-comexstat.mdic.gov.br"
-GENERAL_ENDPOINT = f"{BASE_URL}/general"
-UPDATED_ENDPOINT = f"{BASE_URL}/general/dates/updated"
-FILTER_VALUES_ENDPOINT = f"{BASE_URL}/general/filters"
+BASE_URL_HTTPS = "https://api-comexstat.mdic.gov.br"
+BASE_URL_HTTP  = "http://api-comexstat.mdic.gov.br"
+def _make_endpoints(base_url: str):
+    return {
+        "GENERAL": f"{base_url}/general",
+        "UPDATED": f"{base_url}/general/dates/updated",
+        "FILTERS": f"{base_url}/general/filters",
+    }
 
 # Config
 FLOW = "export"
@@ -35,12 +39,16 @@ def _to_eom(year: int, month: int) -> str:
 
 
 def _safe_get_updated_to() -> str:
-    """
-    Retorna 'YYYY-MM' do último mês completo disponível na API.
-    O endpoint /general/dates/updated costuma retornar algo como { "updated": "2025-12" } ou semelhante.
-    """
-    r = requests.get(UPDATED_ENDPOINT, timeout=60)
-    r.raise_for_status()
+    # tenta HTTPS, se falhar por SSL, tenta HTTP
+    eps = _make_endpoints(BASE_URL_HTTPS)
+    try:
+        r = requests.get(eps["UPDATED"], timeout=60)
+        r.raise_for_status()
+    except requests.exceptions.SSLError:
+        eps = _make_endpoints(BASE_URL_HTTP)
+        r = requests.get(eps["UPDATED"], timeout=60)
+        r.raise_for_status()
+
     data = r.json()
 
     # tenta chaves comuns
@@ -60,11 +68,13 @@ def _safe_get_updated_to() -> str:
 
 
 def _post_general(body: dict) -> list:
-    """
-    Faz POST /general e retorna lista de linhas (dicts).
-    A API pode retornar lista direta ou envelope com chave.
-    """
-    r = requests.post(GENERAL_ENDPOINT, params={"language": "pt"}, json=body, timeout=120)
+    # tenta HTTPS, se falhar por SSL, tenta HTTP
+    eps = _make_endpoints(BASE_URL_HTTPS)
+    try:
+        r = requests.post(eps["GENERAL"], params={"language": "pt"}, json=body, timeout=120)
+    except requests.exceptions.SSLError:
+        eps = _make_endpoints(BASE_URL_HTTP)
+        r = requests.post(eps["GENERAL"], params={"language": "pt"}, json=body, timeout=120)
     if r.status_code == 400:
         # deixa o chamador tratar (fallback de filtro)
         raise ValueError(r.text)
@@ -90,13 +100,23 @@ def _try_cuci_filter_values_to_ids(codes: list[str]) -> list:
     """
     Busca /general/filters/cuci e tenta mapear os códigos (071a/071c) para IDs numéricos,
     caso a API exija IDs no body.
+    Tenta HTTPS; se falhar por SSL, cai para HTTP.
     """
-    url = f"{FILTER_VALUES_ENDPOINT}/cuci"
-    r = requests.get(url, params={"language": "pt"}, timeout=120)
-    r.raise_for_status()
+    # tenta HTTPS
+    eps = _make_endpoints(BASE_URL_HTTPS)
+    url = f"{eps['FILTERS']}/cuci"
+    try:
+        r = requests.get(url, params={"language": "pt"}, timeout=120)
+        r.raise_for_status()
+    except requests.exceptions.SSLError:
+        # fallback HTTP
+        eps = _make_endpoints(BASE_URL_HTTP)
+        url = f"{eps['FILTERS']}/cuci"
+        r = requests.get(url, params={"language": "pt"}, timeout=120)
+        r.raise_for_status()
+
     data = r.json()
 
-    # data pode ser lista ou envelope
     values = None
     if isinstance(data, list):
         values = data
@@ -105,10 +125,10 @@ def _try_cuci_filter_values_to_ids(codes: list[str]) -> list:
             if isinstance(data.get(k), list):
                 values = data[k]
                 break
+
     if not values:
         raise RuntimeError(f"Não consegui ler valores de /general/filters/cuci: {data}")
 
-    # Heurística: procurar o code em campos tipo "code", "co", "id", "text", "label", "descricao"
     found_ids = []
     code_l = [c.lower().strip() for c in codes]
 
@@ -117,29 +137,35 @@ def _try_cuci_filter_values_to_ids(codes: list[str]) -> list:
         for it in values:
             if not isinstance(it, dict):
                 continue
-            # campos comuns
-            txt = " ".join([str(it.get(k, "")) for k in ["code", "co", "text", "label", "descricao", "description", "name"]]).lower()
+            txt = " ".join(
+                [str(it.get(k, "")) for k in ["code", "co", "text", "label", "descricao", "description", "name"]]
+            ).lower()
             if c in txt:
                 matched = it
                 break
 
         if not matched:
-            raise RuntimeError(f"Não encontrei '{c}' em /general/filters/cuci. Exemplo item: {values[0] if values else None}")
+            raise RuntimeError(
+                f"Não encontrei '{c}' em /general/filters/cuci. Exemplo item: {values[0] if values else None}"
+            )
 
-        # tenta extrair id numérico
+        # extrair id numérico
+        extracted = False
         for kid in ["id", "value", "co", "code"]:
             if kid in matched:
                 try:
                     vid = int(str(matched[kid]).strip())
                     found_ids.append(vid)
+                    extracted = True
                     break
                 except Exception:
                     continue
 
-        if len(found_ids) < code_l.index(c) + 1:
+        if not extracted:
             raise RuntimeError(f"Encontrei '{c}', mas não consegui extrair um ID numérico do item: {matched}")
 
     return found_ids
+
 
 
 def main():
