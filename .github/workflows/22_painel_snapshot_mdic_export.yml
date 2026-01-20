@@ -1,11 +1,11 @@
-name: XX - Update Painel Snapshot (MDIC Export)
+name: 22 - Update Painel Snapshot (MDIC Export)
 
 on:
   workflow_dispatch:
   # Opcional: rodar automaticamente depois do workflow da SÉRIE do MDIC finalizar com sucesso.
   # ATENÇÃO: o nome abaixo tem que ser exatamente igual ao "name:" do seu workflow de série do MDIC.
   workflow_run:
-    workflows: ["XX - Update MDIC Export (series/mdic_export.json)"]
+    workflows: ["21 - Update MDIC Export (series/mdic_export.json)"]
     types:
       - completed
 
