@@ -1,37 +1,26 @@
-# ============================================================
-# MDIC / COMEXSTAT — Exportação de Café Verde (Brasil)
-# Endpoint: POST /general
-# Produto: Café Verde (NCM 090111 + 090112)
-# Frequência: Mensal
-# Métrica: metricKG (quantidade)
-# Saída: data/cafe/series/mdic_export.json
-# ============================================================
-
 import json
+import time
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from collections import defaultdict
 
 import requests
-from requests.exceptions import SSLError
 import urllib3
 
-# Evita warnings quando cair em verify=False (opcional, mas limpa logs)
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
 # =========================
-# CONFIGURAÇÕES
+# CONFIG
 # =========================
-BASE_URL_HTTPS = "https://api-comexstat.mdic.gov.br"
-BASE_URL_HTTP  = "http://api-comexstat.mdic.gov.br"
-ENDPOINT_PATH  = "/general"
-
 OUT_PATH = Path("data/cafe/series/mdic_export.json")
 
-# Café verde (2 NCMs)
-NCM_CAFE_VERDE = {"090111", "090112"}
+BASE_URL = "https://api-comexstat.mdic.gov.br"
+ENDPOINT = f"{BASE_URL}/general"
 
-# Todas as UFs do Brasil (exportação brasileira)
+HEADERS = {"Content-Type": "application/json", "Accept": "application/json"}
+
+# 2 NCMs (confirmados no seu teste)
+NCM_CAFE_VERDE = ["09011110", "09011190"]
+
+# Estados do Brasil (código do ComexStat)
 UF_BRASIL = [
     11, 12, 13, 14, 15, 16, 17,
     21, 22, 23, 24, 25, 26, 27, 28, 29,
@@ -40,189 +29,239 @@ UF_BRASIL = [
     50, 51, 52, 53
 ]
 
-START_PERIOD = "1996-01"
-END_PERIOD = datetime.utcnow().strftime("%Y-%m")
+START_FULL = "1996-01"
+ROLLING_MONTHS = 3
 
-HEADERS = {
-    "Content-Type": "application/json",
-    "Accept": "application/json",
-}
+# Rate limit: a própria API sugere ~10s
+WAIT_429_SECONDS = 12
+MAX_TRIES_429 = 10
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # =========================
-# REQUISIÇÃO ROBUSTA (SSL fallback)
+# HELPERS (date)
 # =========================
-def _post_general(body: dict) -> list:
-    """
-    Tenta:
-      1) HTTPS verify=True
-      2) HTTPS verify=False (fallback para runner com CA quebrado)
-      3) HTTP (último fallback)
-    """
-    # 1) HTTPS normal
-    try:
+def _now_utc_str() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+
+def _ym_to_tuple(ym: str) -> tuple[int, int]:
+    y, m = ym.split("-")
+    return int(y), int(m)
+
+def _tuple_to_ym(y: int, m: int) -> str:
+    return f"{y:04d}-{m:02d}"
+
+def _add_months(y: int, m: int, delta: int) -> tuple[int, int]:
+    # delta pode ser negativo
+    total = y * 12 + (m - 1) + delta
+    ny = total // 12
+    nm = (total % 12) + 1
+    return ny, nm
+
+def _month_range(start_ym: str, end_ym: str) -> list[tuple[int, int]]:
+    sy, sm = _ym_to_tuple(start_ym)
+    ey, em = _ym_to_tuple(end_ym)
+    out = []
+    y, m = sy, sm
+    while (y < ey) or (y == ey and m <= em):
+        out.append((y, m))
+        y, m = _add_months(y, m, 1)
+    return out
+
+# =========================
+# HELPERS (api)
+# =========================
+def _extract_list(payload: dict) -> list:
+    # esperado: {"data":{"list":[...]}, "success":true, ...}
+    data = payload.get("data", {})
+    if isinstance(data, dict) and isinstance(data.get("list"), list):
+        return data["list"]
+    raise RuntimeError(f"Estrutura inesperada no payload: {str(payload)[:400]}")
+
+def _post_with_retry(body: dict) -> dict:
+    for attempt in range(1, MAX_TRIES_429 + 1):
         r = requests.post(
-            BASE_URL_HTTPS + ENDPOINT_PATH,
+            ENDPOINT,
             headers=HEADERS,
             json=body,
             timeout=120,
-            verify=True,
+            verify=False,  # necessário (SSL falha no Python)
         )
+
+        if r.status_code == 429:
+            print(f"HTTP 429 (rate limit). Tentativa {attempt}/{MAX_TRIES_429}. Aguardando {WAIT_429_SECONDS}s...")
+            time.sleep(WAIT_429_SECONDS)
+            continue
+
+        if r.status_code >= 400:
+            print("HTTP:", r.status_code)
+            print("Resposta (inicio):", r.text[:600])
+
         r.raise_for_status()
-        payload = r.json()
-        return _normalize_rows(payload)
-    except SSLError:
-        pass
+        return r.json()
 
-    # 2) HTTPS sem verificação
-    try:
-        r = requests.post(
-            BASE_URL_HTTPS + ENDPOINT_PATH,
-            headers=HEADERS,
-            json=body,
-            timeout=120,
-            verify=False,
-        )
-        r.raise_for_status()
-        payload = r.json()
-        return _normalize_rows(payload)
-    except Exception:
-        pass
+    raise RuntimeError("EstoureI o limite de tentativas por 429. A API está limitando no momento.")
 
-    # 3) HTTP
-    r = requests.post(
-        BASE_URL_HTTP + ENDPOINT_PATH,
-        headers=HEADERS,
-        json=body,
-        timeout=120,
-    )
-    r.raise_for_status()
-    payload = r.json()
-    return _normalize_rows(payload)
+def _make_body(period_from_ym: str, period_to_ym: str) -> dict:
+    return {
+        "flow": "export",
+        "monthDetail": True,
+        "period": {"from": period_from_ym, "to": period_to_ym},
+        "filters": [
+            {"filter": "state", "values": UF_BRASIL},
+            {"filter": "ncm", "values": NCM_CAFE_VERDE},
+        ],
+        "details": ["ncm"],          # traz coNcm + descrição
+        "metrics": ["metricKG"],
+    }
 
+# =========================
+# IO
+# =========================
+def _load_existing() -> dict | None:
+    if not OUT_PATH.exists():
+        return None
+    return json.loads(OUT_PATH.read_text(encoding="utf-8"))
 
-def _normalize_rows(raw):
+def _series_to_map(series: list[dict]) -> dict[str, dict]:
+    # key: YYYY-MM-01
+    out = {}
+    for r in series:
+        d = str(r.get("date", "")).strip()
+        if d:
+            out[d] = r
+    return out
+
+def _map_to_series(m: dict[str, dict]) -> list[dict]:
+    return [m[k] for k in sorted(m.keys())]
+
+def _deep_equal(a, b) -> bool:
+    return json.dumps(a, sort_keys=True, ensure_ascii=False) == json.dumps(b, sort_keys=True, ensure_ascii=False)
+
+# =========================
+# CORE FETCH
+# =========================
+def _fetch_period(start_ym: str, end_ym: str) -> dict[str, float]:
     """
-    Aceita:
-      - lista de dicts
-      - lista de strings JSON
-      - string JSON (que contém lista/dict)
-      - dict (com ou sem "data")
-    Retorna: list[dict]
+    Retorna dict {"YYYY-MM": kg_total} agregando os 2 NCMs.
     """
-    if raw is None:
-        return []
+    print(f">> MDIC Export | Coletando {start_ym} -> {end_ym}")
+    months = _month_range(start_ym, end_ym)
 
-    # Se veio um dict, tenta extrair "data"
-    if isinstance(raw, dict):
-        raw = raw.get("data", raw)
+    # Para reduzir chamadas: agrupa por ano em blocos contínuos
+    # Ex.: (2025-10..2025-12) vira uma chamada (from=2025-10 to=2025-12)
+    blocks = []
+    if months:
+        cy, cm = months[0]
+        by, bm = cy, cm
+        py, pm = cy, cm
+        for (y, m) in months[1:]:
+            # mês seguinte?
+            ny, nm = _add_months(py, pm, 1)
+            if y == ny and m == nm:
+                py, pm = y, m
+                continue
+            # fecha bloco anterior
+            blocks.append((by, bm, py, pm))
+            # inicia novo
+            by, bm = y, m
+            py, pm = y, m
+        blocks.append((by, bm, py, pm))
 
-    # Se veio string, tenta parsear JSON
-    if isinstance(raw, str):
-        s = raw.strip()
-        try:
-            raw = json.loads(s)
-        except Exception:
-            raise RuntimeError(f"Resposta inesperada (string não-JSON): {s[:300]}")
+    agg = defaultdict(float)
 
-    # Se veio lista
-    if isinstance(raw, list):
-        if not raw:
-            return []
+    for (y1, m1, y2, m2) in blocks:
+        period_from = _tuple_to_ym(y1, m1)
+        period_to = _tuple_to_ym(y2, m2)
 
-        # Já está no formato certo
-        if isinstance(raw[0], dict):
-            return raw
+        body = _make_body(period_from, period_to)
+        payload = _post_with_retry(body)
+        rows = _extract_list(payload)
 
-        # Lista de strings JSON
-        if isinstance(raw[0], str):
-            out = []
-            for item in raw:
-                try:
-                    obj = json.loads(item)
-                    if isinstance(obj, dict):
-                        out.append(obj)
-                except Exception:
-                    continue
-            if out:
-                return out
-            raise RuntimeError(f"Lista de strings, mas não consegui parsear JSON. Exemplo: {raw[0][:200]}")
+        # agrega por YM usando coNcm (código)
+        for r in rows:
+            co = str(r.get("coNcm", "")).strip()
+            if co not in set(NCM_CAFE_VERDE):
+                continue
+            year = int(r["year"])
+            month = int(r["monthNumber"])
+            kg = float(r.get("metricKG", 0) or 0)
+            ym = _tuple_to_ym(year, month)
+            agg[ym] += kg
 
-    raise RuntimeError(f"Formato inesperado de rows: {type(raw)} | exemplo: {str(raw)[:300]}")
-
+    return dict(agg)
 
 # =========================
 # MAIN
 # =========================
 def main():
-    print(">> MDIC Export | Café Verde | Iniciando coleta")
+    print(">> MDIC Export | Café Verde | Iniciando")
 
-    body = {
-        "flow": "export",
-        "monthDetail": True,
-        "period": {"from": START_PERIOD, "to": END_PERIOD},
-        "filters": [
-            {"filter": "state", "values": UF_BRASIL},
-        ],
-        "details": ["ncm"],
-        "metrics": ["metricKG"],
-    }
+    existing = _load_existing()
+    now = datetime.now(timezone.utc)
+    end_ym = f"{now.year:04d}-{now.month:02d}"
 
-    rows = _post_general(body)
-    print(f">> Linhas recebidas: {len(rows)} | tipo primeiro item: {type(rows[0]).__name__ if rows else 'EMPTY'}")
-    if not rows:
-        raise RuntimeError("MDIC retornou zero linhas.")
+    if existing is None:
+        # FULL HISTORY (1x)
+        start_ym = START_FULL
+        mode = "FULL"
+    else:
+        # INCREMENTAL: últimos 3 meses (inclui o mês atual)
+        y, m = _ym_to_tuple(end_ym)
+        sy, sm = _add_months(y, m, -(ROLLING_MONTHS - 1))
+        start_ym = _tuple_to_ym(sy, sm)
+        mode = "INCREMENTAL"
 
-    # -------------------------
-    # Agregação mensal (NCM 090111 + 090112)
-    # -------------------------
-    agg = defaultdict(float)
+    print(f">> Modo: {mode} | Janela: {start_ym} -> {end_ym}")
 
-    for r in rows:
-        ncm = str(r.get("ncm", "")).strip()
-        if ncm not in NCM_CAFE_VERDE:
-            continue
+    fetched = _fetch_period(start_ym, end_ym)  # {"YYYY-MM": kg}
 
-        year = int(r["year"])
-        month = int(r["monthNumber"])
-        kg = float(r.get("metricKG", 0) or 0)
+    # monta linhas no padrão do seu site
+    new_rows_map = {}
+    for ym, kg in fetched.items():
+        new_rows_map[f"{ym}-01"] = {
+            "date": f"{ym}-01",
+            "kg": round(float(kg), 2),
+            "bags_60kg": round(float(kg) / 60.0, 2),
+        }
 
-        ym = f"{year}-{month:02d}"
-        agg[ym] += kg
+    if existing is None:
+        out = {
+            "source": "MDIC / COMEXSTAT",
+            "endpoint": "/general",
+            "flow": "export",
+            "product": "Café Verde",
+            "ncm": NCM_CAFE_VERDE,
+            "frequency": "monthly",
+            "updated_at": _now_utc_str(),
+            "series": _map_to_series(new_rows_map),
+        }
+        OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+        OUT_PATH.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(f">> OK (full). Gravado: {OUT_PATH}")
+        return
 
-    if not agg:
-        raise RuntimeError("MDIC retornou dados, mas nenhum bateu nos NCMs 090111/090112.")
+    # merge inteligente
+    old_series = existing.get("series", [])
+    old_map = _series_to_map(old_series)
 
-    # -------------------------
-    # Série final
-    # -------------------------
-    series = []
-    for ym in sorted(agg.keys()):
-        dt = datetime.strptime(ym + "-01", "%Y-%m-%d")
-        kg = agg[ym]
-        bags_60kg = kg / 60.0 if kg else 0.0
+    changed = False
+    # aplica updates do período buscado
+    for d, row in new_rows_map.items():
+        if d not in old_map or not _deep_equal(old_map[d], row):
+            old_map[d] = row
+            changed = True
 
-        series.append({
-            "date": dt.strftime("%Y-%m-%d"),
-            "kg": round(kg, 2),
-            "bags_60kg": round(bags_60kg, 2),
-        })
+    # se nada mudou, não regrava
+    if not changed:
+        print(">> Sem mudanças na janela incremental. Nada a gravar.")
+        return
 
-    OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    payload = {
-        "source": "MDIC / COMEXSTAT",
-        "endpoint": "/general",
-        "flow": "export",
-        "product": "Café Verde",
-        "ncm": sorted(NCM_CAFE_VERDE),
-        "frequency": "monthly",
-        "updated_at": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
-        "series": series,
-    }
+    existing["series"] = _map_to_series(old_map)
+    existing["updated_at"] = _now_utc_str()
 
-    with open(OUT_PATH, "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=2)
-
-    print(f">> Série salva em {OUT_PATH} | {len(series)} pontos")
+    OUT_PATH.write_text(json.dumps(existing, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f">> OK (incremental). Atualizado: {OUT_PATH}")
 
 if __name__ == "__main__":
     main()
