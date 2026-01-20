@@ -7,15 +7,17 @@
 # Saída: data/cafe/series/mdic_export.json
 # ============================================================
 
-import requests
 import json
 from pathlib import Path
 from datetime import datetime
 from collections import defaultdict
-import urllib3
-from requests.exceptions import SSLError
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+import requests
+from requests.exceptions import SSLError
+import urllib3
+
+# Evita warnings quando cair em verify=False (opcional, mas limpa logs)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # =========================
 # CONFIGURAÇÕES
@@ -26,15 +28,16 @@ ENDPOINT_PATH  = "/general"
 
 OUT_PATH = Path("data/cafe/series/mdic_export.json")
 
+# Café verde (2 NCMs)
 NCM_CAFE_VERDE = {"090111", "090112"}
 
 # Todas as UFs do Brasil (exportação brasileira)
 UF_BRASIL = [
-    11,12,13,14,15,16,17,
-    21,22,23,24,25,26,27,28,29,
-    31,32,33,35,
-    41,42,43,
-    50,51,52,53
+    11, 12, 13, 14, 15, 16, 17,
+    21, 22, 23, 24, 25, 26, 27, 28, 29,
+    31, 32, 33, 35,
+    41, 42, 43,
+    50, 51, 52, 53
 ]
 
 START_PERIOD = "1996-01"
@@ -42,14 +45,20 @@ END_PERIOD = datetime.utcnow().strftime("%Y-%m")
 
 HEADERS = {
     "Content-Type": "application/json",
-    "Accept": "application/json"
+    "Accept": "application/json",
 }
 
 # =========================
-# FUNÇÕES AUXILIARES
+# REQUISIÇÃO ROBUSTA (SSL fallback)
 # =========================
 def _post_general(body: dict) -> list:
-    # 1) tentativa padrão: HTTPS com verificação de certificado
+    """
+    Tenta:
+      1) HTTPS verify=True
+      2) HTTPS verify=False (fallback para runner com CA quebrado)
+      3) HTTP (último fallback)
+    """
+    # 1) HTTPS normal
     try:
         r = requests.post(
             BASE_URL_HTTPS + ENDPOINT_PATH,
@@ -61,9 +70,9 @@ def _post_general(body: dict) -> list:
         r.raise_for_status()
         return r.json().get("data", [])
     except SSLError:
-        pass  # cai para fallback abaixo
+        pass
 
-    # 2) fallback: HTTPS sem verificação (evita SSL no GitHub runner)
+    # 2) HTTPS sem verificação
     try:
         r = requests.post(
             BASE_URL_HTTPS + ENDPOINT_PATH,
@@ -77,7 +86,7 @@ def _post_general(body: dict) -> list:
     except Exception:
         pass
 
-    # 3) último fallback: HTTP (se o host aceitar)
+    # 3) HTTP
     r = requests.post(
         BASE_URL_HTTP + ENDPOINT_PATH,
         headers=HEADERS,
@@ -86,7 +95,6 @@ def _post_general(body: dict) -> list:
     )
     r.raise_for_status()
     return r.json().get("data", [])
-
 
 # =========================
 # MAIN
@@ -97,22 +105,15 @@ def main():
     body = {
         "flow": "export",
         "monthDetail": True,
-        "period": {
-            "from": START_PERIOD,
-            "to": END_PERIOD
-        },
+        "period": {"from": START_PERIOD, "to": END_PERIOD},
         "filters": [
-            {
-                "filter": "state",
-                "values": UF_BRASIL
-            }
+            {"filter": "state", "values": UF_BRASIL},
         ],
         "details": ["ncm"],
-        "metrics": ["metricKG"]
+        "metrics": ["metricKG"],
     }
 
     rows = _post_general(body)
-
     if not rows:
         raise RuntimeError("MDIC retornou zero linhas.")
 
@@ -126,15 +127,18 @@ def main():
         if ncm not in NCM_CAFE_VERDE:
             continue
 
-        year = r["year"]
-        month = r["monthNumber"]
+        year = int(r["year"])
+        month = int(r["monthNumber"])
         kg = float(r.get("metricKG", 0) or 0)
 
-        key = f"{year}-{month:02d}"
-        agg[key] += kg
+        ym = f"{year}-{month:02d}"
+        agg[ym] += kg
+
+    if not agg:
+        raise RuntimeError("MDIC retornou dados, mas nenhum bateu nos NCMs 090111/090112.")
 
     # -------------------------
-    # Construção da série final
+    # Série final
     # -------------------------
     series = []
     for ym in sorted(agg.keys()):
@@ -145,28 +149,25 @@ def main():
         series.append({
             "date": dt.strftime("%Y-%m-%d"),
             "kg": round(kg, 2),
-            "bags_60kg": round(bags_60kg, 2)
+            "bags_60kg": round(bags_60kg, 2),
         })
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "source": "MDIC / COMEXSTAT",
+        "endpoint": "/general",
+        "flow": "export",
+        "product": "Café Verde",
+        "ncm": sorted(NCM_CAFE_VERDE),
+        "frequency": "monthly",
+        "updated_at": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+        "series": series,
+    }
 
     with open(OUT_PATH, "w", encoding="utf-8") as f:
-        json.dump(
-            {
-                "source": "MDIC / COMEXSTAT",
-                "product": "Café Verde",
-                "ncm": sorted(NCM_CAFE_VERDE),
-                "frequency": "monthly",
-                "updated_at": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
-                "series": series
-            },
-            f,
-            ensure_ascii=False,
-            indent=2
-        )
+        json.dump(payload, f, ensure_ascii=False, indent=2)
 
     print(f">> Série salva em {OUT_PATH} | {len(series)} pontos")
-
 
 if __name__ == "__main__":
     main()
