@@ -751,7 +751,10 @@
         if(!res.ok) throw new Error("Falha ao carregar snapshot: " + res.status);
         const snap = await res.json();
 
-        subtitle.textContent = `Snapshot: ${snap.updated_at || "—"} • Cards: clique em “Tabela” para ver os dados.`;
+        subtitle.textContent =
+          `Abaixo estão séries históricas das variáveis que impactam o preço do café. ` +
+          `Nos cards, clique em "Gráfico" para ver a evolução dos dados ou em "Tabela" para uma visão tabular. ` +
+          `Atualizado em: ${snap.updated_at || "—"}.`;
 
         const rows = Array.isArray(snap.rows) ? snap.rows.slice() : [];
 
