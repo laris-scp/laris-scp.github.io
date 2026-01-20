@@ -12,7 +12,7 @@ VAR_ID = "mdic_export"
 VAR_NAME = "EXPORTAÇÃO (MDIC) – CAFÉ VERDE"
 FREQUENCIA = "Mensal"
 BLOCO = 1
-FONTE = "MDIC/ComexStat – Exportação Brasil (API) | NCM 09011110 + 09011190 | Métrica: KG"
+FONTE = "MDIC/ComexStat – Exportação Brasil"
 
 SERIES_LAST_DATE_FIELD = "ultima_data_serie"
 
@@ -227,7 +227,7 @@ def main():
     score_ponderado = float(score * peso)
 
     regra_de_sinal = (
-        "Nível: compara a exportação do mês com a sazonalidade do mesmo mês nos últimos 5 anos (robusto). "
+        "Nível: compara a exportação do mês com a sazonalidade do mesmo mês nos últimos 5 anoS. "
         "Tendência: compara o acumulado do ano (até o mês atual) com o padrão dos últimos 5 anos. "
         "Momento: mede se a exportação está acelerando vs o ano passado (YoY da média dos últimos 3 meses). "
         "Exportação acima do padrão tende a ser bullish (maior escoamento externo da oferta)."
