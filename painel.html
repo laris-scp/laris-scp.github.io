@@ -133,6 +133,7 @@
       estoques_certificados: 0,
       fundamental_stu: 4,
       ico_ia: 0,
+      mdic_export: 0,
     };
 
 
@@ -175,12 +176,20 @@
         document.getElementById("tg").textContent = (t.geral ?? "—");
 
         const rows0 = Array.isArray(data.rows) ? data.rows : [];
-        // ORDENAÇÃO: Bloco 1 primeiro, depois Bloco 2 (e dentro do bloco por nome)
+
+        // ORDENAÇÃO: Bloco 1 primeiro, depois Bloco 2; dentro do bloco: peso (desc), depois nome
         const rows = rows0.slice().sort((a,b)=>{
           const da = normBloco(a.bloco), db = normBloco(b.bloco);
           if(da !== db) return da - db;
+        
+          const pa = Number(a.peso), pb = Number(b.peso);
+          const ppa = Number.isFinite(pa) ? pa : -999;
+          const ppb = Number.isFinite(pb) ? pb : -999;
+          if(ppa !== ppb) return ppb - ppa; // maior peso primeiro
+        
           return normName(a).localeCompare(normName(b), "pt-BR");
         });
+
 
         const tbody = document.getElementById("tbody");
         tbody.innerHTML = "";
