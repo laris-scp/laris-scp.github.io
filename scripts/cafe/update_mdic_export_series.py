@@ -1,199 +1,155 @@
+import json
 from pathlib import Path
 from datetime import datetime
-import json
 
 import requests
-from requests.exceptions import SSLError
-import certifi
 import urllib3
 
 # =========================
-# CONFIG GERAL
+# CONFIGURAÇÕES GERAIS
 # =========================
-OUT_PATH = Path("data/cafe/series/mdic_export.json")
 
-BASE_URL = "https://api-comexstat.mdic.gov.br"
-
-HISTORICAL_ENDPOINT = f"{BASE_URL}/historical-data"
-UPDATED_ENDPOINT = f"{BASE_URL}/general/dates/updated"
-
-# evita warning quando cair em verify=False
+# evita warnings de SSL no runner do GitHub
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# =========================
-# DEFINIÇÕES DA VARIÁVEL
-# =========================
-# Café verde (Brasil)
-NCM_CAFE_VERDE = ["090111", "090112"]
+BASE_URL = "https://api-comexstat.mdic.gov.br"
+HISTORICAL_ENDPOINT = f"{BASE_URL}/historical-data"
 
-FLOW = "export"
-METRIC = "metricKG"
-MONTH_DETAIL = False
+OUT_PATH = Path("data/cafe/series/mdic_export.json")
 
-KG_PER_BAG = 60.0
+# Produto: café verde (decisão final)
+NCM_CAFE_VERDE = [
+    "09011100",  # Café não torrado, não descafeinado
+    "09011200",  # Café não torrado, descafeinado
+]
+
+COUNTRY_BR = "076"  # Brasil (padrão COMEXSTAT)
+
+START_YM = "1996-01"  # histórico completo
+END_YM = datetime.today().strftime("%Y-%m")
+
 
 # =========================
-# HELPERS DE REQUEST
+# FUNÇÕES AUXILIARES
 # =========================
-def _request_json(method: str, url: str, *, params=None, json_body=None, timeout=120):
+
+def _request_json(method: str, url: str, **kwargs) -> dict:
     """
-    Faz request HTTP e retorna JSON.
-    Estratégia:
-      1) SSL padrão
-      2) SSL com certifi
-      3) fallback verify=False (contorno p/ problema de cadeia no MDIC)
+    Wrapper simples para requests com JSON.
     """
-    # tentativa padrão
-    try:
-        r = requests.request(
-            method,
-            url,
-            params=params,
-            json=json_body,
-            timeout=timeout,
-        )
-        r.raise_for_status()
-        return r.json()
-    except SSLError:
-        pass
-
-    # tentativa com certifi
-    try:
-        r = requests.request(
-            method,
-            url,
-            params=params,
-            json=json_body,
-            timeout=timeout,
-            verify=certifi.where(),
-        )
-        r.raise_for_status()
-        return r.json()
-    except SSLError:
-        pass
-
-    # contorno final
     r = requests.request(
         method,
         url,
-        params=params,
-        json=json_body,
-        timeout=timeout,
-        verify=False,
+        verify=False,  # necessário no GitHub Actions
+        headers={"Content-Type": "application/json"},
+        **kwargs,
     )
     r.raise_for_status()
     return r.json()
 
-# =========================
-# METADATA DE ATUALIZAÇÃO
-# =========================
-def _safe_get_updated_to() -> str:
-    """
-    Retorna YYYY-MM do último mês disponível segundo o ComexStat.
-    """
-    data = _request_json("GET", UPDATED_ENDPOINT, timeout=60)
 
-    # formato padrão da API
-    # { "data": { "year": "2025", "monthNumber": "12", ... }, ... }
-    if isinstance(data, dict) and isinstance(data.get("data"), dict):
-        inner = data["data"]
-        y = inner.get("year")
-        m = inner.get("monthNumber")
-        if isinstance(y, str) and isinstance(m, str):
-            return f"{y}-{int(m):02d}"
-
-    raise RuntimeError(f"Não consegui interpretar updated endpoint: {data}")
-
-# =========================
-# CHAMADA HISTÓRICA
-# =========================
 def _post_historical(body: dict) -> list:
     """
-    POST /historical-data
-    Retorna lista de linhas mensais.
+    POST no endpoint /historical-data
     """
-    data = _request_json(
+    resp = _request_json(
         "POST",
         HISTORICAL_ENDPOINT,
         params={"language": "pt"},
-        json_body=body,
-        timeout=180,
+        json=body,
+        timeout=120,
     )
 
-    if isinstance(data, dict) and isinstance(data.get("data"), list):
-        return data["data"]
+    if not resp.get("success", False):
+        raise RuntimeError(f"API retornou erro: {resp}")
 
-    raise RuntimeError(f"Formato inesperado do /historical-data: {data}")
+    return resp.get("data", [])
+
 
 # =========================
 # MAIN
 # =========================
+
 def main():
-    # intervalo
-    from_ym = "1997-01"
-    to_ym = _safe_get_updated_to()
+    print(">> MDIC Export | Café Verde | Iniciando coleta")
 
     body = {
-        "flow": FLOW,
-        "monthDetail": MONTH_DETAIL,
+        "flow": "export",
+        "monthDetail": True,
         "period": {
-            "from": from_ym,
-            "to": to_ym,
+            "from": START_YM,
+            "to": END_YM,
         },
         "filters": [
             {
+                "filter": "country",
+                "values": [COUNTRY_BR],
+            },
+            {
                 "filter": "ncm",
                 "values": NCM_CAFE_VERDE,
-            }
+            },
         ],
-        "metrics": [METRIC],
+        "details": [],
+        "metrics": ["metricKG"],
     }
 
     rows = _post_historical(body)
 
-    series = []
+    if not rows:
+        raise RuntimeError("Nenhum dado retornado pela API do MDIC")
+
+    # =========================
+    # AGREGAÇÃO MENSAL
+    # =========================
+    series = {}
+
     for r in rows:
-        try:
-            year = int(r["year"])
-            month = int(r["month"])
-            kg = float(r[METRIC])
-        except Exception:
-            continue
+        year = r["year"]
+        month = r["monthNumber"]
+        kg = float(r.get("metricKG", 0))
 
-        date = datetime(year, month, 1).strftime("%Y-%m-%d")
+        ym = f"{year}-{month:02d}"
 
-        series.append(
-            {
-                "date": date,
-                "kg_total": round(kg, 2),
-                "bags_60kg": round(kg / KG_PER_BAG, 2),
-            }
-        )
+        if ym not in series:
+            series[ym] = 0.0
 
-    series = sorted(series, key=lambda x: x["date"])
+        series[ym] += kg
+
+    # ordenar cronologicamente
+    out = []
+    for ym in sorted(series.keys()):
+        kg = series[ym]
+        sacks_60kg = kg / 60.0
+
+        out.append({
+            "date": f"{ym}-01",
+            "kg": round(kg, 2),
+            "sacks_60kg": round(sacks_60kg, 2),
+        })
+
+    # =========================
+    # SALVAR JSON
+    # =========================
+    OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     payload = {
-        "source": "MDIC / ComexStat",
-        "variable": "Exportação de Café Verde – Brasil",
-        "filters": {
-            "ncm": NCM_CAFE_VERDE,
-            "flow": FLOW,
-            "metric": METRIC,
-        },
-        "unit": {
-            "kg": "quilogramas",
-            "bags_60kg": "sacas de 60kg",
-        },
+        "source": "MDIC / COMEXSTAT",
+        "commodity": "coffee",
+        "product": "green_coffee",
+        "ncm": NCM_CAFE_VERDE,
+        "country": "Brazil",
+        "unit": "kg",
         "updated_at": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
-        "series": series,
+        "series": out,
     }
 
-    OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
 
-    print(f"OK: série MDIC exportação café verde salva em {OUT_PATH}")
+    print(f">> Arquivo gerado com sucesso: {OUT_PATH}")
+    print(f">> Registros mensais: {len(out)}")
 
-# =========================
+
 if __name__ == "__main__":
     main()
