@@ -13,7 +13,6 @@ Gera um diagnóstico textual (IA) para o Painel do Café, interpretando as vari�
 from __future__ import annotations
 
 import json
-import ast
 import os
 import sys
 import time
@@ -66,7 +65,10 @@ def _safe_float(x: Any, default: float = 0.0) -> float:
 
 def _summarize_rows(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
-    Cria um resumo compacto para reduzir tokens e custo.
+    Cria um resumo compacto para reduzir tokens e custo:
+    - ranking de contribuições (score_ponderado)
+    - direção implícita por variável (a partir do score_ponderado)
+    - metadados úteis (frequência, última atualização)
     """
     items = []
     for r in rows:
@@ -87,6 +89,7 @@ def _summarize_rows(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
         peso = _safe_float(r.get("peso"), 0.0)
         bloco = r.get("bloco", None)
 
+        # Direção de contribuição: >0 bullish, <0 bearish, ~0 neutro
         if sp > 0.25:
             contrib = "BULLISH"
         elif sp < -0.25:
@@ -133,6 +136,10 @@ def _summarize_rows(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 
 def _build_prompt(snapshot: Dict[str, Any], summary: Dict[str, Any]) -> Tuple[str, str]:
+    """
+    Retorna (instructions, user_content).
+    Mantém o payload pequeno para reduzir custo.
+    """
     updated_at = snapshot.get("updated_at", "")
     commodity = snapshot.get("commodity", "cafe")
 
@@ -144,8 +151,7 @@ def _build_prompt(snapshot: Dict[str, Any], summary: Dict[str, Any]) -> Tuple[st
         "(1) 1 parágrafo de síntese (2–4 frases) explicando o cenário e o viés (alta/queda/lateral) "
         "separando curto prazo (tático) vs médio/longo prazo (estrutural); "
         "(2) bullets curtos com os porquês, priorizando apenas as variáveis de relevância ALTA e MEDIA; "
-        "(3) uma linha final listando as variáveis de relevância BAIXA como 'impacto limitado no momento' "
-        "(sem explicar nível/tendência/momento). "
+        "(3) uma linha final listando as variáveis de relevância BAIXA como 'impacto limitado no momento' (sem explicar nível/tendência/momento). "
 
         "REGRAS OBRIGATÓRIAS: "
         "- NÃO descreva nível/tendência/momento literalmente para todas as variáveis. "
@@ -157,15 +163,17 @@ def _build_prompt(snapshot: Dict[str, Any], summary: Dict[str, Any]) -> Tuple[st
         "ALTA/MEDIA entram nos bullets explicados; BAIXA entra só na linha de 'impacto limitado'. "
         "- Interprete o sentido econômico respeitando o sinal do score_ponderado: "
         "score_ponderado positivo = força altista; negativo = força baixista. "
-        "- NÃO produza frases logicamente incoerentes (ex.: 'queda de fertilizante pressiona custos'). "
+        "NÃO produza frases logicamente incoerentes como 'preço em queda pressiona custos' ou 'queda de fertilizante pressiona custos'. "
+        "Se fertilizante estiver em queda, trate como redução de custo (o efeito no preço deve ser coerente com o sinal do score_ponderado fornecido). "
         "- Confiança: se houver forças altistas e baixistas relevantes simultaneamente, a confiança NÃO pode ser ALTA. "
 
-        "Saída obrigatoriamente em JSON ESTRITO (RFC 8259), somente o JSON e nada mais, "
-        "usando aspas duplas em todas as chaves e strings, sem markdown, sem comentários, sem texto fora do JSON, "
-        "com as chaves: "
-        "{\"summary\": string, \"drivers_bull\": [string,...], \"drivers_bear\": [string,...], "
-        "\"limited_impact\": [string,...], "
-        "\"bias\": \"ALTA\"|\"QUEDA\"|\"LATERAL\", \"confidence\": \"BAIXA\"|\"MEDIA\"|\"ALTA\"}."
+        "Saída obrigatoriamente em JSON estrito com as chaves: "
+        "{'summary': string, "
+        "'drivers_bull': [string,...], "
+        "'drivers_bear': [string,...], "
+        "'limited_impact': [string,...], "
+        "'bias': 'ALTA'|'QUEDA'|'LATERAL', "
+        "'confidence': 'BAIXA'|'MEDIA'|'ALTA'}."
     )
 
     user_content = {
@@ -225,6 +233,9 @@ def _openai_call(instructions: str, user_text: str) -> Dict[str, Any]:
 
 
 def _extract_output_text(resp: Dict[str, Any]) -> str:
+    """
+    Extrai texto do Responses API de forma robusta.
+    """
     if isinstance(resp, dict) and isinstance(resp.get("output_text"), str) and resp["output_text"].strip():
         return resp["output_text"].strip()
 
@@ -250,39 +261,27 @@ def _extract_output_text(resp: Dict[str, Any]) -> str:
 
 
 def _parse_strict_json(text: str) -> Dict[str, Any]:
-    """Tenta interpretar o retorno como JSON. Se vier "quase JSON", tenta fallback seguro via ast.literal_eval."""
-    text = (text or "").strip()
+    """
+    Espera JSON estrito. Se o modelo vier com lixo, tenta recuperar o objeto JSON principal.
+    """
+    text = text.strip()
     if not text:
         raise ValueError("Resposta vazia do modelo.")
 
-    # 1) tentativa direta
+    # Tentativa direta
     try:
         return json.loads(text)
     except Exception:
         pass
 
-    # 2) tenta extrair o maior bloco entre { ... }
+    # Recupera o primeiro bloco JSON entre { ... }
     start = text.find("{")
     end = text.rfind("}")
     if start < 0 or end <= start:
-        raise ValueError(f"Não foi possível localizar bloco JSON. Início da resposta: {text[:300]!r}")
+        raise ValueError("Não foi possível localizar bloco JSON na resposta.")
 
     candidate = text[start:end + 1].strip()
-
-    # 2a) tenta JSON normal no candidato
-    try:
-        return json.loads(candidate)
-    except Exception:
-        pass
-
-    # 3) fallback: alguns modelos retornam algo parecido com dict Python (aspas simples, True/False, trailing commas)
-    try:
-        obj = ast.literal_eval(candidate)
-        if isinstance(obj, dict):
-            return obj
-        raise ValueError("Fallback ast.literal_eval não retornou dict.")
-    except Exception as e:
-        raise ValueError(f"Falha ao interpretar JSON. Erro: {e}. Trecho: {candidate[:400]!r}")
+    return json.loads(candidate)
 
 
 def _validate_schema(obj: Dict[str, Any]) -> Dict[str, Any]:
