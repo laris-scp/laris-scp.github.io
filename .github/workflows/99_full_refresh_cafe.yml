@@ -45,7 +45,6 @@ jobs:
           python scripts/cafe/update_estoques_certificados_series.py
           python scripts/cafe/update_ico_ia_series.py
           python scripts/cafe/update_mdic_export_series.py
-          python scripts/cafe/update_ai_diagnostico.py
 
       # =========================
       # 2) SNAPSHOT (todas)
@@ -62,6 +61,15 @@ jobs:
           python scripts/cafe/update_painel_snapshot_estoques_certificados.py
           python scripts/cafe/update_painel_snapshot_ico_ia.py
           python scripts/cafe/update_painel_snapshot_mdic_export.py
+
+      # =========================
+      # 2.5) AI DIAGNÓSTICO (lê snapshot)
+      # =========================
+      - name: Update ai_diagnostico.json
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python scripts/cafe/update_ai_diagnostico.py
 
       # =========================
       # 3) TERMÔMETROS + HIST
@@ -85,11 +93,12 @@ jobs:
           git add data/cafe/series/*.json
           git add data/cafe/painel_snapshot.json
           git add data/cafe/hist_termometro.json
+          git add data/cafe/ai_diagnostico.json
 
           if git diff --cached --quiet; then
             echo "No changes to commit"
             exit 0
           fi
 
-          git commit -m "data(cafe): full refresh (series + snapshot + thermometros)"
+          git commit -m "data(cafe): full refresh (series + snapshot + thermometros + ai)"
           git push
