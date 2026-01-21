@@ -74,6 +74,17 @@ def _summarize_rows(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     for r in rows:
         vid = r.get("id", "")
         sp = _safe_float(r.get("score_ponderado"), 0.0)
+        abs_sp = abs(sp)
+        if abs_sp >= 6:
+            relev = "ALTA"
+        elif abs_sp >= 2:
+            relev = "MEDIA"
+        else:
+            relev = "BAIXA"
+
+        # PREÇO é variável dependente (não pode ser driver causal)
+        is_dependent = (vid == "preco_arabica")
+
         peso = _safe_float(r.get("peso"), 0.0)
         bloco = r.get("bloco", None)
 
@@ -100,6 +111,8 @@ def _summarize_rows(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
             "score": _safe_float(r.get("score"), 0.0),
             "score_ponderado": sp,
             "contribuicao": contrib,
+            "relevancia": relev,
+            "dependente": is_dependent,
         })
 
     # Ordena por impacto absoluto (mais “importantes” primeiro)
@@ -132,35 +145,39 @@ def _build_prompt(snapshot: Dict[str, Any], summary: Dict[str, Any]) -> Tuple[st
     updated_at = snapshot.get("updated_at", "")
     commodity = snapshot.get("commodity", "cafe")
 
-    instructions = (
-        "Você é um analista de commodities especializado em café arábica. "
-        "Você receberá um resumo estruturado das variáveis do painel (nível, tendência, momento e score_ponderado). "
+        instructions = (
+            "Você é um analista de commodities especializado em café arábica. "
+            "Você receberá um resumo estruturado das variáveis do painel (inclui score_ponderado, relevancia e papel econômico). "
     
-        "Tarefa: produzir um diagnóstico em Português (semi-técnico), com: "
-        "(1) 1 parágrafo de síntese; "
-        "(2) Vetores altistas; "
-        "(3) Vetores baixistas. "
+            "Tarefa: escrever um diagnóstico em Português (semi-técnico) com: "
+            "(1) 1 parágrafo de síntese (2–4 frases) explicando o cenário e o viés (alta/queda/lateral) "
+            "separando curto prazo (tático) vs médio/longo prazo (estrutural); "
+            "(2) bullets curtos com os porquês, priorizando apenas as variáveis de relevância ALTA e MEDIA; "
+            "(3) uma linha final listando as variáveis de relevância BAIXA como 'impacto limitado no momento' (sem explicar nível/tendência/momento). "
     
-        "REGRAS OBRIGATÓRIAS: "
-        "- Você DEVE mencionar TODAS as variáveis do painel ao menos uma vez, "
-        "nem que seja para afirmar que estão neutras ou sem impacto relevante no momento. "
-        "- Os vetores altistas e baixistas devem ser explicados com base no papel econômico da variável. "
-        "- A variável PREÇO ARABICA é DEPENDENTE e NÃO PODE ser listada como vetor altista ou baixista; "
-        "ela pode apenas ser usada como confirmação, timing ou reflexividade. "
-        "- Separe explicitamente a leitura de curto prazo (tática) da leitura estrutural (médio/longo prazo). "
-        "- Se existirem vetores altistas e baixistas relevantes simultaneamente, "
-        "a confiança NÃO PODE ser 'ALTA'. "
-        "- Não invente narrativas que contradigam tendência ou momento das variáveis. "
-        "- Não cite números, valores ou percentuais. "
-        "- Não use o termo 'termômetro' e não mencione que você é IA. "
+            "REGRAS OBRIGATÓRIAS: "
+            "- NÃO descreva nível/tendência/momento literalmente para todas as variáveis. "
+            "Use essas dimensões apenas quando a variável tiver relevância ALTA ou MEDIA e de forma natural (sem jargão repetitivo). "
+            "- A variável PREÇO ARABICA é DEPENDENTE: NÃO pode ser tratada como causa, "
+            "NÃO pode aparecer como vetor altista/baixista. "
+            "Você pode mencioná-la apenas como confirmação/timing no parágrafo de síntese, e nunca como explicação causal. "
+            "- Você DEVE considerar TODAS as variáveis: "
+            "ALTA/MEDIA entram nos bullets explicados; BAIXA entra só na linha de 'impacto limitado'. "
+            "- Interprete o sentido econômico respeitando o sinal do score_ponderado: "
+            "score_ponderado positivo = força altista; negativo = força baixista. "
+            "NÃO produza frases logicamente incoerentes como 'preço em queda pressiona custos' ou 'queda de fertilizante pressiona custos'. "
+            "Se fertilizante estiver em queda, trate como redução de custo (o efeito no preço deve ser coerente com o sinal do score_ponderado fornecido). "
+            "- Confiança: se houver forças altistas e baixistas relevantes simultaneamente, a confiança NÃO pode ser ALTA. "
     
-        "Saída obrigatoriamente em JSON estrito com as chaves: "
-        "{'summary': string, "
-        "'drivers_bull': [string,...], "
-        "'drivers_bear': [string,...], "
-        "'bias': 'ALTA'|'QUEDA'|'LATERAL', "
-        "'confidence': 'BAIXA'|'MEDIA'|'ALTA'}."
-    )
+            "Saída obrigatoriamente em JSON estrito com as chaves: "
+            "{'summary': string, "
+            "'drivers_bull': [string,...], "
+            "'drivers_bear': [string,...], "
+            "'limited_impact': [string,...], "
+            "'bias': 'ALTA'|'QUEDA'|'LATERAL', "
+            "'confidence': 'BAIXA'|'MEDIA'|'ALTA'}."
+        )
+
 
 
     user_content = {
@@ -275,7 +292,7 @@ def _parse_strict_json(text: str) -> Dict[str, Any]:
 
 
 def _validate_schema(obj: Dict[str, Any]) -> Dict[str, Any]:
-    required = ["summary", "drivers_bull", "drivers_bear", "bias", "confidence"]
+    required = ["summary", "drivers_bull", "drivers_bear", "limited_impact", "bias", "confidence"]
     for k in required:
         if k not in obj:
             raise ValueError(f"Campo obrigatório ausente: {k}")
@@ -284,12 +301,14 @@ def _validate_schema(obj: Dict[str, Any]) -> Dict[str, Any]:
 
     bull = obj["drivers_bull"]
     bear = obj["drivers_bear"]
+    lim = obj["limited_impact"]
 
-    if not isinstance(bull, list) or not isinstance(bear, list):
-        raise ValueError("drivers_bull e drivers_bear devem ser listas.")
+    if not isinstance(bull, list) or not isinstance(bear, list) or not isinstance(lim, list):
+        raise ValueError("drivers_bull, drivers_bear e limited_impact devem ser listas.")
 
     bull = [str(x).strip() for x in bull if str(x).strip()]
     bear = [str(x).strip() for x in bear if str(x).strip()]
+    lim = [str(x).strip() for x in lim if str(x).strip()]
 
     bias = str(obj["bias"]).strip().upper()
     conf = str(obj["confidence"]).strip().upper()
@@ -304,9 +323,11 @@ def _validate_schema(obj: Dict[str, Any]) -> Dict[str, Any]:
         "summary": summary,
         "drivers_bull": bull[:8],
         "drivers_bear": bear[:8],
+        "limited_impact": lim[:10],
         "bias": bias,
         "confidence": conf,
     }
+
 
 def main() -> int:
     t0 = time.time()
