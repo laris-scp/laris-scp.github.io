@@ -1,21 +1,22 @@
 {
   "date": "2026-01-21",
-  "summary": "O cenário atual do café arábica apresenta um viés de queda no curto prazo, impulsionado por fatores como a desvalorização do real e a pressão sobre os preços. No entanto, no médio e longo prazo, a oferta estrutural global e os estoques certificados indicam uma perspectiva mais otimista, sugerindo uma possível recuperação futura dos preços.",
+  "summary": "Os estoques globais baixos e a situação dos estoques certificados indicam um aperto estrutural de oferta, o que é altista para o preço do café arábica. No entanto, a queda do Dólar e a desaceleração nas exportações do Brasil geram um viés baixista no curto prazo. O clima apresenta estresse hídrico elevado, mas a sua tendência lateralizada não gera novo impulso. A combinação dessas variáveis sugere uma expectativa de volatilidade.",
   "drivers_bull": [
-    "Fundamental S&D (STU Global) aponta para uma oferta estrutural global baixa, o que é altista para os preços.",
-    "Estoques certificados estão em níveis muito baixos, indicando uma oferta disponível imediata restrita.",
-    "Clima (Soil Moisture) apresenta riscos de oferta futura, o que pode pressionar os preços para cima.",
-    "GSCPI (Fretes) sugere que a fricção logística pode impactar positivamente a dinâmica de preços."
+    "Estoques Globais",
+    "Estoques Certificados na ICE",
+    "Clima ou Estresse hídrico",
+    "Fretes"
   ],
   "drivers_bear": [
-    "A desvalorização do USD/BRL está pressionando os preços em reais, impactando negativamente a competitividade das exportações.",
-    "O preço do arábica está em queda, refletindo a pressão do mercado e a dinâmica de oferta e demanda."
+    "Dólar",
+    "Exportações de café verde do Brasil",
+    "Preço do café arábica",
+    "Fertilizante (ureia)"
   ],
   "limited_impact": [
-    "Fertilizante (Urea) apresenta impacto limitado no momento.",
-    "Exportação (MDIC) – Café Verde mostra um fluxo efetivo neutro.",
-    "COT Report e ICO (IA) têm relevância baixa e não influenciam significativamente o cenário atual."
+    "Posição de fundos no café",
+    "Relatório da ICO"
   ],
-  "bias": "QUEDA",
-  "confidence": "BAIXA"
+  "bias": "LATERAL",
+  "confidence": "MEDIA"
 }
