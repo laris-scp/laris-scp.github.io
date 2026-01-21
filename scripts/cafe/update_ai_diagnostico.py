@@ -134,22 +134,32 @@ def _build_prompt(snapshot: Dict[str, Any], summary: Dict[str, Any]) -> Tuple[st
 
     instructions = (
         "Você é um analista de commodities especializado em café arábica. "
-        "Você receberá um resumo estruturado das variáveis do painel (com nível, tendência, momento e score_ponderado). "
-        "Tarefa: produzir um diagnóstico do mercado em Português (semi-técnico) com: "
+        "Você receberá um resumo estruturado das variáveis do painel (nível, tendência, momento e score_ponderado). "
+    
+        "Tarefa: produzir um diagnóstico em Português (semi-técnico), com: "
         "(1) 1 parágrafo de síntese; "
-        "(2) uma seção 'Principais vetores altistas' com bullets; "
-        "(3) uma seção 'Principais vetores baixistas' com bullets. "
-        "Regras obrigatórias: "
-        "- Você DEVE usar TODAS as variáveis ao menos uma vez na análise (nem que seja para dizer que está neutra). "
-        "- Você DEVE citar explicitamente (por nome) os 2 maiores drivers altistas e os 2 maiores drivers baixistas "
-        "com base em |score_ponderado|. "
-        "- Se existir a variável 'fundamental_stu', você DEVE mencioná-la explicitamente e explicar por que é estrutural. "
-        "- NÃO invente narrativas que contradigam tendência/momento. Se tendencia='QUEDA', não diga 'alta' para a variável. "
-        "- Não cite números, preços ou percentis; use linguagem qualitativa. "
+        "(2) Vetores altistas; "
+        "(3) Vetores baixistas. "
+    
+        "REGRAS OBRIGATÓRIAS: "
+        "- Você DEVE mencionar TODAS as variáveis do painel ao menos uma vez, "
+        "nem que seja para afirmar que estão neutras ou sem impacto relevante no momento. "
+        "- Os vetores altistas e baixistas devem ser explicados com base no papel econômico da variável. "
+        "- A variável PREÇO ARABICA é DEPENDENTE e NÃO PODE ser listada como vetor altista ou baixista; "
+        "ela pode apenas ser usada como confirmação, timing ou reflexividade. "
+        "- Separe explicitamente a leitura de curto prazo (tática) da leitura estrutural (médio/longo prazo). "
+        "- Se existirem vetores altistas e baixistas relevantes simultaneamente, "
+        "a confiança NÃO PODE ser 'ALTA'. "
+        "- Não invente narrativas que contradigam tendência ou momento das variáveis. "
+        "- Não cite números, valores ou percentuais. "
         "- Não use o termo 'termômetro' e não mencione que você é IA. "
+    
         "Saída obrigatoriamente em JSON estrito com as chaves: "
-        "{'summary': string, 'drivers_bull': [string,...], 'drivers_bear': [string,...], "
-        "'bias': 'ALTA'|'QUEDA'|'LATERAL', 'confidence': 'BAIXA'|'MEDIA'|'ALTA'}."
+        "{'summary': string, "
+        "'drivers_bull': [string,...], "
+        "'drivers_bear': [string,...], "
+        "'bias': 'ALTA'|'QUEDA'|'LATERAL', "
+        "'confidence': 'BAIXA'|'MEDIA'|'ALTA'}."
     )
 
 
