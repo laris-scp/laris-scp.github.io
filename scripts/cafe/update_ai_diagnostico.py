@@ -12,6 +12,7 @@ Gera um diagnóstico textual (IA) para o Painel do Café, interpretando as vari�
 
 from __future__ import annotations
 
+import unicodedata
 import json
 import os
 import sys
@@ -326,6 +327,12 @@ def _parse_strict_json(text: str) -> Dict[str, Any]:
 
     candidate = text[start:end + 1].strip()
     return json.loads(candidate)
+    
+def _normalize_enum(s: str) -> str:
+    s = (s or "").strip()
+    s = unicodedata.normalize("NFKD", s)
+    s = "".join(ch for ch in s if not unicodedata.combining(ch))
+    return s.upper()
 
 
 def _validate_schema(obj: Dict[str, Any]) -> Dict[str, Any]:
@@ -347,8 +354,8 @@ def _validate_schema(obj: Dict[str, Any]) -> Dict[str, Any]:
     bear = [str(x).strip() for x in bear if str(x).strip()]
     lim = [str(x).strip() for x in lim if str(x).strip()]
 
-    bias = str(obj["bias"]).strip().upper()
-    conf = str(obj["confidence"]).strip().upper()
+    bias = _normalize_enum(str(obj["bias"]))
+    conf = _normalize_enum(str(obj["confidence"]))
 
     if bias not in ("ALTA", "QUEDA", "LATERAL"):
         raise ValueError("bias inválido. Use: ALTA | QUEDA | LATERAL")
