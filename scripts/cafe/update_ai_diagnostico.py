@@ -134,17 +134,24 @@ def _build_prompt(snapshot: Dict[str, Any], summary: Dict[str, Any]) -> Tuple[st
 
     instructions = (
         "Você é um analista de commodities especializado em café arábica. "
-        "Você receberá um resumo estruturado das variáveis do painel. "
-        "Tarefa: produzir um diagnóstico atual do mercado (Português, semi-técnico), "
-        "com 1 parágrafo de síntese + bullets com os principais porquês. "
-        "Não cite preços ou números específicos; foque em direção (alta/queda/lateral) "
-        "e em probabilidades qualitativas (maior/menor chance), deixando claro o racional. "
-        "Use TODAS as variáveis, mas dê mais peso às que têm maior |score_ponderado|. "
-        "Não use o termo 'termômetro' e não mencione que você é IA. "
+        "Você receberá um resumo estruturado das variáveis do painel (com nível, tendência, momento e score_ponderado). "
+        "Tarefa: produzir um diagnóstico do mercado em Português (semi-técnico) com: "
+        "(1) 1 parágrafo de síntese; "
+        "(2) uma seção 'Principais vetores altistas' com bullets; "
+        "(3) uma seção 'Principais vetores baixistas' com bullets. "
+        "Regras obrigatórias: "
+        "- Você DEVE usar TODAS as variáveis ao menos uma vez na análise (nem que seja para dizer que está neutra). "
+        "- Você DEVE citar explicitamente (por nome) os 2 maiores drivers altistas e os 2 maiores drivers baixistas "
+        "com base em |score_ponderado|. "
+        "- Se existir a variável 'fundamental_stu', você DEVE mencioná-la explicitamente e explicar por que é estrutural. "
+        "- NÃO invente narrativas que contradigam tendência/momento. Se tendencia='QUEDA', não diga 'alta' para a variável. "
+        "- Não cite números, preços ou percentis; use linguagem qualitativa. "
+        "- Não use o termo 'termômetro' e não mencione que você é IA. "
         "Saída obrigatoriamente em JSON estrito com as chaves: "
-        "{'summary': string, 'drivers': [string, ...], 'bias': 'ALTA'|'QUEDA'|'LATERAL', "
-        "'confidence': 'BAIXA'|'MEDIA'|'ALTA'}."
+        "{'summary': string, 'drivers_bull': [string,...], 'drivers_bear': [string,...], "
+        "'bias': 'ALTA'|'QUEDA'|'LATERAL', 'confidence': 'BAIXA'|'MEDIA'|'ALTA'}."
     )
+
 
     user_content = {
         "contexto": {
@@ -258,22 +265,24 @@ def _parse_strict_json(text: str) -> Dict[str, Any]:
 
 
 def _validate_schema(obj: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Garante que o JSON final tenha as chaves exigidas e tipos corretos.
-    """
-    required = ["summary", "drivers", "bias", "confidence"]
+    required = ["summary", "drivers_bull", "drivers_bear", "bias", "confidence"]
     for k in required:
         if k not in obj:
             raise ValueError(f"Campo obrigatório ausente: {k}")
 
     summary = str(obj["summary"]).strip()
-    drivers = obj["drivers"]
+
+    bull = obj["drivers_bull"]
+    bear = obj["drivers_bear"]
+
+    if not isinstance(bull, list) or not isinstance(bear, list):
+        raise ValueError("drivers_bull e drivers_bear devem ser listas.")
+
+    bull = [str(x).strip() for x in bull if str(x).strip()]
+    bear = [str(x).strip() for x in bear if str(x).strip()]
+
     bias = str(obj["bias"]).strip().upper()
     conf = str(obj["confidence"]).strip().upper()
-
-    if not isinstance(drivers, list):
-        raise ValueError("drivers deve ser uma lista.")
-    drivers = [str(x).strip() for x in drivers if str(x).strip()]
 
     if bias not in ("ALTA", "QUEDA", "LATERAL"):
         raise ValueError("bias inválido. Use: ALTA | QUEDA | LATERAL")
@@ -283,11 +292,11 @@ def _validate_schema(obj: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "date": datetime.utcnow().strftime("%Y-%m-%d"),
         "summary": summary,
-        "drivers": drivers[:8],  # limita bullets
+        "drivers_bull": bull[:8],
+        "drivers_bear": bear[:8],
         "bias": bias,
         "confidence": conf,
     }
-
 
 def main() -> int:
     t0 = time.time()
