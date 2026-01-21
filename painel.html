@@ -107,6 +107,14 @@
     .ai-badge.lat{ color:#d1d5db; border-color: rgba(148,163,184,.32); background: rgba(148,163,184,.10); }
     .ai-badge.conf{ margin-left:8px; }
     .ai-hidden{ display:none; }
+        /* Títulos dentro da lista (Altistas/Baixistas) */
+    .ai-bullets li.ai-section {
+      list-style: none;
+      margin-left: -18px;
+      font-weight: 800;
+      color: var(--text);
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -264,18 +272,42 @@
         aiSummary.textContent = safeText(d.summary) || "—";
 
         // Bullets
+        // Bullets (agora: drivers_bull e drivers_bear no MESMO banner)
         aiDrivers.innerHTML = "";
-        const drivers = Array.isArray(d.drivers) ? d.drivers : [];
-        for(const s of drivers){
+
+        const bull = Array.isArray(d.drivers_bull) ? d.drivers_bull : [];
+        const bear = Array.isArray(d.drivers_bear) ? d.drivers_bear : [];
+
+        function addSection(title){
           const li = document.createElement("li");
-          li.textContent = safeText(s);
+          li.className = "ai-section";
+          li.textContent = title;
           aiDrivers.appendChild(li);
         }
 
+        if(bull.length){
+          addSection("Vetores altistas");
+          for(const s of bull){
+            const li = document.createElement("li");
+            li.textContent = safeText(s);
+            aiDrivers.appendChild(li);
+          }
+        }
+
+        if(bear.length){
+          addSection("Vetores baixistas");
+          for(const s of bear){
+            const li = document.createElement("li");
+            li.textContent = safeText(s);
+            aiDrivers.appendChild(li);
+          }
+        }
+
         // Mostrar banner só se tiver conteúdo
-        if((safeText(d.summary).trim()) || drivers.length){
+        if((safeText(d.summary).trim()) || bull.length || bear.length){
           banner.classList.remove("ai-hidden");
         }
+
       }catch(e){
         // silencioso: não quebra o painel
         return;
