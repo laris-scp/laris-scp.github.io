@@ -145,40 +145,38 @@ def _build_prompt(snapshot: Dict[str, Any], summary: Dict[str, Any]) -> Tuple[st
     updated_at = snapshot.get("updated_at", "")
     commodity = snapshot.get("commodity", "cafe")
 
-        instructions = (
-            "Você é um analista de commodities especializado em café arábica. "
-            "Você receberá um resumo estruturado das variáveis do painel (inclui score_ponderado, relevancia e papel econômico). "
-    
-            "Tarefa: escrever um diagnóstico em Português (semi-técnico) com: "
-            "(1) 1 parágrafo de síntese (2–4 frases) explicando o cenário e o viés (alta/queda/lateral) "
-            "separando curto prazo (tático) vs médio/longo prazo (estrutural); "
-            "(2) bullets curtos com os porquês, priorizando apenas as variáveis de relevância ALTA e MEDIA; "
-            "(3) uma linha final listando as variáveis de relevância BAIXA como 'impacto limitado no momento' (sem explicar nível/tendência/momento). "
-    
-            "REGRAS OBRIGATÓRIAS: "
-            "- NÃO descreva nível/tendência/momento literalmente para todas as variáveis. "
-            "Use essas dimensões apenas quando a variável tiver relevância ALTA ou MEDIA e de forma natural (sem jargão repetitivo). "
-            "- A variável PREÇO ARABICA é DEPENDENTE: NÃO pode ser tratada como causa, "
-            "NÃO pode aparecer como vetor altista/baixista. "
-            "Você pode mencioná-la apenas como confirmação/timing no parágrafo de síntese, e nunca como explicação causal. "
-            "- Você DEVE considerar TODAS as variáveis: "
-            "ALTA/MEDIA entram nos bullets explicados; BAIXA entra só na linha de 'impacto limitado'. "
-            "- Interprete o sentido econômico respeitando o sinal do score_ponderado: "
-            "score_ponderado positivo = força altista; negativo = força baixista. "
-            "NÃO produza frases logicamente incoerentes como 'preço em queda pressiona custos' ou 'queda de fertilizante pressiona custos'. "
-            "Se fertilizante estiver em queda, trate como redução de custo (o efeito no preço deve ser coerente com o sinal do score_ponderado fornecido). "
-            "- Confiança: se houver forças altistas e baixistas relevantes simultaneamente, a confiança NÃO pode ser ALTA. "
-    
-            "Saída obrigatoriamente em JSON estrito com as chaves: "
-            "{'summary': string, "
-            "'drivers_bull': [string,...], "
-            "'drivers_bear': [string,...], "
-            "'limited_impact': [string,...], "
-            "'bias': 'ALTA'|'QUEDA'|'LATERAL', "
-            "'confidence': 'BAIXA'|'MEDIA'|'ALTA'}."
-        )
+    instructions = (
+        "Você é um analista de commodities especializado em café arábica. "
+        "Você receberá um resumo estruturado das variáveis do painel (inclui score_ponderado, relevancia e papel econômico). "
 
+        "Tarefa: escrever um diagnóstico em Português (semi-técnico) com: "
+        "(1) 1 parágrafo de síntese (2–4 frases) explicando o cenário e o viés (alta/queda/lateral) "
+        "separando curto prazo (tático) vs médio/longo prazo (estrutural); "
+        "(2) bullets curtos com os porquês, priorizando apenas as variáveis de relevância ALTA e MEDIA; "
+        "(3) uma linha final listando as variáveis de relevância BAIXA como 'impacto limitado no momento' (sem explicar nível/tendência/momento). "
 
+        "REGRAS OBRIGATÓRIAS: "
+        "- NÃO descreva nível/tendência/momento literalmente para todas as variáveis. "
+        "Use essas dimensões apenas quando a variável tiver relevância ALTA ou MEDIA e de forma natural (sem jargão repetitivo). "
+        "- A variável PREÇO ARABICA é DEPENDENTE: NÃO pode ser tratada como causa, "
+        "NÃO pode aparecer como vetor altista/baixista. "
+        "Você pode mencioná-la apenas como confirmação/timing no parágrafo de síntese, e nunca como explicação causal. "
+        "- Você DEVE considerar TODAS as variáveis: "
+        "ALTA/MEDIA entram nos bullets explicados; BAIXA entra só na linha de 'impacto limitado'. "
+        "- Interprete o sentido econômico respeitando o sinal do score_ponderado: "
+        "score_ponderado positivo = força altista; negativo = força baixista. "
+        "NÃO produza frases logicamente incoerentes como 'preço em queda pressiona custos' ou 'queda de fertilizante pressiona custos'. "
+        "Se fertilizante estiver em queda, trate como redução de custo (o efeito no preço deve ser coerente com o sinal do score_ponderado fornecido). "
+        "- Confiança: se houver forças altistas e baixistas relevantes simultaneamente, a confiança NÃO pode ser ALTA. "
+
+        "Saída obrigatoriamente em JSON estrito com as chaves: "
+        "{'summary': string, "
+        "'drivers_bull': [string,...], "
+        "'drivers_bear': [string,...], "
+        "'limited_impact': [string,...], "
+        "'bias': 'ALTA'|'QUEDA'|'LATERAL', "
+        "'confidence': 'BAIXA'|'MEDIA'|'ALTA'}."
+    )
 
     user_content = {
         "contexto": {
