@@ -215,9 +215,9 @@ def _build_prompt(snapshot: Dict[str, Any], summary: Dict[str, Any]) -> Tuple[st
         "- Quando indica conforto de oferta ou normalização, é baixista.\n"
         "- Quando neutro, deve ser tratado como impacto limitado e apenas validação cruzada.\n\n"
         "10) Preço do café arábica (regra crítica)\n"
-        "- O preço do café arábica é uma variável dependente.\n"
+        "- O preço do café arábica é uma variável dependente, ou seja, nunca deve ser utilizada e mencionada na lista de drivers_bull ou drivers_bear ou limited_impact.\n"
         "- É proibido usá-lo como causa, driver, justificativa ou explicação.\n"
-        "- O preço não deve ser mencionado em summary, drivers ou limited_impact.\n"
+        "- O preço do café deverá ser utilizado como uma consequência de todas as outras variáveis acima, independente do peso dela.\n"
         "- O resultado direcional deve ser expresso exclusivamente por bias e confidence.\n"
     )
 
