@@ -1,18 +1,21 @@
 {
   "date": "2026-01-21",
-  "summary": "Atualmente, o mercado de café arábica apresenta uma dinâmica mista, com vetores altistas e baixistas que indicam uma incerteza no curto prazo. A oferta estrutural global e os estoques certificados contribuem positivamente, enquanto a taxa de câmbio USD/BRL e os custos de fertilizantes pressionam negativamente o cenário. A tendência de queda do preço do arábica reforça a necessidade de cautela nas decisões de investimento.",
+  "summary": "O cenário atual do café arábica apresenta um viés de queda no curto prazo, impulsionado por fatores como a desvalorização do real e a pressão sobre os preços. No entanto, no médio e longo prazo, a oferta estrutural global e os estoques certificados indicam uma perspectiva mais otimista, sugerindo uma possível recuperação futura dos preços.",
   "drivers_bull": [
-    "FUNDAMENTAL S&D (STU Global): A oferta estrutural global está em nível muito baixo, com tendência de queda, mas com momento desacelerando, o que pode indicar uma recuperação futura.",
-    "ESTOQUES CERTIFICADOS: Os estoques disponíveis estão em nível muito baixo e com tendência lateral, sugerindo uma oferta imediata que pode sustentar os preços.",
-    "CLIMA (SOIL MOISTURE): O risco de oferta futura devido ao clima está em nível muito alto, mas com tendência lateral e momento neutro, o que pode não impactar drasticamente a oferta a curto prazo.",
-    "GSCPI (FRETES): A fricção logística está em nível muito alto, mas com tendência lateral e momento neutro, o que pode não afetar significativamente os custos de transporte no curto prazo."
+    "Fundamental S&D (STU Global) aponta para uma oferta estrutural global baixa, o que é altista para os preços.",
+    "Estoques certificados estão em níveis muito baixos, indicando uma oferta disponível imediata restrita.",
+    "Clima (Soil Moisture) apresenta riscos de oferta futura, o que pode pressionar os preços para cima.",
+    "GSCPI (Fretes) sugere que a fricção logística pode impactar positivamente a dinâmica de preços."
   ],
   "drivers_bear": [
-    "USD/BRL: A taxa de câmbio está em nível baixo, com tendência de queda e momento desacelerando, o que pode reduzir a competitividade das exportações brasileiras.",
-    "PREÇO ARABICA: O preço do arábica está em nível baixo, com tendência de queda e momento acelerando, o que pode desestimular a produção e o investimento no setor.",
-    "FERTILIZANTE (UREA): O custo marginal de produção está em nível muito alto, com tendência de queda e momento acelerando, o que pode pressionar os custos de produção.",
-    "EXPORTAÇÃO (MDIC) – CAFÉ VERDE: O fluxo efetivo de exportação está neutro, mas com tendência lateral e momento de queda desacelerando, o que pode indicar uma estagnação nas vendas externas."
+    "A desvalorização do USD/BRL está pressionando os preços em reais, impactando negativamente a competitividade das exportações.",
+    "O preço do arábica está em queda, refletindo a pressão do mercado e a dinâmica de oferta e demanda."
   ],
-  "bias": "LATERAL",
+  "limited_impact": [
+    "Fertilizante (Urea) apresenta impacto limitado no momento.",
+    "Exportação (MDIC) – Café Verde mostra um fluxo efetivo neutro.",
+    "COT Report e ICO (IA) têm relevância baixa e não influenciam significativamente o cenário atual."
+  ],
+  "bias": "QUEDA",
   "confidence": "BAIXA"
 }
