@@ -1,0 +1,13 @@
+{
+  "date": "2026-01-21",
+  "summary": "Atualmente, o mercado de café arábica apresenta uma tendência de queda, impulsionada por fatores macroeconômicos e de oferta. A pressão sobre os preços é acentuada pela valorização do dólar em relação ao real, que afeta a competitividade das exportações brasileiras. Apesar de alguns indicadores de oferta, como os estoques certificados, mostrarem uma situação relativamente estável, a expectativa de queda nos preços e nos custos de produção, como os fertilizantes, sugere um cenário desafiador para os produtores.",
+  "drivers": [
+    "A valorização do dólar (USD/BRL) está pressionando os preços em reais, aumentando a competitividade das exportações brasileiras.",
+    "Os preços do café arábica estão em queda, refletindo uma dinâmica de mercado desfavorável e uma possível aceleração dessa tendência.",
+    "Os estoques certificados estão em níveis muito baixos, mas a tendência lateral sugere que a oferta imediata não deve ser um fator de suporte significativo.",
+    "O clima e a umidade do solo estão em níveis neutros, mas a falta de estresse hídrico pode ajudar a estabilizar a oferta futura.",
+    "Os custos de produção, especialmente com fertilizantes, estão em queda, o que pode aliviar a pressão sobre os produtores, mas não é suficiente para reverter a tendência de queda nos preços."
+  ],
+  "bias": "QUEDA",
+  "confidence": "ALTA"
+}
