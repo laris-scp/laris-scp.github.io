@@ -1,0 +1,50 @@
+name: 23 - AI Diagnóstico (data/cafe/ai_diagnostico.json)
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: "30 23 15 * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cafe-ai-diagnostico
+  cancel-in-progress: false
+
+jobs:
+  ai-diagnostico:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+
+      - name: Run AI diagnóstico
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python scripts/cafe/update_ai_diagnostico.py
+
+      - name: Commit changes (if any)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add data/cafe/ai_diagnostico.json
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "data(cafe): update ai_diagnostico.json"
+          git push
