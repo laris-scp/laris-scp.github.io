@@ -117,7 +117,7 @@
     }
 
     /* =========================
-       MOBILE: evitar quebra do Painel
+       MOBILE: evitar quebra do Painel (somente layout)
        ========================= */
     @media (max-width: 720px){
       header{
@@ -170,53 +170,6 @@
       .ai-meta{
         white-space: normal;
       }
-    }
-
-    @media (max-width: 720px){
-      /* Tabela vira lista de cards */
-      table{ font-size: 12px; }
-      thead{ display:none; }
-      tbody, tr, td{ display:block; width:100%; }
-      tr{
-        border: 1px solid rgba(255,255,255,.10);
-        border-radius: 12px;
-        margin: 10px 0;
-        overflow: hidden;
-        background: rgba(255,255,255,.02);
-      }
-      td{
-        border: 0;
-        border-bottom: 1px solid rgba(255,255,255,.07);
-        padding: 10px 12px;
-        display:flex;
-        gap: 10px;
-        justify-content: space-between;
-        align-items: flex-start;
-      }
-      td:last-child{ border-bottom: 0; }
-
-      /* “Label” à esquerda (vem do data-label no HTML) */
-      td::before{
-        content: attr(data-label);
-        color: var(--muted);
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: .04em;
-        font-size: 10px;
-        flex: 0 0 44%;
-      }
-
-      /* coluna da variável pode precisar quebrar em várias linhas */
-      td:nth-child(2){
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      td:nth-child(2)::before{
-        margin-bottom: 6px;
-      }
-
-      /* alinhar “right” não faz sentido no mobile */
-      .right{ text-align: left; }
     }
 
   </style>
@@ -387,20 +340,18 @@
           const scoreP = w * sc;
           tbody.innerHTML += `
             <tr>
-              <td data-label="Bloco"><span class="tag">${r.bloco ?? ""}</span></td>
-
-              <td data-label="Variável">
+              <td><span class="tag">${r.bloco ?? ""}</span></td>
+              <td>
                 <div class="row-title">${r.variavel ?? r.id ?? ""}</div>
                 <div class="src">${(r.fonte ?? "").slice(0, 80)}${(r.fonte ?? "").length>80?"…":""}</div>
               </td>
-
-              <td data-label="Último" class="right">${fmtNumber(r.ultimo_valor, DECIMALS_BY_ID[r.id] ?? 2)}</td>
-              <td data-label="Nível">${r.nivel ?? ""}</td>
-              <td data-label="Tendência">${r.tendencia ?? ""}</td>
-              <td data-label="Momento">${r.momento ?? ""}</td>
-              <td data-label="Score Ponderado" class="right">${Number.isFinite(scoreP) ? scoreP.toFixed(2) : ""}</td>
-              <td data-label="Frequência">${r.frequencia ?? ""}</td>
-              <td data-label="Última Atualização">${fmtDate(r.ultima_atualizacao)}</td>
+              <td class="right">${fmtNumber(r.ultimo_valor, DECIMALS_BY_ID[r.id] ?? 2)}</td>
+              <td>${r.nivel ?? ""}</td>
+              <td>${r.tendencia ?? ""}</td>
+              <td>${r.momento ?? ""}</td>
+              <td class="right">${Number.isFinite(scoreP) ? scoreP.toFixed(2) : ""}</td>
+              <td>${r.frequencia ?? ""}</td>
+              <td>${fmtDate(r.ultima_atualizacao)}</td>
             </tr>
           `;
         }
