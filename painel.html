@@ -55,191 +55,51 @@
     .src{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.25}
     .err{padding:10px;border:1px solid rgba(239,68,68,.35);background:rgba(239,68,68,.08);border-radius:12px;color:#ffd0d0}
     a{color:#9bd0ff}
-        /* AI Diagnóstico (banner) */
-    .ai-banner{
-      background: linear-gradient(180deg, rgba(155,208,255,.10), rgba(255,255,255,.03));
-      border: 1px solid rgba(155,208,255,.25);
-      border-radius: 14px;
-      padding: 14px;
-    }
-    .ai-head{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:8px;
-    }
-    .ai-title{
-      font-size:14px;
-      font-weight:800;
-      margin:0;
-    }
-    .ai-meta{
-      font-size:11px;
-      color: var(--muted);
-      white-space:nowrap;
-    }
-    .ai-summary{
-      margin:0 0 10px 0;
-      line-height:1.35;
-      color: var(--text);
-      font-size:13px;
-    }
-    .ai-bullets{
-      margin:0;
-      padding-left: 18px;
-      color: var(--text);
-      font-size:12px;
-      line-height:1.35;
-    }
-    .ai-bullets li{ margin:6px 0; }
-    .ai-badge{
-      display:inline-block;
-      padding:3px 10px;
-      border-radius:999px;
-      font-size:11px;
-      font-weight:800;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.04);
-    }
-    .ai-badge.alt{ color:#7ff3c7; border-color: rgba(25,195,125,.35); background: rgba(25,195,125,.12); }
-    .ai-badge.bai{ color:#ffb4b4; border-color: rgba(239,68,68,.32); background: rgba(239,68,68,.10); }
-    .ai-badge.lat{ color:#d1d5db; border-color: rgba(148,163,184,.32); background: rgba(148,163,184,.10); }
-    .ai-badge.conf{ margin-left:8px; }
-    .ai-hidden{ display:none; }
-        /* Títulos dentro da lista (Altistas/Baixistas) */
-    .ai-bullets li.ai-section {
-      list-style: none;
-      margin-left: -18px;
-      font-weight: 800;
-      color: var(--text);
-      margin-top: 10px;
-    }
-
-    /* =========================
-       MOBILE: evitar quebra do Painel (somente layout)
-       ========================= */
-    @media (max-width: 720px){
-      header{
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      /* texto longo do header não deve forçar largura */
-      header > div:first-child{
-        width: 100%;
-        min-width: 0;
-      }
-      header .meta{
-        max-width: 100%;
-        overflow-wrap: anywhere;
-        word-break: break-word;
-      }
-
-      /* NAV embaixo e alinhado à esquerda no mobile */
-      .nav{
-        width: 100%;
-        justify-content: flex-start;
-      }
-      .nav a{
-        padding: 10px 12px;
-      }
-      #updatedAt{
-        margin-left: 0 !important;
-        width: 100%;
-      }
-
-      main{
-        padding: 14px 12px;
-      }
-
-      /* KPIs: não “estourar” por min-width */
-      .kpis{
-        gap: 10px;
-      }
-      .kpi{
-        min-width: 0;
-        flex: 1 1 160px;
-      }
-
-      /* Banner IA: permitir quebra de linha do header do card */
-      .ai-head{
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .ai-meta{
-        white-space: normal;
-      }
-    }
-
   </style>
 </head>
 <body>
   <header>
     <div>
       <h1>Painel do Café</h1>
-      <div class="meta">Este painel faz um compilado das variáveis macro e micro do Café, consolidando em um termômetro.
-      </div>
+      <div class="meta">Este painel faz um compilado de variáveis que impactam o preço do café arábica internacional (contrato ICEUS: KC). Por meio de um score que pode variar de -1 a 1, sendo -1 para tendência à depreciação do preço e +1 para apreciação, este painel procura ajudar o usuário a embasar sua decisão na hora de negociar a commodity.</div>
     </div>
 
-    <div class="nav" aria-label="Navegação">
+    <div class="nav">
       <a href="index.html">Home</a>
+      <a class="active" href="painel.html">Painel</a>
       <a href="variaveis.html">Variáveis</a>
-      <a href="painel.html" class="active">Painel</a>
-      <span id="updatedAt" class="meta" style="margin-left:10px"></span>
+      <div class="meta" id="updatedAt" style="margin-left:8px">—</div>
     </div>
   </header>
 
   <main>
     <div class="grid">
-
-      <!-- Termômetros -->
-      <section class="card" id="thermoCard">
-        <h2>Termômetro</h2>
-        <div class="kpis" id="thermoKpis">
+      <section class="card">
+        <h2>Termômetros</h2>
+        <div class="kpis">
           <div class="kpi">
             <div class="label">Bloco 1</div>
-            <div class="val" id="t_b1">–</div>
-            <div class="sub small" id="t_b1_lbl"></div>
+            <div class="val" id="t1">—</div>
+            
           </div>
           <div class="kpi">
             <div class="label">Bloco 2</div>
-            <div class="val" id="t_b2">–</div>
-            <div class="sub small" id="t_b2_lbl"></div>
+            <div class="val" id="t2">—</div>
+            
           </div>
           <div class="kpi">
             <div class="label">Geral</div>
-            <div class="val" id="t_all">–</div>
-            <div class="sub small" id="t_all_lbl"></div>
+            <div class="val" id="tg">—</div>
+            <div class="sub">Média ponderada (todos os blocos)</div>
           </div>
-        </div>
-        <div class="small">Interpretação: positivo = tendência altista; negativo = tendência baixista; próximo de zero = neutro.</div>
-      </section>
-
-      <!-- Diagnóstico IA -->
-      <section class="card ai-hidden" id="aiCard">
-        <div class="ai-banner">
-          <div class="ai-head">
-            <div>
-              <h2 class="ai-title">Diagnóstico Qualitativo (ICO)</h2>
-            </div>
-            <div class="ai-meta">
-              <span class="ai-badge" id="aiBadge">–</span>
-              <span class="ai-badge conf" id="aiConf">–</span>
-              <span class="small" id="aiUpdated"></span>
-            </div>
-          </div>
-          <p class="ai-summary" id="aiSummary"></p>
-          <ul class="ai-bullets" id="aiBullets"></ul>
         </div>
       </section>
 
-      <!-- Lista de variáveis -->
       <section class="card">
-        <h2>Variáveis (painel_snapshot.json)</h2>
-        <div id="status" class="small"></div>
-        <div style="overflow:auto;margin-top:10px">
-          <table id="tbl">
+        <h2>Variáveis</h2>
+        <div id="errBox" class="err" style="display:none"></div>
+        <div style="overflow:auto">
+          <table>
             <thead>
               <tr>
                 <th>Bloco</th>
@@ -253,91 +113,88 @@
                 <th>Última Atualização</th>
               </tr>
             </thead>
-            <tbody></tbody>
+            <tbody id="tbody"></tbody>
           </table>
         </div>
       </section>
-
     </div>
   </main>
 
   <script>
     const SNAPSHOT_URL = "data/cafe/painel_snapshot.json";
-    const AI_URL = "data/cafe/ai_diagnostico_ico.json";
-
     const DECIMALS_BY_ID = {
-      preco_arabica: 2,
-      usdbrl: 2,
-      clima_soil_moisture: 2,
-      gscpi_fretes: 2,
-      fertilizante_ureia: 2,
-      estoque_certificados: 0,
+      clima_soil: 2,
       cot_report: 0,
+      fertilizante_urea: 2,
+      gscpi: 2,
+      preco_arabica: 2,
+      usd_brl: 2,
+      estoques_certificados: 0,
       fundamental_stu: 4,
+      ico_ia: 0,
+      mdic_export: 0,
     };
 
-    function pillForScore(x){
-      if(!Number.isFinite(x)) return ["neu","NEUTRAL"];
-      if(x > 0.25) return ["good","BULLISH"];
-      if(x < -0.25) return ["bad","BEARISH"];
-      return ["neu","NEUTRAL"];
+
+    function fmtNumber(x, decimals = 2){
+      if(x===null || x===undefined || x==="") return "";
+      const n = Number(x);
+      if(!Number.isFinite(n)) return "";
+      const d = Number(decimals);
+      return n.toLocaleString("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d });
     }
-    function fmtNumber(v, dec=2){
-      if(v===null || v===undefined || v==="") return "";
-      const n = Number(v);
-      if(!Number.isFinite(n)) return String(v);
-      return n.toLocaleString("pt-BR", {minimumFractionDigits:dec, maximumFractionDigits:dec});
+
+    function fmtDate(x){
+      if(!x) return "";
+      return String(x);
     }
-    function fmtDate(s){
-      if(!s) return "";
-      // aceita "YYYY-MM-DD" ou "YYYY-MM-DD HH:mm:ss"
+    function showError(msg){
+      const box = document.getElementById("errBox");
+      box.style.display = "block";
+      box.textContent = msg;
+    }
+    function normBloco(x){
+      const n = Number(x);
+      return Number.isFinite(n) ? n : 999;
+    }
+    function normName(r){
+      return String(r.variavel ?? r.id ?? "").toUpperCase();
+    }
+
+    async function load(){
       try{
-        const d = new Date(String(s).replace(" ", "T"));
-        if(Number.isNaN(d.getTime())) return String(s);
-        const dd = String(d.getDate()).padStart(2,"0");
-        const mm = String(d.getMonth()+1).padStart(2,"0");
-        const yyyy = d.getFullYear();
-        return `${dd}/${mm}/${yyyy}`;
-      }catch{ return String(s); }
-    }
+        const res = await fetch(SNAPSHOT_URL,{cache:"no-store"});
+        if(!res.ok) throw new Error("Falha ao carregar painel_snapshot.json: " + res.status);
+        const data = await res.json();
 
-    async function loadSnapshot(){
-      const status = document.getElementById("status");
-      try{
-        status.textContent = "Carregando…";
-        const res = await fetch(SNAPSHOT_URL, {cache:"no-store"});
-        if(!res.ok) throw new Error(`HTTP ${res.status}`);
-        const snap = await res.json();
+        document.getElementById("updatedAt").textContent = "Atualizado em: " + (data.updated_at ?? "—");
 
-        document.getElementById("updatedAt").textContent =
-          snap.updated_at ? `Atualizado em: ${fmtDate(snap.updated_at)}` : "";
+        const t = data.thermometers ?? {};
+        document.getElementById("t1").textContent = (t.bloco_1 ?? "—");
+        document.getElementById("t2").textContent = (t.bloco_2 ?? "—");
+        document.getElementById("tg").textContent = (t.geral ?? "—");
 
-        // Termômetros
-        const t = snap.thermometros || snap.thermometers || {};
-        const b1 = Number(t.bloco_1);
-        const b2 = Number(t.bloco_2);
-        const all = Number(t.geral);
+        const rows0 = Array.isArray(data.rows) ? data.rows : [];
 
-        const b1p = pillForScore(b1);
-        const b2p = pillForScore(b2);
-        const ap = pillForScore(all);
+        // ORDENAÇÃO: Bloco 1 primeiro, depois Bloco 2; dentro do bloco: peso (desc), depois nome
+        const rows = rows0.slice().sort((a,b)=>{
+          const da = normBloco(a.bloco), db = normBloco(b.bloco);
+          if(da !== db) return da - db;
+        
+          const pa = Number(a.peso), pb = Number(b.peso);
+          const ppa = Number.isFinite(pa) ? pa : -999;
+          const ppb = Number.isFinite(pb) ? pb : -999;
+          if(ppa !== ppb) return ppb - ppa; // maior peso primeiro
+        
+          return normName(a).localeCompare(normName(b), "pt-BR");
+        });
 
-        document.getElementById("t_b1").textContent = Number.isFinite(b1) ? b1.toFixed(2) : "–";
-        document.getElementById("t_b2").textContent = Number.isFinite(b2) ? b2.toFixed(2) : "–";
-        document.getElementById("t_all").textContent = Number.isFinite(all) ? all.toFixed(2) : "–";
 
-        document.getElementById("t_b1_lbl").innerHTML = `<span class="pill ${b1p[0]}">${b1p[1]}</span>`;
-        document.getElementById("t_b2_lbl").innerHTML = `<span class="pill ${b2p[0]}">${b2p[1]}</span>`;
-        document.getElementById("t_all_lbl").innerHTML = `<span class="pill ${ap[0]}">${ap[1]}</span>`;
-
-        // Tabela
-        const rows = snap.rows || [];
-        const tbody = document.querySelector("#tbl tbody");
+        const tbody = document.getElementById("tbody");
         tbody.innerHTML = "";
+
         for(const r of rows){
-          const w = Number(r.peso ?? 0);
-          const sc = Number(r.score ?? 0);
-          const scoreP = w * sc;
+          const scoreP = Number(r.score_ponderado);
           tbody.innerHTML += `
             <tr>
               <td><span class="tag">${r.bloco ?? ""}</span></td>
@@ -355,90 +212,11 @@
             </tr>
           `;
         }
-        status.textContent = `OK • ${rows.length} variáveis`;
       }catch(err){
-        status.innerHTML = `<div class="err">Falha ao carregar snapshot: ${String(err)}</div>`;
+        showError(String(err));
       }
     }
-
-    function buildAiBullets(obj){
-      const ul = document.getElementById("aiBullets");
-      ul.innerHTML = "";
-      const evid = obj.evidencias || obj.evidencias_altistas_baixistas || [];
-      if(Array.isArray(evid) && evid.length){
-        for(const it of evid){
-          const li = document.createElement("li");
-          li.textContent = String(it);
-          ul.appendChild(li);
-        }
-        return;
-      }
-
-      // fallback se vier separado em altistas/baixistas
-      const alt = obj.altistas || [];
-      const bai = obj.baixistas || [];
-      if(Array.isArray(alt) && alt.length){
-        const t = document.createElement("li");
-        t.className = "ai-section";
-        t.textContent = "Forças Altistas";
-        ul.appendChild(t);
-        for(const it of alt){
-          const li = document.createElement("li");
-          li.textContent = String(it);
-          ul.appendChild(li);
-        }
-      }
-      if(Array.isArray(bai) && bai.length){
-        const t = document.createElement("li");
-        t.className = "ai-section";
-        t.textContent = "Forças Baixistas";
-        ul.appendChild(t);
-        for(const it of bai){
-          const li = document.createElement("li");
-          li.textContent = String(it);
-          ul.appendChild(li);
-        }
-      }
-    }
-
-    async function loadAI(){
-      try{
-        const res = await fetch(AI_URL, {cache:"no-store"});
-        if(!res.ok) return; // se não existir, só não mostra
-        const obj = await res.json();
-        const card = document.getElementById("aiCard");
-        card.classList.remove("ai-hidden");
-
-        const label = obj.label || obj.tendencia || obj.signal_label || "–";
-        const conf = obj.confidence || obj.confianca || "–";
-        const updated = obj.updated_at || obj.atualizado_em || "";
-
-        // badge por label
-        const badge = document.getElementById("aiBadge");
-        badge.textContent = String(label);
-        badge.classList.remove("alt","bai","lat");
-        const l = String(label).toUpperCase();
-        if(l.includes("BULL") || l.includes("ALT")) badge.classList.add("alt");
-        else if(l.includes("BEAR") || l.includes("BAI")) badge.classList.add("bai");
-        else badge.classList.add("lat");
-
-        const c = document.getElementById("aiConf");
-        c.textContent = `Conf.: ${String(conf)}`;
-
-        document.getElementById("aiUpdated").textContent =
-          updated ? ` • ${fmtDate(updated)}` : "";
-
-        const sum = obj.summary || obj.resumo || obj.diagnostico || "";
-        document.getElementById("aiSummary").textContent = String(sum);
-
-        buildAiBullets(obj);
-      }catch{
-        // silencioso
-      }
-    }
-
-    loadSnapshot();
-    loadAI();
+    load();
   </script>
 </body>
 </html>
