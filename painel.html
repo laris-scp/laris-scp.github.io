@@ -55,6 +55,58 @@
     .src{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.25}
     .err{padding:10px;border:1px solid rgba(239,68,68,.35);background:rgba(239,68,68,.08);border-radius:12px;color:#ffd0d0}
     a{color:#9bd0ff}
+        /* AI Diagnóstico (banner) */
+    .ai-banner{
+      background: linear-gradient(180deg, rgba(155,208,255,.10), rgba(255,255,255,.03));
+      border: 1px solid rgba(155,208,255,.25);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .ai-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:8px;
+    }
+    .ai-title{
+      font-size:14px;
+      font-weight:800;
+      margin:0;
+    }
+    .ai-meta{
+      font-size:11px;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+    .ai-summary{
+      margin:0 0 10px 0;
+      line-height:1.35;
+      color: var(--text);
+      font-size:13px;
+    }
+    .ai-bullets{
+      margin:0;
+      padding-left: 18px;
+      color: var(--text);
+      font-size:12px;
+      line-height:1.35;
+    }
+    .ai-bullets li{ margin:6px 0; }
+    .ai-badge{
+      display:inline-block;
+      padding:3px 10px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:800;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.04);
+    }
+    .ai-badge.alt{ color:#7ff3c7; border-color: rgba(25,195,125,.35); background: rgba(25,195,125,.12); }
+    .ai-badge.bai{ color:#ffb4b4; border-color: rgba(239,68,68,.32); background: rgba(239,68,68,.10); }
+    .ai-badge.lat{ color:#d1d5db; border-color: rgba(148,163,184,.32); background: rgba(148,163,184,.10); }
+    .ai-badge.conf{ margin-left:8px; }
+    .ai-hidden{ display:none; }
   </style>
 </head>
 <body>
@@ -94,6 +146,22 @@
           </div>
         </div>
       </section>
+            <!-- AI Diagnóstico (banner) -->
+      <section class="ai-banner ai-hidden" id="aiBanner">
+        <div class="ai-head">
+          <div>
+            <h2 class="ai-title">Diagnóstico (IA)</h2>
+            <div class="small" id="aiDate">—</div>
+          </div>
+          <div style="text-align:right">
+            <span class="ai-badge" id="aiBias">—</span>
+            <span class="ai-badge conf" id="aiConf">—</span>
+          </div>
+        </div>
+
+        <p class="ai-summary" id="aiSummary">—</p>
+        <ul class="ai-bullets" id="aiDrivers"></ul>
+      </section>
 
       <section class="card">
         <h2>Variáveis</h2>
@@ -122,6 +190,7 @@
 
   <script>
     const SNAPSHOT_URL = "data/cafe/painel_snapshot.json";
+    const AI_URL = "data/cafe/ai_diagnostico.json";
     const DECIMALS_BY_ID = {
       clima_soil: 2,
       cot_report: 0,
@@ -134,7 +203,6 @@
       ico_ia: 0,
       mdic_export: 0,
     };
-
 
     function fmtNumber(x, decimals = 2){
       if(x===null || x===undefined || x==="") return "";
@@ -153,6 +221,67 @@
       box.style.display = "block";
       box.textContent = msg;
     }
+    function biasClass(bias){
+      const b = String(bias || "").toUpperCase();
+      if(b === "ALTA") return "alt";
+      if(b === "QUEDA") return "bai";
+      if(b === "LATERAL") return "lat";
+      return "";
+    }
+
+    function safeText(x){
+      if(x === null || x === undefined) return "";
+      return String(x);
+    }
+
+    async function loadAIDiagnostico(){
+      // Não pode quebrar o site se o JSON ainda não existir
+      try{
+        const res = await fetch(AI_URL, {cache:"no-store"});
+        if(!res.ok){
+          // se 404/500 etc: apenas não mostra
+          return;
+        }
+        const d = await res.json();
+
+        const banner = document.getElementById("aiBanner");
+        const aiDate = document.getElementById("aiDate");
+        const aiBias = document.getElementById("aiBias");
+        const aiConf = document.getElementById("aiConf");
+        const aiSummary = document.getElementById("aiSummary");
+        const aiDrivers = document.getElementById("aiDrivers");
+
+        const dateTxt = d.date ? `Atualizado em: ${safeText(d.date)}` : "—";
+        aiDate.textContent = dateTxt;
+
+        const bias = safeText(d.bias).toUpperCase();
+        const conf = safeText(d.confidence).toUpperCase();
+
+        aiBias.textContent = bias ? `Viés: ${bias}` : "—";
+        aiBias.className = "ai-badge " + biasClass(bias);
+
+        aiConf.textContent = conf ? `Confiança: ${conf}` : "—";
+        aiSummary.textContent = safeText(d.summary) || "—";
+
+        // Bullets
+        aiDrivers.innerHTML = "";
+        const drivers = Array.isArray(d.drivers) ? d.drivers : [];
+        for(const s of drivers){
+          const li = document.createElement("li");
+          li.textContent = safeText(s);
+          aiDrivers.appendChild(li);
+        }
+
+        // Mostrar banner só se tiver conteúdo
+        if((safeText(d.summary).trim()) || drivers.length){
+          banner.classList.remove("ai-hidden");
+        }
+      }catch(e){
+        // silencioso: não quebra o painel
+        return;
+      }
+    }
+
     function normBloco(x){
       const n = Number(x);
       return Number.isFinite(n) ? n : 999;
@@ -217,6 +346,7 @@
       }
     }
     load();
+    loadAIDiagnostico();
   </script>
 </body>
 </html>
