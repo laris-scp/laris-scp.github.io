@@ -172,6 +172,26 @@ def main():
         df_all["date"] = pd.to_datetime(df_all["date"], errors="coerce")
         df_all["close"] = pd.to_numeric(df_all["close"], errors="coerce")
         df_all = df_all.dropna().drop_duplicates(subset=["date"]).sort_values("date").reset_index(drop=True)
+    # --- 4.1) Garantia de histórico mínimo para calcular MM252 sem quebrar ---
+    # Após rolling(MM_LONG) e dropna(), perdemos (MM_LONG-1) linhas.
+    # Para ter pelo menos (MM_LONG + 60) linhas "válidas" no fim, precisamos:
+    # len_bruto >= (MM_LONG - 1) + (MM_LONG + 60)
+    min_raw = (MM_LONG - 1) + (MM_LONG + 60)
+
+    if len(df_all) < min_raw:
+        # Fallback seguro: refaz bootstrap (10 anos) para recompor histórico suficiente
+        print(
+            f"AVISO: histórico insuficiente para MM{MM_LONG}. "
+            f"len(df_all)={len(df_all)} < {min_raw}. Fazendo bootstrap de {LOOKBACK_YEARS} anos."
+        )
+        start_dt = end_dt - timedelta(days=LOOKBACK_YEARS * 365 - 5)
+        df_bcb = fetch_bcb_chunked(start_dt, end_dt, session)
+        if df_bcb.empty:
+            raise RuntimeError("BCB retornou vazio no bootstrap (fallback por histórico insuficiente).")
+        df_all = df_bcb.rename(columns={"data": "date", "valor": "close"})
+        df_all["date"] = pd.to_datetime(df_all["date"], errors="coerce")
+        df_all["close"] = pd.to_numeric(df_all["close"], errors="coerce")
+        df_all = df_all.dropna().drop_duplicates(subset=["date"]).sort_values("date").reset_index(drop=True)
 
     # --- 5) Médias móveis ---
     df_all["mm252"] = df_all["close"].rolling(MM_LONG).mean()
