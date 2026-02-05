@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     # 10:02 UTC = 07:02 America/Sao_Paulo (UTC-3) — evita colisão com USD/BRL
-    - cron: "2 10 * * *"
+    - cron: "30 10 * * *"
 
 permissions:
   contents: write
