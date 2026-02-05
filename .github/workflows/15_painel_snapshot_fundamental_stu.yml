@@ -10,6 +10,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: cafe-main-push
+  cancel-in-progress: false  
+
 jobs:
   update:
     # Só roda automaticamente se o workflow da série terminou com sucesso
