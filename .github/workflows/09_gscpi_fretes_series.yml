@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -39,4 +41,6 @@ jobs:
           fi
           git add data/cafe/series/gscpi_fretes.json
           git commit -m "data(cafe): update gscpi_fretes.json"
+          git pull --rebase origin main
+
           git push
