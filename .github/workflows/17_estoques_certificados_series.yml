@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -40,4 +42,6 @@ jobs:
           git add data/cafe/series/estoques_certificados.json
           git diff --cached --quiet && echo "No changes to commit" && exit 0
           git commit -m "data(cafe): update estoques_certificados series"
+          git pull --rebase origin main
+
           git push
