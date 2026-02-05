@@ -6,6 +6,10 @@ on:
     # roda mensalmente no dia 5 às 22:30 UTC (mesmo padrão mensal)
     - cron: "30 19 6 * *"
 
+concurrency:
+  group: cafe-main-push
+  cancel-in-progress: false    
+
 jobs:
   mdic_export_series:
     runs-on: ubuntu-latest
