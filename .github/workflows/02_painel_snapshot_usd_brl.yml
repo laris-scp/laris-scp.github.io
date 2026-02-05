@@ -19,6 +19,9 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -46,4 +49,6 @@ jobs:
 
           git add data/cafe/painel_snapshot.json
           git commit -m "data(cafe): update painel_snapshot (usd_brl)"
+          git pull --rebase origin main
+
           git push
