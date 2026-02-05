@@ -19,6 +19,9 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -46,4 +49,6 @@ jobs:
 
           git add data/cafe/series/usd_brl.json
           git commit -m "data(cafe): update usd_brl.json"
+          git pull --rebase origin main
+
           git push
