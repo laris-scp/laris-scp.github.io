@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     # roda mensalmente no dia 5 às 22:30 UTC (mesmo padrão mensal)
-    - cron: "30 22 5 * *"
+    - cron: "30 19 6 * *"
 
 jobs:
   mdic_export_series:
