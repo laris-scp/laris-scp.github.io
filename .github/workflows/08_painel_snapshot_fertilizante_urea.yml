@@ -20,6 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -41,4 +43,6 @@ jobs:
           fi
           git add data/cafe/painel_snapshot.json
           git commit -m "data(cafe): update painel_snapshot (fertilizante_urea)"
+          git pull --rebase origin main
+
           git push
