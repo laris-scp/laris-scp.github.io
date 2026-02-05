@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
   schedule:
   # Dia 5 e dia 15 às 07:00 BRT = 10:00 UTC
-  - cron: "0 10 5 * *"
-  - cron: "0 10 15 * *"
+  - cron: "0 11 5 * *"
+  - cron: "0 11 15 * *"
 
 permissions:
   contents: write
