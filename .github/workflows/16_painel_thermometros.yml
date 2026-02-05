@@ -20,7 +20,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: painel_thermometros
+  group: cafe-main-push
   cancel-in-progress: false
 
 jobs:
