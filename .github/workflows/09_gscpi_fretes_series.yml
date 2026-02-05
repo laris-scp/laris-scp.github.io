@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: cafe-gscpi-series
+  group: cafe-main-push
   cancel-in-progress: false
 
 jobs:
