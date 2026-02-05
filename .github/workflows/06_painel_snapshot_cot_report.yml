@@ -8,9 +8,12 @@ on:
     types:
       - completed
 
-
 permissions:
   contents: write
+
+concurrency:
+  group: cafe-main-push
+  cancel-in-progress: false
 
 jobs:
   update-snapshot:
