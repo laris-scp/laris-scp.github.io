@@ -7,7 +7,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: full_refresh_cafe
+  group: cafe-main-push
   cancel-in-progress: false
 
 jobs:
