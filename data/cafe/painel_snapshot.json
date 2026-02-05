@@ -1,6 +1,6 @@
 {
   "commodity": "cafe",
-  "updated_at": "2026-02-05 15:06:02",
+  "updated_at": "2026-02-05 15:23:58",
   "rows": [
     {
       "id": "preco_arabica",
@@ -90,8 +90,8 @@
       "id": "gscpi",
       "bloco": 1,
       "variavel": "GSCPI (FRETES)",
-      "ultimo_valor": 0.5133738634959152,
-      "percentil": 0.8452,
+      "ultimo_valor": 0.41147747569247506,
+      "percentil": 0.8101,
       "nivel": "MUITO ALTO",
       "valor_nivel": 1.0,
       "tendencia": "LATERAL",
@@ -102,7 +102,7 @@
       "peso": 2.0,
       "score_ponderado": 2.0,
       "frequencia": "Mensal",
-      "ultima_atualizacao": "2025-12-31",
+      "ultima_atualizacao": "2026-01-31",
       "regra_de_sinal": "Nível: compara o GSCPI atual com todo o histórico e diz se ele está baixo, normal ou alto. Tendência: olha a direção do GSCPI nos últimos meses usando uma média móvel e mede se ele vem subindo, caindo ou ficando de lado (regra mais estável: MM6 + tendência de 12 meses, com filtro de ruído). Momento: indica se essa tendência está ganhando força ou perdendo força.",
       "fonte": "NY Fed – Global Supply Chain Pressure Index (GSCPI)"
     },
