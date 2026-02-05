@@ -3,7 +3,7 @@ name: 17 - cafe - estoques_certificados - series
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 12 5 * *" # dia 5, 12:00 UTC (09:00 Brasil, aprox.)
+    - cron: "0 15 5 * *" # dia 5, 12:00 UTC (09:00 Brasil, aprox.)
 
 permissions:
   contents: write
