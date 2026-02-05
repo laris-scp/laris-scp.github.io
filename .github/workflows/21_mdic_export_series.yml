@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -48,5 +50,7 @@ jobs:
             echo "No changes to commit."
           else
             git commit -m "Update MDIC export series"
-            git push
+          git pull --rebase origin main
+
+          git push
           fi
