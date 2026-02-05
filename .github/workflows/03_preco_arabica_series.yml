@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -52,4 +54,9 @@ jobs:
 
           git add data/cafe/series/preco_arabica.json
           git commit -m "data(cafe): update preco_arabica.json"
+
+          # Puxa o que entrou no main enquanto este job rodava e reaplica seu commit por cima
+          git pull --rebase origin main
+
           git push
+
