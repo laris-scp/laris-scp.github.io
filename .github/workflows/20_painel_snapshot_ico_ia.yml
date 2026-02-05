@@ -22,6 +22,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -48,4 +50,6 @@ jobs:
           fi
 
           git commit -m "data(cafe): update painel_snapshot (ico_ia)"
+          git pull --rebase origin main
+
           git push
