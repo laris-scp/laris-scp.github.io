@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -40,4 +42,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/cafe/painel_snapshot.json
           git diff --cached --quiet || git commit -m "data(cafe): update painel_snapshot (estoques_certificados)"
+          git pull --rebase origin main
+
           git push
