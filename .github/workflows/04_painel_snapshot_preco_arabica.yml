@@ -19,6 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -36,4 +38,6 @@ jobs:
           fi
           git add data/cafe/painel_snapshot.json
           git commit -m "data(cafe): update painel_snapshot (preco_arabica)"
+          git pull --rebase origin main
+
           git push
