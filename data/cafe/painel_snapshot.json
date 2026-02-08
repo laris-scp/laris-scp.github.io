@@ -1,13 +1,13 @@
 {
   "commodity": "cafe",
-  "updated_at": "2026-02-08 10:22:08",
+  "updated_at": "2026-02-08 10:56:43",
   "rows": [
     {
       "id": "preco_arabica",
       "bloco": 1,
       "variavel": "PREÇO ARABICA",
-      "ultimo_valor": 296.54998779296875,
-      "percentil": 0.0291,
+      "ultimo_valor": 294.0,
+      "percentil": 0.0283,
       "nivel": "MUITO BAIXO",
       "valor_nivel": -1.0,
       "tendencia": "QUEDA",
