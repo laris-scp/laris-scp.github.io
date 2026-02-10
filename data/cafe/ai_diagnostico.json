@@ -1,21 +1,19 @@
 {
-  "date": "2026-02-05",
-  "summary": "Os estoques globais de café estão em níveis muito baixos, o que indica um aperto estrutural de oferta e é altista para os preços no médio e longo prazo. Os estoques certificados na ICE também estão baixos, mas com tendência lateral, o que mantém um viés altista, embora sem novo impulso. O clima apresenta estresse hídrico elevado, o que aumenta o risco de quebra de safra futura, contribuindo para uma perspectiva altista. No entanto, a queda acentuada do Dólar gera um viés baixista no curto prazo, reduzindo o preço em reais e a sustentação nominal do mercado. As exportações do Brasil estão desacelerando, o que também é baixista. A combinação dessas variáveis sugere uma tendência de alta moderada, mas com riscos significativos.",
+  "date": "2026-02-10",
+  "summary": "Os estoques globais estão em níveis muito baixos, o que indica um aperto estrutural de oferta e é altista para o preço do café arábica no médio e longo prazo. O clima apresenta estresse hídrico elevado, aumentando o risco de quebra de safra futura, o que também é um fator altista. No entanto, a queda do Dólar e a redução nas posições compradas dos fundos exercem pressão baixista sobre os preços no curto prazo.",
   "drivers_bull": [
     "Estoques Globais",
-    "Estoques Certificados na ICE",
     "Clima ou Estresse hídrico",
+    "Estoques Certificados na ICE",
     "Fretes"
   ],
   "drivers_bear": [
     "Dólar",
+    "Posição de fundos no café",
     "Exportações de café verde do Brasil",
     "Fertilizante (ureia)"
   ],
-  "limited_impact": [
-    "Posição de fundos no café",
-    "Relatório da ICO"
-  ],
+  "limited_impact": [],
   "bias": "ALTA",
   "confidence": "MEDIA"
 }
