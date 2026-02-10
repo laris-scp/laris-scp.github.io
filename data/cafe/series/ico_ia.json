@@ -335,8 +335,23 @@
       "pdf_sha256": "190918ed53aa1765de2abd17127bff4cfd0bfde01f8065c8205160010e73df93",
       "model": "gpt-5",
       "prompt_version": "v1"
+    },
+    {
+      "date": "2026-01-01",
+      "close": 0.0,
+      "signal": 0.0,
+      "label": "NEUTRAL",
+      "evidencias": [
+        "- Fonte: ICO; Fato principal: Produção global 2024 subiu 5,2% para 177,5 mi sacas e o balanço virou superávit de 2,44 mi; Regra aplicada: Aumento de produção → BEARISH; Impacto esperado no preço: Pressão baixista pela maior oferta líquida.",
+        "- Fonte: ICO; Fato principal: Exportações globais de verde +9,2% em dez/25 (Robustas +26,5%; Ásia & Oceania +38,4%); Regra aplicada: Exportações acelerando → BULLISH; Impacto esperado no preço: Suporte altista via maior ritmo de escoamento/curto prazo.",
+        "- Fonte: ICO; Fato principal: Chuva mais intensa em Minas Gerais aliviou preocupação com a oferta futura (revisão positiva de safra implícita); Regra aplicada: Revisão positiva de safra → BEARISH; Impacto esperado no preço: Redução do prêmio de risco de oferta."
+      ],
+      "pdf_url": "http://www.ico.org/documents/cy2025-26/cmr-0126-e.pdf",
+      "pdf_sha256": "a69a729d26fb39209ddbf3aa40951a34e1230b5a1eae9fd8b22850dd62546496",
+      "model": "gpt-5",
+      "prompt_version": "v1"
     }
   ],
   "source": "International Coffee Organization (ICO) — Monthly Coffee Market Report (CMR).",
-  "updated_at": "2026-01-19T18:01:50Z"
+  "updated_at": "2026-02-10T13:31:41Z"
 }
