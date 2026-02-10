@@ -5,6 +5,7 @@ on:
   schedule:
     # Rodar todo dia 5 às 10:00 UTC (ajuste se você quiser)
     - cron: "0 14 5 * *"
+    - cron: "0 14 15 * *"
 
 permissions:
   contents: write
