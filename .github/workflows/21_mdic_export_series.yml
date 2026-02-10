@@ -5,6 +5,7 @@ on:
   schedule:
     # roda mensalmente no dia 5 às 22:30 UTC (mesmo padrão mensal)
     - cron: "30 19 6 * *"
+    - cron: "30 19 12 * *"
 
 concurrency:
   group: cafe-main-push
