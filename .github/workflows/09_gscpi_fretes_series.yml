@@ -5,6 +5,7 @@ on:
   schedule:
   # Dia 5 às 07:00 BRT = 10:00 UTC
   - cron: "0 12 5 * *"
+  - cron: "0 12 10 * *"
 
 permissions:
   contents: write
