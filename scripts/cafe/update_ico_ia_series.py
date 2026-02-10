@@ -76,9 +76,21 @@ REGRAS FIXAS:
   - Se não houver explicação clara do motivo → NEUTRAL
 - Se um fato não tiver impacto claro → NEUTRAL
 
-ETAPA 3 — CONSOLIDAÇÃO DO SINAL DO RELATÓRIO
-Avalie o conjunto de fatos e responda:
-- O relatório como um todo é: BULLISH, BEARISH ou NEUTRAL.
+ETAPA 3 — CLASSIFICAÇÃO FINAL (REGRA OBRIGATÓRIA)
+
+Com base EXCLUSIVAMENTE nas evidências listadas acima, aplique a seguinte regra objetiva
+para definir o cenário final do mercado de café:
+
+- Conte quantas evidências são BEARISH e quantas são BULLISH.
+- Ignore evidências classificadas como NEUTRAL.
+
+Regras:
+1) Se BEARISH ≥ 2 e BULLISH ≤ 1 → label = BEARISH e signal = -1.0
+2) Se BULLISH ≥ 2 e BEARISH ≤ 1 → label = BULLISH e signal = 1.0
+3) Em qualquer outro caso → label = NEUTRAL e signal = 0.0
+
+Esta regra deve ser seguida obrigatoriamente, sem exceções ou julgamentos subjetivos.
+
 
 ETAPA 4 — SCORE NUMÉRICO
 - BULLISH → +1.0
