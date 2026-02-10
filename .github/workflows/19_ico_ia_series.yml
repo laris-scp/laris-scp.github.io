@@ -6,7 +6,7 @@ on:
       backfill_n:
         description: "Quantos relatórios mais recentes processar (1 = só o último)"
         required: true
-        default: "1"
+        default: "3"
   schedule:
     - cron: "0 16 11 * *"
 
@@ -45,7 +45,7 @@ jobs:
       - name: Run ICO IA series updater
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          ICO_BACKFILL_N: ${{ github.event.inputs.backfill_n || '1' }}
+          ICO_BACKFILL_N: ${{ github.event.inputs.backfill_n || '3' }}
         run: |
           python scripts/cafe/update_ico_ia_series.py
 
