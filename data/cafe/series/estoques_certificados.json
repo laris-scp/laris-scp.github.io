@@ -5,7 +5,7 @@
     "source": "https://www.ice.com/publicdocs/futures_us_reports/coffee/EOM_KC_cert_stox_by_port_nov96-present.xls",
     "frequency": "Mensal (EOM)",
     "unit": "contratos (ICE) / total reportado",
-    "updated_at": "2026-02-10 18:41:59",
+    "updated_at": "2026-02-11 16:00:20",
     "notes": "append-only; full history; escala x1.0"
   },
   "series": [
