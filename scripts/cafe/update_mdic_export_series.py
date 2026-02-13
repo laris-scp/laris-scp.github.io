@@ -148,24 +148,26 @@ def _fetch_period(start_ym: str, end_ym: str) -> dict[str, float]:
     print(f">> MDIC Export | Coletando {start_ym} -> {end_ym}")
     months = _month_range(start_ym, end_ym)
 
-    # Para reduzir chamadas: agrupa por ano em blocos contínuos
-    # Ex.: (2025-10..2025-12) vira uma chamada (from=2025-10 to=2025-12)
+    # Para reduzir chamadas: agrupa por blocos contínuos,
+    # MAS NÃO DEIXA BLOCO CRUZAR ANO (evita comportamento inconsistente da API)
     blocks = []
     if months:
-        cy, cm = months[0]
-        by, bm = cy, cm
-        py, pm = cy, cm
+        by, bm = months[0]
+        py, pm = months[0]
+
         for (y, m) in months[1:]:
-            # mês seguinte?
             ny, nm = _add_months(py, pm, 1)
-            if y == ny and m == nm:
-                py, pm = y, m
-                continue
-            # fecha bloco anterior
-            blocks.append((by, bm, py, pm))
-            # inicia novo
-            by, bm = y, m
+
+            same_year = (y == py)
+            is_next_month = (y == ny and m == nm)
+
+            # Se não for mês seguinte OU mudou o ano, fecha bloco.
+            if (not is_next_month) or (y != py):
+                blocks.append((by, bm, py, pm))
+                by, bm = y, m
+
             py, pm = y, m
+
         blocks.append((by, bm, py, pm))
 
     agg = defaultdict(float)
@@ -177,6 +179,9 @@ def _fetch_period(start_ym: str, end_ym: str) -> dict[str, float]:
         body = _make_body(period_from, period_to)
         payload = _post_with_retry(body)
         rows = _extract_list(payload)
+        years = sorted({(r.get("year"), r.get("monthNumber")) for r in rows if "year" in r and "monthNumber" in r})
+        print(f">> MDIC Export | Linhas recebidas: {len(rows)} | YM únicos (amostra): {years[-6:]}")
+
 
         # agrega por YM usando coNcm (código)
         for r in rows:
