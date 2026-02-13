@@ -5,7 +5,7 @@ on:
   # Opcional: rodar automaticamente depois do workflow da SÉRIE do MDIC finalizar com sucesso.
   # ATENÇÃO: o nome abaixo tem que ser exatamente igual ao "name:" do seu workflow de série do MDIC.
   workflow_run:
-    workflows: ["21 - Update MDIC Export (series/mdic_export.json)"]
+    workflows: ["21 - MDIC Export (Series)"]
     types:
       - completed
 
