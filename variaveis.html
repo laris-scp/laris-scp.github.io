@@ -225,6 +225,9 @@
       function plot(key){
         ctx.strokeStyle = styles[key] || "rgba(231,236,255,.92)";
         ctx.lineWidth = 2;
+
+        const ptsValid = [];
+
         ctx.beginPath();
         let started = false;
         points.forEach((p,i)=>{
@@ -232,11 +235,23 @@
           if(Number.isNaN(v)) return;
           const x = xPix(i);
           const y = yPix(v);
+
+          ptsValid.push({x,y});
+
           if(!started){ ctx.moveTo(x,y); started = true; }
           else ctx.lineTo(x,y);
         });
         ctx.stroke();
+
+        // Desenha marcadores (bolinhas) — faz o ponto "aparecer" mesmo se houver só 1 valor
+        ctx.fillStyle = ctx.strokeStyle;
+        for(const q of ptsValid){
+          ctx.beginPath();
+          ctx.arc(q.x, q.y, 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
+
 
       plot("close");
       if(o.showMM50) plot("mm50");
