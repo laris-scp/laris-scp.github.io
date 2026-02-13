@@ -747,17 +747,23 @@
             });
           }
         
-          // Tabela: ano atual (meses disponíveis), mais recente em cima
-          const rowsYearCur = rowsAll
-            .filter(r => Number(String(r.date).slice(0,4)) === yearCur)
+          // Tabela: últimos 5 anos completos (mais recente em cima)
+          const minYear = yearCur - 4;
+          
+          const rowsLast5Y = rowsAll
+            .filter(r => {
+              const y = Number(String(r.date).slice(0,4));
+              return y >= minYear;
+            })
             .sort((a,b)=> String(a.date).localeCompare(String(b.date)));
-        
+          
           tbody.innerHTML = "";
-          if(rowsYearCur.length === 0){
-            tbody.innerHTML = `<tr><td colspan="3" class="muted">Sem dados para o ano atual (${yearCur}).</td></tr>`;
+          
+          if(rowsLast5Y.length === 0){
+            tbody.innerHTML = `<tr><td colspan="3" class="muted">Sem dados nos últimos 5 anos.</td></tr>`;
           } else {
-            for(let i=rowsYearCur.length-1; i>=0; i--){
-              const r = rowsYearCur[i];
+            for(let i=rowsLast5Y.length-1; i>=0; i--){
+              const r = rowsLast5Y[i];
               const tr = document.createElement("tr");
               tr.innerHTML = `
                 <td>${fmtDateBR(r.date)}</td>
@@ -767,6 +773,7 @@
               tbody.appendChild(tr);
             }
           }
+
         
           // Gráfico: meses no eixo X, sacas no Y (0 casas)
           drawMultiLine(canvas, ptsMDIC, {
