@@ -143,11 +143,12 @@
       const o = Object.assign({
         showMM50: true,
         showMM252: true,
+        showMarkers: false,     // <<< NOVO: por padrão, sem pontinhos
         labelClose: "Close",
         labelMM50: "MM50",
         labelMM252: "MM252",
-        xLabelFormatter: null,   // opcional: (point, idx) => "Jan"
-        yDecimals: 1             // opcional: casas no eixo Y
+        xLabelFormatter: null,  // opcional: (point, idx) => "Jan"
+        yDecimals: 1            // opcional: casas no eixo Y
       }, (opts || {}));
 
 
@@ -243,14 +244,15 @@
         });
         ctx.stroke();
 
-        // Desenha marcadores (bolinhas) — faz o ponto "aparecer" mesmo se houver só 1 valor
-        ctx.fillStyle = ctx.strokeStyle;
-        for(const q of ptsValid){
-          ctx.beginPath();
-          ctx.arc(q.x, q.y, 3, 0, Math.PI * 2);
-          ctx.fill();
+        // Desenha marcadores (bolinhas) apenas quando habilitado
+        if(o.showMarkers){
+          ctx.fillStyle = ctx.strokeStyle;
+          for(const q of ptsValid){
+            ctx.beginPath();
+            ctx.arc(q.x, q.y, 3, 0, Math.PI * 2);
+            ctx.fill();
+          }
         }
-      }
 
 
       plot("close");
@@ -466,7 +468,7 @@
           </div>
         </div>
 
-        <details>
+        <details open>
           <summary>Ver regra de sinal e fonte</summary>
           <div class="small"><b>Regra:</b> ${(snapshotRow.regra_de_sinal || "—")}</div>
           <div class="small"><b>Fonte:</b> ${(snapshotRow.fonte || "—")}</div>
@@ -779,6 +781,7 @@
           drawMultiLine(canvas, ptsMDIC, {
             showMM50: true,
             showMM252: true,
+            showMarkers: true, // <<< NOVO: mantém os pontos na exportação
             labelClose: String(yearCur),
             labelMM50: "Média 5y",
             labelMM252: String(yearPrev),
