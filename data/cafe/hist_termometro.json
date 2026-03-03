@@ -5,7 +5,7 @@
     "source": "painel_snapshot.json (thermometers.geral)",
     "frequency": "Diária",
     "value_name": "TERMOMETRO GERAL",
-    "updated_at": "2026-03-03 10:34:54"
+    "updated_at": "2026-03-03 11:07:41"
   },
   "series": [
     {
@@ -246,7 +246,7 @@
     },
     {
       "date": "2026-03-03",
-      "value": 0.17
+      "value": 0.18
     }
   ]
 }
