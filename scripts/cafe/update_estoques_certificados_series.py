@@ -2,6 +2,8 @@ import json
 from pathlib import Path
 from datetime import datetime
 from io import BytesIO
+import re
+from difflib import get_close_matches
 
 import pandas as pd
 import requests
@@ -53,6 +55,112 @@ def ensure_series_list(obj):
             return obj.get("meta", {}), obj["data"]
     return {}, []
 
+MONTH_MAP = {
+    "january": "January",
+    "jan": "January",
+    "janeiro": "January",
+    "fevereiro": "February",
+    "february": "February",
+    "feb": "February",
+    "março": "March",
+    "marco": "March",
+    "march": "March",
+    "mar": "March",
+    "abril": "April",
+    "april": "April",
+    "abr": "April",
+    "apr": "April",
+    "maio": "May",
+    "may": "May",
+    "junho": "June",
+    "june": "June",
+    "jun": "June",
+    "julho": "July",
+    "july": "July",
+    "jul": "July",
+    "agosto": "August",
+    "august": "August",
+    "ago": "August",
+    "aug": "August",
+    "setembro": "September",
+    "september": "September",
+    "sep": "September",
+    "sept": "September",
+    "outubro": "October",
+    "october": "October",
+    "out": "October",
+    "oct": "October",
+    "novembro": "November",
+    "november": "November",
+    "nov": "November",
+    "dezembro": "December",
+    "december": "December",
+    "dez": "December",
+    "dec": "December",
+}
+
+MONTH_KEYS = list(MONTH_MAP.keys())
+
+
+def _clean_date_text(x) -> str:
+    if pd.isna(x):
+        return ""
+
+    s = str(x).strip()
+    if not s:
+        return ""
+
+    s = s.replace("\xa0", " ")
+    s = re.sub(r"\s+", " ", s)
+    s = re.sub(r",\s*(\d{4})$", r", \1", s)
+
+    return s
+
+
+def _normalize_month_token(token: str) -> str:
+    t = token.strip().lower()
+
+    # remove pontuação nas pontas
+    t = re.sub(r"^[^A-Za-zÀ-ÿ]+|[^A-Za-zÀ-ÿ]+$", "", t)
+
+    # correções diretas conhecidas / idioma
+    if t in MONTH_MAP:
+        return MONTH_MAP[t]
+
+    # tentativa por similaridade
+    match = get_close_matches(t, MONTH_KEYS, n=1, cutoff=0.70)
+    if match:
+        return MONTH_MAP[match[0]]
+
+    return token
+
+
+def _parse_ice_date(x):
+    # se já veio como data do Excel / timestamp, deixa o pandas resolver direto
+    if isinstance(x, (datetime, pd.Timestamp)):
+        return pd.to_datetime(x, errors="coerce")
+
+    s = _clean_date_text(x)
+    if not s:
+        return pd.NaT
+
+    # tenta achar o primeiro token textual como mês
+    parts = s.split(" ")
+    if parts:
+        parts[0] = _normalize_month_token(parts[0])
+        s = " ".join(parts)
+
+    # tentativa principal
+    dt = pd.to_datetime(s, errors="coerce")
+    if pd.notna(dt):
+        return dt
+
+    # fallback explícito: "Month DD, YYYY"
+    try:
+        return pd.to_datetime(datetime.strptime(s, "%B %d, %Y"))
+    except Exception:
+        return pd.NaT
+
 
 def download_ice_xls(url: str) -> pd.DataFrame:
     r = requests.get(url, timeout=60)
@@ -64,9 +172,24 @@ def download_ice_xls(url: str) -> pd.DataFrame:
     ice = raw.iloc[:, [1, 10]].copy()
     ice.columns = ["DATA", "TOTAL"]
 
-    ice["DATA"] = pd.to_datetime(ice["DATA"], errors="coerce")
+    # guarda o texto bruto para debug/validação
+    ice["DATA_RAW"] = ice["DATA"]
+
+    # parsing robusto: aceita inglês, português e pequenos erros de digitação
+    ice["DATA"] = ice["DATA"].apply(_parse_ice_date)
     ice["TOTAL"] = pd.to_numeric(ice["TOTAL"], errors="coerce")
 
+    # validação: se as últimas linhas com TOTAL tiverem data inválida, quebra o job
+    recent_check = ice.loc[ice["TOTAL"].notna(), ["DATA_RAW", "DATA", "TOTAL"]].tail(3)
+    bad_recent = recent_check[recent_check["DATA"].isna()]
+
+    if not bad_recent.empty:
+        exemplos = " | ".join(str(x) for x in bad_recent["DATA_RAW"].tolist())
+        raise ValueError(
+            f"Falha ao interpretar data nas linhas mais recentes do XLS da ICE: {exemplos}"
+        )
+
+    # limpeza final
     ice = ice.dropna(subset=["DATA", "TOTAL"]).sort_values("DATA").reset_index(drop=True)
 
     # O arquivo já é EOM; guardamos como YYYY-MM-DD
