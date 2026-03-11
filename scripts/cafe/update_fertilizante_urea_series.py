@@ -24,7 +24,7 @@ MM_SHORT = 4
 MM_LONG = 12
 
 # Use exatamente a URL que você já usa no Colab (a mais recente)
-URL_XLS = "https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/related/CMO-Historical-Data-Monthly.xlsx"
+URL_XLS = "https://thedocs.worldbank.org/en/doc/74e8be41ceb20fa0da750cda2f6b9e4e-0050012026/related/CMO-Historical-Data-Monthly.xlsx"
 SHEET = "Monthly Prices"
 
 # =========================
