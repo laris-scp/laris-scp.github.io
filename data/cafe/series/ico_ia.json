@@ -350,8 +350,25 @@
       "pdf_sha256": "a69a729d26fb39209ddbf3aa40951a34e1230b5a1eae9fd8b22850dd62546496",
       "model": "gpt-5",
       "prompt_version": "v1"
+    },
+    {
+      "date": "2026-02-01",
+      "close": -1.0,
+      "signal": -1.0,
+      "label": "BEARISH",
+      "evidencias": [
+        "[BEARISH] CONAB projeta safra recorde do Brasil em 2026 (66,2 milhões de sacas, +17,1% a/a) — revisão positiva de safra.",
+        "[BEARISH] Condições climáticas favoráveis em Minas Gerais (Brasil) e no Vietnã melhoram a perspectiva de oferta 2025/26, com expectativa de superávit global.",
+        "[BEARISH] Produção mundial 2024 sobe 5,2% para 177,5 milhões de sacas; balanço global vira superávit de 2,44 milhões de sacas.",
+        "[BEARISH] Estoques certificados: Arábica nos EUA +12% m/m (0,52 mi sc) e Robusta em Londres +0,7% m/m (0,76 mi sc).",
+        "[BEARISH] Ásia & Oceania: expectativa de bumper crop em 2025/26 (+6% a +12% vs 2024/25), com Vietnã liderando."
+      ],
+      "pdf_url": "http://www.ico.org/documents/cy2025-26/cmr-0226-e.pdf",
+      "pdf_sha256": "e6e56d8b4b267b5d050e89166a3ce45a944c040ffa2d53f25bd81f1ef99c4c15",
+      "model": "gpt-5",
+      "prompt_version": "v1"
     }
   ],
   "source": "International Coffee Organization (ICO) — Monthly Coffee Market Report (CMR).",
-  "updated_at": "2026-02-10T13:31:41Z"
+  "updated_at": "2026-03-12T16:57:37Z"
 }
