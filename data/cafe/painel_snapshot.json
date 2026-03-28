@@ -1,13 +1,13 @@
 {
   "commodity": "cafe",
-  "updated_at": "2026-03-28 10:27:23",
+  "updated_at": "2026-03-28 11:00:19",
   "rows": [
     {
       "id": "preco_arabica",
       "bloco": 1,
       "variavel": "PREÇO ARABICA",
-      "ultimo_valor": 307.6499938964844,
-      "percentil": 0.1135,
+      "ultimo_valor": 301.70001220703125,
+      "percentil": 0.083,
       "nivel": "MUITO BAIXO",
       "valor_nivel": -1.0,
       "tendencia": "QUEDA",
@@ -18,10 +18,10 @@
       "peso": 1.0,
       "score_ponderado": -2.5,
       "frequencia": "Diária",
-      "ultima_atualizacao": "2026-03-26",
+      "ultima_atualizacao": "2026-03-27",
       "regra_de_sinal": "Nível indica se o preço está baixo ou alto versus o histórico recente; Tendência mostra a direção atual comparando o preço com médias de curto e longo prazo; Momento indica se essa tendência está ganhando ou perdendo força ao observar a evolução mensal da média de curto prazo; Score combina Nível, Tendência e Momento (com peso) em um único indicador.",
       "fonte": "Yahoo Finance (KC=F).",
-      "ultima_data_serie": "2026-03-26"
+      "ultima_data_serie": "2026-03-27"
     },
     {
       "id": "cot_report",
