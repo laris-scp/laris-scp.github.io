@@ -1,6 +1,6 @@
 {
   "commodity": "cafe",
-  "updated_at": "2026-04-07 11:31:00",
+  "updated_at": "2026-04-08 10:52:25",
   "rows": [
     {
       "id": "preco_arabica",
@@ -48,8 +48,8 @@
       "id": "usd_brl",
       "bloco": 1,
       "variavel": "USD/BRL",
-      "ultimo_valor": 5.1532,
-      "percentil": 0.0887,
+      "ultimo_valor": 5.1625,
+      "percentil": 0.1093,
       "nivel": "MUITO BAIXO",
       "valor_nivel": -1.0,
       "tendencia": "QUEDA",
@@ -60,10 +60,10 @@
       "peso": 4.0,
       "score_ponderado": -10.0,
       "frequencia": "Diária",
-      "ultima_atualizacao": "2026-04-06",
+      "ultima_atualizacao": "2026-04-07",
       "regra_de_sinal": "Nível indica se o dólar está baixo ou alto versus seu comportamento histórico recente; Tendência mostra a direção atual comparando o valor com médias de curto e longo prazo; Momento indica se essa tendência está ganhando ou perdendo força ao observar a evolução mensal da média de curto prazo; Score combina Nível, Tendência e Momento (com peso) em um único indicador.",
       "fonte": "Banco Central do Brasil (SGS série 1).",
-      "ultima_data_serie": "2026-04-06"
+      "ultima_data_serie": "2026-04-07"
     },
     {
       "id": "fertilizante_urea",
