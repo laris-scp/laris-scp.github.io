@@ -1,18 +1,21 @@
 {
-  "date": "2026-04-05",
-  "summary": "Os estoques globais de café estão em níveis muito baixos, o que indica um aperto estrutural de oferta, gerando um viés altista para o preço no médio e longo prazo. No entanto, a queda nas exportações do Brasil e a valorização do Dólar estão pressionando os preços para baixo no curto prazo.",
+  "date": "2026-04-14",
+  "summary": "Os estoques globais de café estão em níveis muito baixos e em queda, o que indica um aperto estrutural de oferta e é altista para o preço no médio e longo prazo. O aumento dos custos de fertilizantes também contribui para uma pressão altista. No entanto, a queda do Dólar e a desaceleração nas exportações do Brasil geram um viés baixista no curto prazo, o que pode limitar a recuperação dos preços.",
   "drivers_bull": [
     "Estoques Globais",
     "Fertilizante (ureia)",
-    "Estoques Certificados na ICE",
-    "Clima ou Estresse hídrico"
+    "Estoques Certificados"
   ],
   "drivers_bear": [
     "Dólar",
     "Exportações de café verde do Brasil",
+    "Clima ou Estresse hídrico",
     "Posição de fundos no café"
   ],
-  "limited_impact": [],
+  "limited_impact": [
+    "Fretes",
+    "Relatório da ICO"
+  ],
   "bias": "LATERAL",
   "confidence": "MEDIA"
 }
