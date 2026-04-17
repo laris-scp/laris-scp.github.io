@@ -1,27 +1,27 @@
 {
   "commodity": "cafe",
-  "updated_at": "2026-04-17 10:51:36",
+  "updated_at": "2026-04-17 11:31:27",
   "rows": [
     {
       "id": "preco_arabica",
       "bloco": 1,
       "variavel": "PREÇO ARABICA",
-      "ultimo_valor": 304.25,
-      "percentil": 0.1179,
+      "ultimo_valor": 296.45001220703125,
+      "percentil": 0.0716,
       "nivel": "MUITO BAIXO",
       "valor_nivel": -1.0,
-      "tendencia": "NEUTRO",
-      "valor_tendencia": 0.0,
-      "momento": "NEUTRO",
-      "valor_momento": 0.0,
-      "score": -1.0,
+      "tendencia": "QUEDA",
+      "valor_tendencia": -1.0,
+      "momento": "QUEDA DESACELERANDO",
+      "valor_momento": -0.5,
+      "score": -2.5,
       "peso": 1.0,
-      "score_ponderado": -1.0,
+      "score_ponderado": -2.5,
       "frequencia": "Diária",
-      "ultima_atualizacao": "2026-04-15",
+      "ultima_atualizacao": "2026-04-16",
       "regra_de_sinal": "Nível indica se o preço está baixo ou alto versus o histórico recente; Tendência mostra a direção atual comparando o preço com médias de curto e longo prazo; Momento indica se essa tendência está ganhando ou perdendo força ao observar a evolução mensal da média de curto prazo; Score combina Nível, Tendência e Momento (com peso) em um único indicador.",
       "fonte": "Yahoo Finance (KC=F).",
-      "ultima_data_serie": "2026-04-15"
+      "ultima_data_serie": "2026-04-16"
     },
     {
       "id": "cot_report",
