@@ -1,6 +1,6 @@
 {
   "commodity": "cafe",
-  "updated_at": "2026-05-04 12:10:44",
+  "updated_at": "2026-05-04 12:11:03",
   "rows": [
     {
       "id": "preco_arabica",
@@ -210,8 +210,8 @@
     }
   ],
   "thermometers": {
-    "bloco_1": -1.18,
+    "bloco_1": -1.1,
     "bloco_2": 1.75,
-    "geral": -0.2
+    "geral": -0.15
   }
 }
