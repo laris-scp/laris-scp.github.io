@@ -34,7 +34,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install --upgrade openai pdfplumber requests
+          pip install --upgrade anthropic pdfplumber requests
 
       - name: Update CA certificates
         run: |
@@ -45,7 +45,7 @@ jobs:
 
       - name: Run ICO IA series updater
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ICO_BACKFILL_N: ${{ github.event.inputs.backfill_n || '3' }}
         run: |
           python scripts/cafe/update_ico_ia_series.py
