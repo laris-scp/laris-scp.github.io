@@ -367,8 +367,25 @@
       "pdf_sha256": "e6e56d8b4b267b5d050e89166a3ce45a944c040ffa2d53f25bd81f1ef99c4c15",
       "model": "gpt-5",
       "prompt_version": "v1"
+    },
+    {
+      "date": "2026-03-01",
+      "close": -1.0,
+      "signal": -1.0,
+      "label": "BEARISH",
+      "evidencias": [
+        "Fonte: Marex Group e Sucafina - Projeções de safra recorde para Brasil 2026/27 em 75.9 e 75.4 milhões de sacas, respectivamente. Regra: revisão positiva de safra → BEARISH. Impacto: pressão baixista nos preços pela expectativa de aumento significativo de oferta.",
+        "Fonte: Rabobank - Projeção de superávit global de 8.64 milhões de sacas para 2026/27. Regra: excesso de oferta projetado → BEARISH. Impacto: expectativa de pressão descendente nos preços por excesso estrutural de oferta.",
+        "Fonte: ICO - Estoques certificados de Arábica em Nova York subiram 17.7% (fev-mar 2026), fechando em 0.61 milhões de sacas. Regra: aumento de estoques → BEARISH. Impacto: maior disponibilidade física reduz prêmios e pressiona preços.",
+        "Fonte: ICO - Exportações globais de café verde caíram 9.0% em fevereiro 2026 vs fevereiro 2025. Regra: queda de exportações por fatores sazonais (Tết vietnamita) e normalização de oferta (fim do vácuo de Robusta) → NEUTRAL/BEARISH contextual. Impacto: não indica restrição de oferta, mas ajuste de fluxo comercial.",
+        "Fonte: ICO - Participação de Arábica nas exportações totais caiu de 65.1% para 60.9% nos primeiros 5 meses do ano-safra 2025/26. Regra: mudança de mix com maior peso de Robusta (menor valor) → NEUTRAL com viés BEARISH. Impacto: pressão nos preços médios do mercado global."
+      ],
+      "pdf_url": "https://www.ico.org/documents/cy2025-26/cmr-0326-e.pdf",
+      "pdf_sha256": "14433e318f0d8d8a8df8e2ad8e2f630db34245587af875683aeb1e5e30463678",
+      "model": "claude-sonnet-4-5",
+      "prompt_version": "v2"
     }
   ],
   "source": "International Coffee Organization (ICO) — Monthly Coffee Market Report (CMR).",
-  "updated_at": "2026-03-12T16:57:37Z"
+  "updated_at": "2026-05-07T13:47:47Z"
 }
