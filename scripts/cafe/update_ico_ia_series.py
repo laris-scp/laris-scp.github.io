@@ -13,21 +13,24 @@ from urllib.parse import urljoin
 
 import requests
 import pdfplumber
-from openai import OpenAI
+import anthropic
 from requests.exceptions import SSLError, HTTPError
 
 SERIES_PATH = Path("data/cafe/series/ico_ia.json")
 
 ICO_LIST_URL = "https://ico.org/specialized-reports/"
 
-# Fallbacks (caso o HTML mude / scraping falhe)
+# Fallbacks (caso o HTML mude / scraping falhe / geração por regra falhe)
 FALLBACK_PDFS = [
-    "http://www.ico.org/documents/cy2025-26/cmr-1225-e.pdf",
-    "http://www.ico.org/documents/cy2025-26/cmr-1125-e.pdf",
+    "https://www.ico.org/documents/cy2025-26/cmr-0326-e.pdf",
+    "https://www.ico.org/documents/cy2025-26/cmr-0226-e.pdf",
+    "https://www.ico.org/documents/cy2025-26/cmr-0126-e.pdf",
+    "https://www.ico.org/documents/cy2025-26/cmr-1225-e.pdf",
+    "https://www.ico.org/documents/cy2025-26/cmr-1125-e.pdf",
 ]
 
-# OpenAI
-MODEL = os.environ.get("OPENAI_MODEL", "gpt-5")
+# Anthropic Claude
+MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-5")
 
 MAX_CHARS_TOTAL = 120_000
 HEAD_CHARS = 70_000
@@ -106,7 +109,7 @@ Explique o diagnóstico final em até 5 bullets, no formato:
 - Impacto esperado no preço
 
 ETAPA 6 — SAÍDA ESTRUTURADA
-Retorne APENAS o JSON abaixo, sem texto adicional:
+Retorne APENAS o JSON abaixo, sem texto adicional, sem markdown, sem ```json:
 
 {{
   "fonte": "{fonte}",
@@ -149,8 +152,7 @@ def shrink_text(text: str) -> str:
 
 def find_pdf_links_from_html(html: str, base_url: str) -> list[str]:
     """
-    Tenta extrair qualquer ocorrência de cmr-####-e.pdf no HTML (absoluta ou relativa).
-    Observação: no GitHub Actions, pode vir vazio (conteúdo carregado via JS / bloqueio).
+    Extrai ocorrências de cmr-MMYY-e.pdf no HTML (absoluta ou relativa).
     """
     abs_matches = re.findall(
         r'(https?://[^\s"\'<>]*cmr-\d{4}-e\.pdf[^\s"\'<>]*)',
@@ -173,6 +175,22 @@ def find_pdf_links_from_html(html: str, base_url: str) -> list[str]:
     return sorted(set(urls))
 
 
+def find_report_page_links_from_html(html: str, base_url: str) -> list[str]:
+    """
+    Extrai links das páginas individuais de relatório (ex: '.../monthly-coffee-market-report-march-2026/').
+    Esses links levam pra páginas que contêm o PDF embutido.
+    """
+    matches = re.findall(
+        r'href=["\']([^"\']*monthly-coffee-market-report[^"\']*)["\']',
+        html,
+        flags=re.IGNORECASE,
+    )
+    urls = [urljoin(base_url, m.strip()) for m in matches]
+    # remove ancoras e duplicatas
+    urls = [u.split("#")[0] for u in urls if u]
+    return sorted(set(urls))
+
+
 def pdf_mmyy_to_date(url: str) -> str:
     m = re.search(r"cmr-(\d{2})(\d{2})-e\.pdf", url, flags=re.IGNORECASE)
     if not m:
@@ -185,10 +203,10 @@ def pdf_mmyy_to_date(url: str) -> str:
 
 def cy_folder_for_year_month(year: int, month: int) -> str:
     """
-    Pela evidência que você trouxe:
+    Pela evidência:
       - Oct-Dec/2025 => cy2025-26
       - Sep/2025     => cy2024-25
-    Logo, o 'coffee year' vira em Outubro.
+    O 'coffee year' vira em Outubro.
     """
     if month >= 10:
         y1 = year
@@ -199,16 +217,26 @@ def cy_folder_for_year_month(year: int, month: int) -> str:
     return f"cy{y1}-{str(y2)[-2:]}"
 
 
-def build_ico_cmr_url(year: int, month: int) -> str:
+def build_ico_cmr_url_variants(year: int, month: int) -> list[str]:
+    """
+    Gera as 3 variações de URL pra um dado PDF, em ordem de preferência.
+    A ICO mudou de http pra https em algum momento, então tentamos várias.
+    """
     cy = cy_folder_for_year_month(year, month)
     mmyy = f"{month:02d}{str(year)[-2:]}"
-    return f"http://www.ico.org/documents/{cy}/cmr-{mmyy}-e.pdf"
+    path = f"/documents/{cy}/cmr-{mmyy}-e.pdf"
+    return [
+        f"https://www.ico.org{path}",
+        f"http://www.ico.org{path}",
+        f"https://ico.org{path}",
+    ]
 
 
 def generate_candidate_cmr_urls(n_months: int, anchor: datetime | None = None) -> list[str]:
     """
     Gera URLs dos últimos n_months a partir de anchor (default: hoje UTC),
-    do mais antigo para o mais recente.
+    do mais antigo para o mais recente. Apenas a 1ª variação (https://www.ico.org)
+    porque o normalize/try-download cuida das variações depois.
     """
     if anchor is None:
         anchor = datetime.utcnow()
@@ -227,7 +255,7 @@ def generate_candidate_cmr_urls(n_months: int, anchor: datetime | None = None) -
     out = []
     yy, mm = y0, m0
     for _ in range(n_months):
-        out.append(build_ico_cmr_url(yy, mm))
+        out.append(build_ico_cmr_url_variants(yy, mm)[0])  # versão preferencial
         mm += 1
         if mm == 13:
             mm = 1
@@ -269,51 +297,138 @@ def already_has_date(series: list[dict], date: str) -> bool:
     return False
 
 
-def call_openai(document_text: str) -> dict:
-    api_key = os.environ.get("OPENAI_API_KEY", "").strip()
+def call_claude(document_text: str) -> dict:
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
     if not api_key:
-        raise RuntimeError("OPENAI_API_KEY não encontrado no ambiente (GitHub Secrets).")
+        raise RuntimeError("ANTHROPIC_API_KEY não encontrado no ambiente (GitHub Secrets).")
 
-    client = OpenAI()
+    client = anthropic.Anthropic()
     user_prompt = USER_PROMPT_TEMPLATE.format(fonte="ICO", document_text=document_text)
 
-    resp = client.responses.create(
+    resp = client.messages.create(
         model=MODEL,
-        instructions=SYSTEM_ROLE,
-        input=user_prompt,
-        reasoning={"effort": "low"},
+        max_tokens=2000,
+        system=SYSTEM_ROLE,
+        messages=[{"role": "user", "content": user_prompt}],
     )
-    out = (resp.output_text or "").strip()
 
+    # Extrai texto de todos os blocos (geralmente é só 1)
+    out = ""
+    for block in resp.content:
+        if hasattr(block, "text"):
+            out += block.text
+    out = out.strip()
+
+    # Tenta parsear direto
     try:
         return json.loads(out)
     except json.JSONDecodeError:
+        # Procura JSON no meio do texto (caso venha com algum preâmbulo)
         m = re.search(r"\{.*\}", out, flags=re.DOTALL)
         if not m:
             raise RuntimeError(f"Resposta não veio em JSON válido.\n\nResposta bruta:\n{out[:2000]}")
         return json.loads(m.group(0))
 
 
-def normalize_ico_pdf_url(u: str) -> str:
-    u = u.replace("https://www.ico.org", "http://www.ico.org")
-    u = u.replace("https://ico.org", "http://www.ico.org")
-    return u
+def url_variants_for(url: str) -> list[str]:
+    """
+    Dado um URL de PDF (qualquer scheme/host), gera as 3 variações pra tentar.
+    """
+    m = re.search(r"cmr-(\d{2})(\d{2})-e\.pdf", url, flags=re.IGNORECASE)
+    if not m:
+        # se não casa o padrão, devolve só o original
+        return [url]
+
+    mm = int(m.group(1))
+    yy = int(m.group(2))
+    year = 2000 + yy
+    return build_ico_cmr_url_variants(year, mm)
 
 
 def try_download(url: str) -> bytes:
+    """
+    Tenta baixar um PDF testando as 3 variações de URL (https/www, http/www, https sem www).
+    Retorna o conteúdo do primeiro que funcionar; raise no último erro se todos falharem.
+    """
     headers = {"User-Agent": "Mozilla/5.0"}
+    last_err: Exception | None = None
+
+    for candidate in url_variants_for(url):
+        try:
+            r = requests.get(candidate, timeout=90, headers=headers, allow_redirects=True)
+            r.raise_for_status()
+            content = r.content
+            # valida se é PDF mesmo
+            if not content.startswith(b"%PDF-"):
+                last_err = RuntimeError(f"Conteúdo baixado de {candidate} não é PDF (primeiros bytes: {content[:20]!r})")
+                continue
+            print(f"DEBUG: download OK em {candidate}")
+            return content
+        except SSLError as e:
+            # tenta sem verify
+            try:
+                warnings.filterwarnings("ignore", message="Unverified HTTPS request")
+                r = requests.get(candidate, timeout=90, headers=headers, allow_redirects=True, verify=False)
+                r.raise_for_status()
+                content = r.content
+                if not content.startswith(b"%PDF-"):
+                    last_err = RuntimeError(f"Fallback SSL: conteúdo de {candidate} não é PDF")
+                    continue
+                print(f"DEBUG: download OK em {candidate} (sem SSL verify)")
+                return content
+            except Exception as e2:
+                last_err = e2
+                continue
+        except Exception as e:
+            last_err = e
+            continue
+
+    raise last_err if last_err else RuntimeError(f"Falha em todas as variações de {url}")
+
+
+def discover_pdfs_via_scraping() -> list[str]:
+    """
+    Estratégia melhorada de scraping:
+    1. Pega o HTML da página de listagem (specialized-reports)
+    2. Tenta achar links diretos pra cmr-MMYY-e.pdf
+    3. Se não achar, segue os links das páginas individuais de relatório
+       e tenta extrair o PDF de cada uma.
+    """
+    headers = {"User-Agent": "Mozilla/5.0"}
+    pdf_urls: list[str] = []
+
     try:
-        r = requests.get(url, timeout=90, headers=headers, allow_redirects=True)
+        r = requests.get(ICO_LIST_URL, timeout=30, headers=headers)
         r.raise_for_status()
-        return r.content
-    except SSLError:
-        warnings.filterwarnings("ignore", message="Unverified HTTPS request")
-        r = requests.get(url, timeout=90, headers=headers, allow_redirects=True, verify=False)
-        r.raise_for_status()
-        content = r.content
-        if not content.startswith(b"%PDF-"):
-            raise RuntimeError("Fallback SSL foi usado, mas o conteúdo baixado não parece ser um PDF válido.")
-        return content
+        list_html = r.text
+    except Exception as e:
+        print(f"DEBUG: falha ao buscar página de listagem: {e}")
+        return []
+
+    # Tentativa 1: links diretos pro PDF
+    direct = find_pdf_links_from_html(list_html, ICO_LIST_URL)
+    if direct:
+        print(f"DEBUG: scraping direto encontrou {len(direct)} PDFs")
+        pdf_urls.extend(direct)
+
+    # Tentativa 2: páginas individuais de relatório
+    report_pages = find_report_page_links_from_html(list_html, ICO_LIST_URL)
+    print(f"DEBUG: encontradas {len(report_pages)} páginas de relatório")
+
+    for page_url in report_pages[:24]:  # limita para não explodir
+        try:
+            rp = requests.get(page_url, timeout=30, headers=headers)
+            if not rp.ok:
+                continue
+            page_pdfs = find_pdf_links_from_html(rp.text, page_url)
+            if page_pdfs:
+                pdf_urls.extend(page_pdfs)
+        except Exception as e:
+            print(f"DEBUG: falha ao abrir {page_url}: {e}")
+            continue
+
+    pdf_urls = sorted(set(pdf_urls))
+    return pdf_urls
 
 
 # -------------------------
@@ -326,34 +441,57 @@ def main():
     backfill_n = int(os.environ.get("ICO_BACKFILL_N", "1").strip() or "1")
     backfill_n = max(1, min(backfill_n, 48))  # teto de segurança
 
-    # 1) Descobrir PDFs disponíveis
-    pdf_urls = []
-    try:
-        r = requests.get(ICO_LIST_URL, timeout=30, headers={"User-Agent": "Mozilla/5.0"})
-        r.raise_for_status()
-        pdf_urls = find_pdf_links_from_html(r.text, ICO_LIST_URL)
-    except Exception:
-        pdf_urls = []
+    # 1) Descobrir PDFs disponíveis — 3 camadas:
+    #    (a) scraping melhorado (segue páginas individuais)
+    #    (b) geração por regra (últimos N + alguns extras pra cobrir gap)
+    #    (c) fallbacks fixos
+    pdf_urls: list[str] = []
 
-    print(f"DEBUG: PDFs encontrados via scraping: {len(pdf_urls)}")
+    print("=" * 60)
+    print("ETAPA 1: Scraping melhorado")
+    print("=" * 60)
+    scraped = discover_pdfs_via_scraping()
+    print(f"DEBUG: scraping retornou {len(scraped)} URLs")
+    pdf_urls.extend(scraped)
 
-    # Se scraping vier vazio (caso do Actions), gera candidatos por regra
-    if not pdf_urls:
-        pdf_urls = generate_candidate_cmr_urls(backfill_n)
-        print(f"DEBUG: usando geração por regra. candidatos={len(pdf_urls)}")
+    print("=" * 60)
+    print("ETAPA 2: Geração por regra")
+    print("=" * 60)
+    # gera mais meses do que backfill_n pra dar margem (ICO publica com ~10d de atraso)
+    gen_n = max(backfill_n + 3, 6)
+    generated = generate_candidate_cmr_urls(gen_n)
+    print(f"DEBUG: geração por regra produziu {len(generated)} candidatos")
+    pdf_urls.extend(generated)
 
-    # adiciona fallback fixo
-    for u in FALLBACK_PDFS:
-        if u not in pdf_urls:
-            pdf_urls.append(u)
+    print("=" * 60)
+    print("ETAPA 3: Fallbacks fixos")
+    print("=" * 60)
+    pdf_urls.extend(FALLBACK_PDFS)
+    print(f"DEBUG: {len(FALLBACK_PDFS)} fallbacks adicionados")
 
-    # mantém apenas PDFs do CMR
-    pdf_urls = [u for u in pdf_urls if re.search(r"cmr-\d{4}-e\.pdf", u, flags=re.IGNORECASE)]
-    pdf_urls = sorted(set(pdf_urls), key=pdf_mmyy_to_date)
+    # Filtra só PDFs do CMR e dedupa por (mês, ano), preferindo a versão https://www.ico.org
+    cmr_urls = [u for u in pdf_urls if re.search(r"cmr-\d{4}-e\.pdf", u, flags=re.IGNORECASE)]
+
+    # Dedup por date (MMYY) — mantém só uma URL por mês
+    by_date: dict[str, str] = {}
+    for u in cmr_urls:
+        try:
+            d = pdf_mmyy_to_date(u)
+        except ValueError:
+            continue
+        # prioriza https://www.ico.org
+        if d not in by_date:
+            by_date[d] = u
+        elif "https://www.ico.org" in u and "https://www.ico.org" not in by_date[d]:
+            by_date[d] = u
+
+    pdf_urls = sorted(by_date.values(), key=pdf_mmyy_to_date)
 
     # processa só os N mais recentes (backfill)
-    targets = pdf_urls[-min(backfill_n, len(pdf_urls)) :]
-    print(f"INFO: backfill_n={backfill_n} | encontrados={len(pdf_urls)} | processando={len(targets)}")
+    targets = pdf_urls[-min(backfill_n, len(pdf_urls)):]
+    print(f"\nINFO: backfill_n={backfill_n} | candidatos únicos={len(pdf_urls)} | processando={len(targets)}")
+    for t in targets:
+        print(f"  -> {t}")
 
     added = 0
     for pdf_url in targets:
@@ -363,16 +501,14 @@ def main():
             print(f"SKIP: date já existe no JSON: {point_date}")
             continue
 
-        pdf_url_norm = normalize_ico_pdf_url(pdf_url)
-
-        # download resiliente: se o PDF não existir, pula
+        # download resiliente: tenta as 3 variações de URL
         try:
-            pdf_bytes = try_download(pdf_url_norm)
+            pdf_bytes = try_download(pdf_url)
         except HTTPError as e:
-            print(f"SKIP: HTTP ao baixar {pdf_url_norm} | erro={e}")
+            print(f"SKIP: HTTP ao baixar {pdf_url} | erro={e}")
             continue
         except Exception as e:
-            print(f"SKIP: falha ao baixar {pdf_url_norm} | erro={e}")
+            print(f"SKIP: falha ao baixar {pdf_url} | erro={e}")
             continue
 
         pdf_sha = sha256_bytes(pdf_bytes)
@@ -383,7 +519,7 @@ def main():
 
         raw_text = extract_pdf_text_bytes(pdf_bytes)
         doc_text = shrink_text(raw_text)
-        result = call_openai(doc_text)
+        result = call_claude(doc_text)
 
         signal = float(result.get("signal"))
         label = str(result.get("label", "")).upper().strip()
@@ -400,10 +536,10 @@ def main():
             "signal": signal,
             "label": label,
             "evidencias": evid[:5],
-            "pdf_url": pdf_url_norm,
+            "pdf_url": pdf_url,
             "pdf_sha256": pdf_sha,
             "model": MODEL,
-            "prompt_version": "v1",
+            "prompt_version": "v2",
         }
 
         series.append(point)
