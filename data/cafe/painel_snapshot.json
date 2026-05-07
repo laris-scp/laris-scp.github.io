@@ -1,6 +1,6 @@
 {
   "commodity": "cafe",
-  "updated_at": "2026-05-07 13:48:33",
+  "updated_at": "2026-05-07 14:11:55",
   "rows": [
     {
       "id": "preco_arabica",
@@ -150,8 +150,8 @@
       "id": "clima_soil",
       "bloco": 1,
       "variavel": "CLIMA (SOIL MOISTURE)",
-      "ultimo_valor": 0.4079199731349945,
-      "percentil": 0.9565,
+      "ultimo_valor": 0.37700727581977844,
+      "percentil": 0.9157,
       "nivel": "MUITO ALTO",
       "valor_nivel": 1.0,
       "tendencia": "QUEDA",
@@ -162,7 +162,7 @@
       "peso": 3.0,
       "score_ponderado": -3.0,
       "frequencia": "Mensal",
-      "ultima_atualizacao": "2026-03-01",
+      "ultima_atualizacao": "2026-04-01",
       "regra_de_sinal": "Este indicador mede o nivel de estresse hidrico do solo nas principais regioes produtoras de cafe.\n    Valores mais altos indicam solo mais seco, o que pode reduzir a produtividade.\n    O painel compara o estresse atual com o historico e so gera sinal de tendencia quando a seca atinge niveis extremos.\n    Fora desses episodios, o clima e considerado neutro para a analise direcional.",
       "fonte": "ERA5-Land (ECMWF/Copernicus) - swvl3 (Volumetric soil water layer 3)."
     },
