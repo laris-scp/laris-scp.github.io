@@ -20,20 +20,20 @@ import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
-from urllib import request, error
+
+import anthropic
 
 
 SNAPSHOT_PATH = Path("data/cafe/painel_snapshot.json")
 OUT_PATH = Path("data/cafe/ai_diagnostico.json")
 
-OPENAI_API_URL = "https://api.openai.com/v1/responses"
-MODEL = "gpt-4o-mini"
+# Anthropic Claude
+MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-5")
 
 # Limites para controlar custo
-MAX_OUTPUT_TOKENS = 650  # suficiente para parágrafo + bullets
-TEMPERATURE = 0.2        # mais estável / menos aleatório
+MAX_OUTPUT_TOKENS = 1500  # margem para o JSON completo
 
-# Taxonomia econômica (embutida no prompt, como você aprovou)
+# Taxonomia econômica (embutida no prompt)
 ECONOMIC_TAXONOMY = {
     "preco_arabica": "Preço (timing / reflexividade do mercado)",
     "usd_brl": "Macro (amplificador de preço em BRL e competitividade/exportações)",
@@ -138,17 +138,17 @@ def _summarize_rows(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 def _build_prompt(snapshot: Dict[str, Any], summary: Dict[str, Any]) -> Tuple[str, str]:
     """
-    Retorna (instructions, user_content).
+    Retorna (system, user_content).
     Mantém o payload pequeno para reduzir custo.
     """
     updated_at = snapshot.get("updated_at", "")
     commodity = snapshot.get("commodity", "cafe")
 
-    instructions = (
+    system = (
         "Você é um analista de commodities especializado em café arábica.\n\n"
         "Tarefa:\n"
         "Gerar um diagnóstico econômico interpretativo para a tendência futura do preço do café com base nas variáveis fornecidas.\n\n"
-        "FORMATO OBRIGATÓRIO (JSON estrito):\n"
+        "FORMATO OBRIGATÓRIO (JSON estrito, sem markdown, sem ```json, sem texto adicional):\n"
         "{\n"
         '  "summary": "...",\n'
         '  "drivers_bull": ["..."],\n'
@@ -236,73 +236,32 @@ def _build_prompt(snapshot: Dict[str, Any], summary: Dict[str, Any]) -> Tuple[st
         "variaveis_ordenadas_por_impacto": summary["variaveis"],
     }
 
-    return instructions, json.dumps(user_content, ensure_ascii=False)
+    return system, json.dumps(user_content, ensure_ascii=False)
 
 
-def _openai_call(instructions: str, user_text: str) -> Dict[str, Any]:
-    api_key = os.getenv("OPENAI_API_KEY", "").strip()
+def _claude_call(system: str, user_text: str) -> str:
+    """
+    Chama Claude via SDK Anthropic. Retorna o texto bruto da resposta.
+    """
+    api_key = os.getenv("ANTHROPIC_API_KEY", "").strip()
     if not api_key:
-        raise RuntimeError("OPENAI_API_KEY não encontrado no ambiente. Configure o secret no GitHub Actions.")
+        raise RuntimeError("ANTHROPIC_API_KEY não encontrado no ambiente. Configure o secret no GitHub Actions.")
 
-    payload = {
-        "model": MODEL,
-        "instructions": instructions,
-        "input": [
-            {"role": "user", "content": user_text}
-        ],
-        "max_output_tokens": MAX_OUTPUT_TOKENS,
-        "temperature": TEMPERATURE,
-        "store": False,
-    }
+    client = anthropic.Anthropic()
 
-    data = json.dumps(payload).encode("utf-8")
-    req = request.Request(
-        OPENAI_API_URL,
-        data=data,
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {api_key}",
-        },
-        method="POST",
+    resp = client.messages.create(
+        model=MODEL,
+        max_tokens=MAX_OUTPUT_TOKENS,
+        system=system,
+        messages=[{"role": "user", "content": user_text}],
     )
 
-    try:
-        with request.urlopen(req, timeout=60) as resp:
-            raw = resp.read().decode("utf-8", errors="replace")
-            return json.loads(raw)
-    except error.HTTPError as e:
-        body = e.read().decode("utf-8", errors="replace") if hasattr(e, "read") else ""
-        raise RuntimeError(f"Erro HTTP OpenAI: {e.code} {e.reason} | body={body[:2000]}")
-    except Exception as e:
-        raise RuntimeError(f"Falha ao chamar OpenAI: {e}")
-
-
-def _extract_output_text(resp: Dict[str, Any]) -> str:
-    """
-    Extrai texto do Responses API de forma robusta.
-    """
-    if isinstance(resp, dict) and isinstance(resp.get("output_text"), str) and resp["output_text"].strip():
-        return resp["output_text"].strip()
-
-    out = resp.get("output")
-    if isinstance(out, list):
-        chunks: List[str] = []
-        for item in out:
-            if not isinstance(item, dict):
-                continue
-            content = item.get("content")
-            if not isinstance(content, list):
-                continue
-            for c in content:
-                if not isinstance(c, dict):
-                    continue
-                if c.get("type") in ("output_text", "text") and isinstance(c.get("text"), str):
-                    chunks.append(c["text"])
-        txt = "\n".join(chunks).strip()
-        if txt:
-            return txt
-
-    return ""
+    # Extrai texto de todos os blocos
+    out = ""
+    for block in resp.content:
+        if hasattr(block, "text"):
+            out += block.text
+    return out.strip()
 
 
 def _parse_strict_json(text: str) -> Dict[str, Any]:
@@ -327,7 +286,8 @@ def _parse_strict_json(text: str) -> Dict[str, Any]:
 
     candidate = text[start:end + 1].strip()
     return json.loads(candidate)
-    
+
+
 def _normalize_enum(s: str) -> str:
     s = (s or "").strip()
     s = unicodedata.normalize("NFKD", s)
@@ -383,10 +343,9 @@ def main() -> int:
 
     summary = _summarize_rows(rows)
 
-    instructions, user_text = _build_prompt(snapshot, summary)
-    resp = _openai_call(instructions, user_text)
+    system, user_text = _build_prompt(snapshot, summary)
+    out_text = _claude_call(system, user_text)
 
-    out_text = _extract_output_text(resp)
     parsed = _parse_strict_json(out_text)
     final_obj = _validate_schema(parsed)
 
