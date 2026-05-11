@@ -148,7 +148,10 @@
         labelMM50: "MM50",
         labelMM252: "MM252",
         xLabelFormatter: null,  // opcional: (point, idx) => "Jan"
-        yDecimals: 1            // opcional: casas no eixo Y
+        yDecimals: 1,           // opcional: casas no eixo Y
+        yMinFixed: null,        // se setado, força yMin (ignora auto-cálculo)
+        yMaxFixed: null,        // se setado, força yMax (ignora auto-cálculo)
+        yTicks: null            // se setado (array de {value,label}), substitui os rótulos do eixo Y
       }, (opts || {}));
 
 
@@ -186,21 +189,37 @@
         return;
       }
 
-      let yMin = Math.min(...values);
-      let yMax = Math.max(...values);
-      const margin = (yMax - yMin) * 0.12 || 1;
-      yMin -= margin; yMax += margin;
+      let yMin, yMax;
+      if(o.yMinFixed !== null && o.yMaxFixed !== null){
+        yMin = Number(o.yMinFixed);
+        yMax = Number(o.yMaxFixed);
+      } else {
+        yMin = Math.min(...values);
+        yMax = Math.max(...values);
+        const margin = (yMax - yMin) * 0.12 || 1;
+        yMin -= margin; yMax += margin;
+      }
 
       function xPix(i){ return padL + (i/(points.length-1))*iw; }
       function yPix(v){ return padT + (1 - (v - yMin)/(yMax - yMin))*ih; }
 
-      // grid
+      // grid + y labels: se yTicks customizado, usa ele; senão, comportamento padrão
+      const useCustomTicks = Array.isArray(o.yTicks) && o.yTicks.length > 0;
+
       ctx.strokeStyle = "rgba(255,255,255,.08)";
       ctx.lineWidth = 1;
-      const gridY = 5;
-      for(let k=0;k<=gridY;k++){
-        const y = padT + (k/gridY)*ih;
-        ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(padL+iw,y); ctx.stroke();
+
+      if(useCustomTicks){
+        for(const t of o.yTicks){
+          const y = yPix(Number(t.value));
+          ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(padL+iw,y); ctx.stroke();
+        }
+      } else {
+        const gridY = 5;
+        for(let k=0;k<=gridY;k++){
+          const y = padT + (k/gridY)*ih;
+          ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(padL+iw,y); ctx.stroke();
+        }
       }
 
       // axes
@@ -211,10 +230,19 @@
       // y labels
       ctx.fillStyle = "rgba(255,255,255,.70)";
       ctx.font = "18px system-ui";
-      for(let k=0;k<=gridY;k++){
-        const v = yMax - (k/gridY)*(yMax-yMin);
-        const y = padT + (k/gridY)*ih;
-        ctx.fillText(v.toFixed(Number(o.yDecimals ?? 1)), 8, y+4);
+
+      if(useCustomTicks){
+        for(const t of o.yTicks){
+          const y = yPix(Number(t.value));
+          ctx.fillText(String(t.label), 8, y+4);
+        }
+      } else {
+        const gridY = 5;
+        for(let k=0;k<=gridY;k++){
+          const v = yMax - (k/gridY)*(yMax-yMin);
+          const y = padT + (k/gridY)*ih;
+          ctx.fillText(v.toFixed(Number(o.yDecimals ?? 1)), 8, y+4);
+        }
       }
 
       const styles = {
@@ -621,7 +649,14 @@
           drawMultiLine(canvas, ptsChart, {
             showMM50:false,
             showMM252:false,
-            labelClose:"Score"
+            labelClose:"Score",
+            yMinFixed: -1,
+            yMaxFixed: 1,
+            yTicks: [
+              { value:  1, label: "BULLISH"  },
+              { value:  0, label: "NEUTRAL"  },
+              { value: -1, label: "BEARISH"  }
+            ]
           });
 
           return;
