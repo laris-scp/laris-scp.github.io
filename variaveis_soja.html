@@ -59,6 +59,17 @@
       color:var(--accent-2);
       box-shadow:inset 0 0 0 1px rgba(79,163,255,.25);
     }
+    .sidebar .nav-item img{
+      width:26px;height:26px;object-fit:contain;
+      filter:grayscale(1) opacity(.45) brightness(1.6);
+      transition:filter .2s ease;
+    }
+    .sidebar .nav-item:hover img{
+      filter:grayscale(.5) opacity(.85) brightness(1.1);
+    }
+    .sidebar .nav-item.active img{
+      filter:none;
+    }
     .sidebar .nav-item .tip{
       position:absolute;left:54px;top:50%;transform:translateY(-50%);
       background:#1a2236;color:var(--text);padding:6px 10px;border-radius:8px;
@@ -174,24 +185,20 @@
     <a class="logo" href="index.html" style="text-decoration:none">L</a>
 
     <a class="nav-item" href="variaveis.html">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>
+      <img src="cafe_icone.png" alt="Café">
       <span class="tip">Café</span>
     </a>
     <a class="nav-item active" href="variaveis_soja.html">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><circle cx="9" cy="10" r="1"/><circle cx="15" cy="10" r="1"/></svg>
+      <img src="soja_icone.png" alt="Soja">
       <span class="tip">Soja</span>
     </a>
     <div class="nav-item" title="Milho">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c2 4 2 8 2 12s0 6-2 8c-2-2-2-4-2-8s0-8 2-12z"/><path d="M12 6c-2 0-4 1-4 4"/><path d="M12 6c2 0 4 1 4 4"/></svg>
+      <img src="milho_icone.png" alt="Milho">
       <span class="tip">Milho (em breve)</span>
     </div>
     <div class="nav-item" title="Algodão">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="12" r="3"/><circle cx="12" cy="9" r="3"/><circle cx="17" cy="12" r="3"/><circle cx="12" cy="15" r="3"/></svg>
+      <img src="algodao_icone.png" alt="Algodão">
       <span class="tip">Algodão (em breve)</span>
-    </div>
-    <div class="nav-item" title="Trigo">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22V2"/><path d="M12 8c-2-2-4-2-6 0 2 2 4 2 6 0z"/><path d="M12 8c2-2 4-2 6 0-2 2-4 2-6 0z"/><path d="M12 14c-2-2-4-2-6 0 2 2 4 2 6 0z"/><path d="M12 14c2-2 4-2 6 0-2 2-4 2-6 0z"/></svg>
-      <span class="tip">Trigo (em breve)</span>
     </div>
   </aside>
 
@@ -529,7 +536,7 @@ function buildCard(snapshotRow){
       </div>
     </div>
 
-    <details>
+    <details open>
       <summary>Ver regra de sinal e fonte</summary>
       <div class="small"><b>Regra:</b> ${snapshotRow.regra_de_sinal || "—"}</div>
       <div class="small" style="margin-top:4px"><b>Fonte:</b> ${snapshotRow.fonte || "—"}</div>
