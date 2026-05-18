@@ -1,0 +1,60 @@
+name: 50 - Update Preço Soja (series/preco_soja.json)
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 10:35 UTC = 07:35 America/Sao_Paulo (UTC-3)
+    # Roda 5min depois do preço arábica pra não conflitar
+    - cron: "35 10 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: soja-main-push
+  cancel-in-progress: false
+
+jobs:
+  update-preco-soja:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas yfinance
+          python - << 'PY'
+          import pandas, yfinance
+          print("pandas:", pandas.__version__)
+          print("yfinance:", yfinance.__version__)
+          PY
+
+      - name: Run updater
+        run: |
+          python scripts/soja/update_preco_soja_series.py
+
+      - name: Commit only if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet; then
+            echo "No changes detected. Skipping commit."
+            exit 0
+          fi
+
+          git add data/soja/series/preco_soja.json
+          git commit -m "data(soja): update preco_soja.json"
+
+          git pull --rebase origin main
+
+          git push
