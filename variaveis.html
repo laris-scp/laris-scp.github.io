@@ -177,10 +177,10 @@
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>
       <span class="tip">Café</span>
     </a>
-    <div class="nav-item" title="Soja">
+    <a class="nav-item" href="variaveis_soja.html">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><circle cx="9" cy="10" r="1"/><circle cx="15" cy="10" r="1"/></svg>
-      <span class="tip">Soja (em breve)</span>
-    </div>
+      <span class="tip">Soja</span>
+    </a>
     <div class="nav-item" title="Milho">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c2 4 2 8 2 12s0 6-2 8c-2-2-2-4-2-8s0-8 2-12z"/><path d="M12 6c-2 0-4 1-4 4"/><path d="M12 6c2 0 4 1 4 4"/></svg>
       <span class="tip">Milho (em breve)</span>
@@ -346,12 +346,11 @@ function baseChartOptions(series, opts){
     yDecimals: 2,
     yMin: undefined,
     yMax: undefined,
-    yLabels: null,
-    xType: 'datetime',
-    xCategories: null,
+    yLabels: null,             // array de {value,label} para eixos categóricos como ICO
+    xType: 'datetime',         // 'datetime' ou 'category'
+    xCategories: null,         // se xType='category'
     height: 230,
-    showMarkers: false,
-    curve: 'smooth'
+    showMarkers: false
   }, (opts || {}));
 
   const yFormatter = (v) => {
@@ -395,7 +394,7 @@ function baseChartOptions(series, opts){
     },
     colors:colors,
     stroke:{
-      curve: o.curve,
+      curve:'smooth',
       width: series.map((_,i) => i === 0 ? 2.5 : 1.8)
     },
     fill:{
@@ -541,7 +540,7 @@ function buildCard(snapshotRow){
       </div>
     </div>
 
-    <details open>
+    <details>
       <summary>Ver regra de sinal e fonte</summary>
       <div class="small"><b>Regra:</b> ${snapshotRow.regra_de_sinal || "—"}</div>
       <div class="small" style="margin-top:4px"><b>Fonte:</b> ${snapshotRow.fonte || "—"}</div>
@@ -682,9 +681,7 @@ async function loadSeriesIntoCard(card, url){
             {value: 1,  label: 'BULLISH'},
             {value: 0,  label: 'NEUTRAL'},
             {value: -1, label: 'BEARISH'}
-          ],
-          curve: 'stepline',
-          showMarkers: true
+          ]
         }
       ));
       return;
