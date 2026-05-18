@@ -4,349 +4,678 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Painel – Café</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
   <style>
-    :root{--bg:#0b1220;--card:#121a2c;--muted:#a9b2c3;--text:#e9eef7;--line:#24304a;--good:#19c37d;--bad:#ef4444;--warn:#f59e0b;}
+    :root{
+      --bg: #0a0e1a;
+      --bg-2: #0e1424;
+      --panel: #111828;
+      --panel-2: #151d31;
+      --line: rgba(255,255,255,.06);
+      --line-2: rgba(255,255,255,.1);
+      --text: #e8edf7;
+      --muted: #8a93a8;
+      --muted-2: #6b7488;
+      --accent: #4fa3ff;
+      --accent-2: #7cc5ff;
+      --good: #22c55e;
+      --bad: #ef4444;
+      --warn: #f59e0b;
+      --neutral: #94a3b8;
+    }
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:var(--bg);color:var(--text)}
-    header{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}
-    header h1{margin:0;font-size:18px;font-weight:700;letter-spacing:.2px}
-    header .meta{font-size:12px;color:var(--muted)}
-    main{padding:16px 20px;max-width:1200px;margin:0 auto}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.5}
 
-    /* NAV (botões do topo) */
-    .nav{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
-    .nav a{
+    .shell{display:grid;grid-template-columns:72px 1fr;min-height:100vh}
+
+    /* Sidebar */
+    .sidebar{
+      background:var(--bg-2);border-right:1px solid var(--line);
+      display:flex;flex-direction:column;align-items:center;
+      padding:20px 0;gap:8px;position:sticky;top:0;height:100vh;
+    }
+    .sidebar .logo{
+      width:40px;height:40px;border-radius:12px;
+      background:linear-gradient(135deg,#4fa3ff,#1f6fbf);
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Space Grotesk';font-weight:700;color:#fff;font-size:18px;margin-bottom:16px;
       text-decoration:none;
-      color:var(--text);
-      padding:10px 14px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.03);
-      font-size:13px;
-      font-weight:600;
     }
-    .nav a:hover{background:rgba(255,255,255,.06)}
-    .nav a.active{
-      border-color:rgba(155,208,255,.45);
-      box-shadow:0 0 0 2px rgba(155,208,255,.10) inset;
+    .sidebar .nav-item{
+      width:44px;height:44px;border-radius:12px;
+      display:flex;align-items:center;justify-content:center;
+      color:var(--muted);cursor:pointer;transition:all .15s ease;position:relative;
+      text-decoration:none;
     }
+    .sidebar .nav-item:hover{background:rgba(255,255,255,.04);color:var(--text)}
+    .sidebar .nav-item.active{
+      background:linear-gradient(135deg,rgba(79,163,255,.18),rgba(79,163,255,.06));
+      color:var(--accent-2);
+      box-shadow:inset 0 0 0 1px rgba(79,163,255,.25);
+    }
+    .sidebar .nav-item .tip{
+      position:absolute;left:54px;top:50%;transform:translateY(-50%);
+      background:#1a2236;color:var(--text);padding:6px 10px;border-radius:8px;
+      font-size:12px;white-space:nowrap;border:1px solid var(--line-2);
+      opacity:0;pointer-events:none;transition:opacity .15s ease;z-index:10;
+    }
+    .sidebar .nav-item:hover .tip{opacity:1}
+    .sidebar .divider{width:24px;height:1px;background:var(--line);margin:8px 0}
 
-    .grid{display:grid;grid-template-columns:1fr;gap:12px}
-    @media (min-width: 980px){.grid{grid-template-columns:1fr}}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
-    .card h2{margin:0 0 10px 0;font-size:14px}
-    .kpis{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0 6px}
-    .kpi{padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);min-width:180px}
-    .kpi .label{font-size:11px;color:var(--muted);margin-bottom:2px}
-    .kpi .val{font-size:18px;font-weight:800}
-    .kpi .sub{font-size:11px;color:var(--muted)}
-    table{width:100%;border-collapse:collapse;font-size:12px}
-    th,td{border-bottom:1px solid rgba(255,255,255,.07);padding:10px 8px;vertical-align:top}
-    th{color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;font-size:11px}
-    tr:hover td{background:rgba(255,255,255,.02)}
-    .right{text-align:right}
-    .tag{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.10);font-size:11px;color:var(--muted)}
-    .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700}
-    .pill.good{background:rgba(25,195,125,.15);color:#7ff3c7;border:1px solid rgba(25,195,125,.35)}
-    .pill.bad{background:rgba(239,68,68,.12);color:#ffb4b4;border:1px solid rgba(239,68,68,.32)}
-    .pill.neu{background:rgba(148,163,184,.12);color:#d1d5db;border:1px solid rgba(148,163,184,.32)}
-    .small{font-size:11px;color:var(--muted)}
-    .row-title{font-weight:700}
-    .src{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.25}
-    .err{padding:10px;border:1px solid rgba(239,68,68,.35);background:rgba(239,68,68,.08);border-radius:12px;color:#ffd0d0}
-    a{color:#9bd0ff}
-        /* AI Diagnóstico (banner) */
-    .ai-banner{
-      background: linear-gradient(180deg, rgba(155,208,255,.10), rgba(255,255,255,.03));
-      border: 1px solid rgba(155,208,255,.25);
-      border-radius: 14px;
-      padding: 14px;
+    .main{padding:24px 32px 60px;max-width:1500px;margin:0 auto;width:100%}
+
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+    .topbar h1{
+      margin:0;font-family:'Space Grotesk';font-size:24px;font-weight:700;letter-spacing:-.5px;
+      display:flex;align-items:center;gap:10px;
     }
-    .ai-head{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:8px;
+    .topbar h1 .badge{
+      font-family:'Inter';font-size:11px;font-weight:600;
+      background:rgba(79,163,255,.12);color:var(--accent-2);
+      padding:3px 8px;border-radius:6px;border:1px solid rgba(79,163,255,.2);
     }
-    .ai-title{
-      font-size:14px;
-      font-weight:800;
-      margin:0;
+    .topbar .subtitle{color:var(--muted);font-size:12px;margin-top:4px;max-width:760px}
+    .topbar .tabs{display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px}
+    .topbar .tabs a{
+      text-decoration:none;color:var(--muted);padding:8px 14px;border-radius:8px;
+      font-size:13px;font-weight:500;transition:all .15s ease;
     }
-    .ai-meta{
-      font-size:11px;
-      color: var(--muted);
-      white-space:nowrap;
+    .topbar .tabs a:hover{color:var(--text)}
+    .topbar .tabs a.active{background:rgba(79,163,255,.14);color:var(--accent-2)}
+
+    /* Termômetros KPI */
+    .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+    .kpi-card{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:20px 22px;
+      position:relative;
+      overflow:hidden;
     }
-    .ai-summary{
-      margin:0 0 10px 0;
-      line-height:1.35;
-      color: var(--text);
-      font-size:13px;
+    .kpi-card::before{
+      content:'';position:absolute;inset:0;
+      background:radial-gradient(80% 80% at 100% 0%,rgba(79,163,255,.06),transparent 60%);
+      pointer-events:none;
     }
-    .ai-bullets{
-      margin:0;
-      padding-left: 18px;
-      color: var(--text);
-      font-size:12px;
-      line-height:1.35;
+    .kpi-card .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+    .kpi-card .value{
+      font-family:'Space Grotesk';
+      font-size:38px;font-weight:700;margin-top:8px;
+      display:flex;align-items:baseline;gap:8px;
     }
-    .ai-bullets li{ margin:6px 0; }
-    .ai-badge{
-      display:inline-block;
-      padding:3px 10px;
-      border-radius:999px;
-      font-size:11px;
-      font-weight:800;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.04);
+    .kpi-card .value .arrow{font-size:18px}
+    .kpi-card.up .value{color:var(--good)}
+    .kpi-card.down .value{color:var(--bad)}
+    .kpi-card.neutral .value{color:var(--neutral)}
+    .kpi-card .sub{color:var(--muted-2);font-size:11px;margin-top:6px}
+
+    .meter{margin-top:14px;height:6px;background:rgba(255,255,255,.05);border-radius:999px;position:relative;overflow:visible}
+    .meter .scale{position:absolute;inset:0;background:linear-gradient(90deg,#ef4444,#94a3b8 50%,#22c55e);border-radius:999px;opacity:.35}
+    .meter .needle{
+      position:absolute;top:-4px;width:4px;height:14px;background:var(--text);border-radius:2px;
+      transform:translateX(-50%);
+      box-shadow:0 0 0 2px var(--panel);
     }
-    .ai-badge.alt{ color:#7ff3c7; border-color: rgba(25,195,125,.35); background: rgba(25,195,125,.12); }
-    .ai-badge.bai{ color:#ffb4b4; border-color: rgba(239,68,68,.32); background: rgba(239,68,68,.10); }
-    .ai-badge.lat{ color:#d1d5db; border-color: rgba(148,163,184,.32); background: rgba(148,163,184,.10); }
-    .ai-badge.conf{ margin-left:8px; }
-    .ai-hidden{ display:none; }
+    .meter-ticks{display:flex;justify-content:space-between;font-size:10px;color:var(--muted-2);margin-top:6px}
+
+    /* AI Diagnóstico */
+    .ai-card{
+      background:linear-gradient(180deg,rgba(79,163,255,.06),rgba(79,163,255,.02));
+      border:1px solid rgba(79,163,255,.18);
+      border-radius:16px;padding:22px;margin-bottom:20px;
+    }
+    .ai-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:12px;flex-wrap:wrap}
+    .ai-head h2{
+      margin:0;font-family:'Space Grotesk';font-size:16px;font-weight:600;
+      display:flex;align-items:center;gap:10px;
+    }
+    .ai-head h2 .dot{
+      width:8px;height:8px;border-radius:50%;background:var(--accent);
+      box-shadow:0 0 0 4px rgba(79,163,255,.18);
+    }
+    .ai-head .meta-date{font-weight:400;color:var(--muted);font-size:12px;margin-left:6px;font-family:'Inter'}
+    .ai-tags{display:flex;gap:8px;flex-wrap:wrap}
+    .ai-tag{
+      font-size:11px;font-weight:600;padding:5px 12px;border-radius:999px;
+      border:1px solid var(--line-2);background:rgba(255,255,255,.03);
+    }
+    .ai-tag.bias-lat{background:rgba(148,163,184,.12);color:#cbd5e1;border-color:rgba(148,163,184,.25)}
+    .ai-tag.bias-alt{background:rgba(34,197,94,.12);color:#7ff3c7;border-color:rgba(34,197,94,.25)}
+    .ai-tag.bias-bai{background:rgba(239,68,68,.12);color:#ffb4b4;border-color:rgba(239,68,68,.25)}
+    .ai-tag.conf-alta{background:rgba(34,197,94,.10);color:#a8e6bf;border-color:rgba(34,197,94,.20)}
+    .ai-tag.conf-media{background:rgba(245,158,11,.10);color:#fde0a1;border-color:rgba(245,158,11,.22)}
+    .ai-tag.conf-baixa{background:rgba(148,163,184,.10);color:#cbd5e1;border-color:rgba(148,163,184,.22)}
+
+    .ai-summary{margin:0 0 16px;color:#cdd5e6;font-size:13px;line-height:1.6}
+
+    .ai-drivers{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px}
+    @media(max-width:1100px){.ai-drivers{grid-template-columns:1fr}}
+    .ai-col{
+      background:rgba(255,255,255,.025);
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:14px;
+    }
+    .ai-col.bull{border-color:rgba(34,197,94,.22);background:rgba(34,197,94,.04)}
+    .ai-col.bear{border-color:rgba(239,68,68,.22);background:rgba(239,68,68,.04)}
+    .ai-col.limited{border-color:rgba(148,163,184,.22);background:rgba(148,163,184,.04)}
+    .ai-col h4{
+      margin:0 0 10px;font-family:'Inter';font-size:11px;font-weight:700;
+      text-transform:uppercase;letter-spacing:.06em;
+      display:flex;align-items:center;gap:8px;
+    }
+    .ai-col h4 .ico{
+      width:18px;height:18px;border-radius:5px;
+      display:inline-flex;align-items:center;justify-content:center;
+      font-size:11px;font-weight:700;
+    }
+    .ai-col.bull h4{color:#7ff3c7}
+    .ai-col.bull h4 .ico{background:rgba(34,197,94,.18);color:#7ff3c7}
+    .ai-col.bear h4{color:#ffb4b4}
+    .ai-col.bear h4 .ico{background:rgba(239,68,68,.18);color:#ffb4b4}
+    .ai-col.limited h4{color:#cbd5e1}
+    .ai-col.limited h4 .ico{background:rgba(148,163,184,.18);color:#cbd5e1}
+    .ai-col ul{margin:0;padding-left:0;list-style:none}
+    .ai-col li{
+      position:relative;padding:6px 0 6px 18px;
+      font-size:12px;line-height:1.5;color:#b6c0d4;
+      border-bottom:1px dashed var(--line);
+    }
+    .ai-col li:last-child{border-bottom:0}
+    .ai-col li::before{
+      content:'';position:absolute;left:4px;top:14px;
+      width:6px;height:6px;border-radius:50%;
+    }
+    .ai-col.bull li::before{background:var(--good)}
+    .ai-col.bear li::before{background:var(--bad)}
+    .ai-col.limited li::before{background:var(--neutral)}
+    .ai-col .empty{font-size:11.5px;color:var(--muted-2);font-style:italic}
+
+    /* Variáveis table */
+    .vars-card{
+      background:var(--panel);border:1px solid var(--line);border-radius:16px;
+      overflow:hidden;
+    }
+    .vars-head{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    .vars-head h2{margin:0;font-family:'Space Grotesk';font-size:15px;font-weight:600}
+    .vars-head .filters{display:flex;gap:6px}
+    .vars-head .filter-btn{
+      font-size:12px;color:var(--muted);background:transparent;border:1px solid var(--line-2);
+      padding:6px 12px;border-radius:8px;cursor:pointer;font-family:inherit;
+    }
+    .vars-head .filter-btn:hover{color:var(--text)}
+    .vars-head .filter-btn.active{background:rgba(79,163,255,.12);color:var(--accent-2);border-color:rgba(79,163,255,.25)}
+
+    .vars-table{width:100%;border-collapse:collapse}
+    .vars-table th{
+      text-align:left;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;
+      padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.015);
+    }
+    .vars-table th.right{text-align:right}
+    .vars-table td{padding:14px 16px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle}
+    .vars-table tbody tr{transition:background .12s ease}
+    .vars-table tbody tr:hover{background:rgba(255,255,255,.02)}
+    .vars-table .right{text-align:right;font-variant-numeric:tabular-nums}
+
+    .bloco-tag{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:24px;height:24px;border-radius:6px;
+      background:rgba(79,163,255,.12);color:var(--accent-2);
+      font-size:11px;font-weight:700;
+    }
+    .var-name{font-weight:600;color:var(--text)}
+    .var-source{font-size:11px;color:var(--muted-2);margin-top:3px;line-height:1.4}
+
+    .pill{display:inline-block;font-size:11px;font-weight:600;padding:4px 10px;border-radius:999px;white-space:nowrap}
+    .pill.muito-alto{background:rgba(34,197,94,.15);color:#7ff3c7}
+    .pill.alto{background:rgba(34,197,94,.10);color:#a8e6bf}
+    .pill.baixo{background:rgba(239,68,68,.10);color:#ffc4c4}
+    .pill.muito-baixo{background:rgba(239,68,68,.15);color:#ffb4b4}
+    .pill.neutro{background:rgba(148,163,184,.12);color:#cbd5e1}
+    .pill.alta{background:rgba(34,197,94,.12);color:#7ff3c7}
+    .pill.queda{background:rgba(239,68,68,.12);color:#ffb4b4}
+    .pill.lateral{background:rgba(148,163,184,.12);color:#cbd5e1}
+    .pill.bullish{background:rgba(34,197,94,.15);color:#7ff3c7}
+    .pill.bearish{background:rgba(239,68,68,.15);color:#ffb4b4}
+    .pill.neutral{background:rgba(148,163,184,.12);color:#cbd5e1}
+
+    .score-cell{font-family:'Space Grotesk';font-weight:700;font-size:14px}
+    .score-pos{color:var(--good)}
+    .score-neg{color:var(--bad)}
+    .score-neu{color:var(--neutral)}
+
+    .err{padding:10px 14px;border:1px solid rgba(239,68,68,.35);background:rgba(239,68,68,.08);border-radius:10px;color:#ffd0d0;font-size:12px;margin:10px 0}
+
+    ::-webkit-scrollbar{width:10px;height:10px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:10px}
+    ::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.14)}
+
+    @media(max-width:900px){
+      .shell{grid-template-columns:1fr}
+      .sidebar{display:none}
+      .main{padding:16px}
+      .kpis{grid-template-columns:1fr}
+      .topbar{flex-direction:column;align-items:flex-start}
+    }
   </style>
 </head>
 <body>
-  <header>
-    <div>
-      <h1>Painel do Café</h1>
-      <div class="meta">Este painel faz um compilado de variáveis que impactam o preço do café arábica internacional (contrato ICEUS: KC). Por meio de um score que pode variar de -1 a 1, sendo -1 para tendência à depreciação do preço e +1 para apreciação, este painel procura ajudar o usuário a embasar sua decisão na hora de negociar a commodity.</div>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="logo" href="index.html">L</a>
+
+    <a class="nav-item active" href="painel.html">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>
+      <span class="tip">Café</span>
+    </a>
+    <div class="nav-item" title="Soja">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><circle cx="9" cy="10" r="1"/><circle cx="15" cy="10" r="1"/></svg>
+      <span class="tip">Soja (em breve)</span>
+    </div>
+    <div class="nav-item" title="Milho">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c2 4 2 8 2 12s0 6-2 8c-2-2-2-4-2-8s0-8 2-12z"/><path d="M12 6c-2 0-4 1-4 4"/><path d="M12 6c2 0 4 1 4 4"/></svg>
+      <span class="tip">Milho (em breve)</span>
+    </div>
+    <div class="nav-item" title="Algodão">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="12" r="3"/><circle cx="12" cy="9" r="3"/><circle cx="17" cy="12" r="3"/><circle cx="12" cy="15" r="3"/></svg>
+      <span class="tip">Algodão (em breve)</span>
+    </div>
+    <div class="nav-item" title="Trigo">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22V2"/><path d="M12 8c-2-2-4-2-6 0 2 2 4 2 6 0z"/><path d="M12 8c2-2 4-2 6 0-2 2-4 2-6 0z"/><path d="M12 14c-2-2-4-2-6 0 2 2 4 2 6 0z"/><path d="M12 14c2-2 4-2 6 0-2 2-4 2-6 0z"/></svg>
+      <span class="tip">Trigo (em breve)</span>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1>Painel do Café <span class="badge">ICEUS · KC</span></h1>
+        <div class="subtitle">Compilado de variáveis que impactam o preço do café arábica internacional. Score varia de −1 a +1: valores negativos indicam tendência à depreciação; positivos, apreciação.</div>
+      </div>
+      <div class="tabs">
+        <a href="index.html">Home</a>
+        <a href="painel.html" class="active">Painel</a>
+        <a href="variaveis.html">Variáveis</a>
+      </div>
     </div>
 
-    <div class="nav">
-      <a href="index.html">Home</a>
-      <a class="active" href="painel.html">Painel</a>
-      <a href="variaveis.html">Variáveis</a>
-      <div class="meta" id="updatedAt" style="margin-left:8px">—</div>
+    <!-- Termômetros -->
+    <div class="kpis">
+      <div class="kpi-card" id="kpi-b1">
+        <div class="label">Bloco 1 · Curto Prazo</div>
+        <div class="value" id="t1">— <span class="arrow" id="arrow-b1"></span></div>
+        <div class="sub">Posicionamento, câmbio, fluxo, custo</div>
+        <div class="meter"><div class="scale"></div><div class="needle" id="needle-b1" style="left:50%"></div></div>
+        <div class="meter-ticks"><span>−10</span><span>0</span><span>+10</span></div>
+      </div>
+      <div class="kpi-card" id="kpi-b2">
+        <div class="label">Bloco 2 · Fundamentos</div>
+        <div class="value" id="t2">— <span class="arrow" id="arrow-b2"></span></div>
+        <div class="sub">Estoques, oferta, dinâmica estrutural</div>
+        <div class="meter"><div class="scale"></div><div class="needle" id="needle-b2" style="left:50%"></div></div>
+        <div class="meter-ticks"><span>−10</span><span>0</span><span>+10</span></div>
+      </div>
+      <div class="kpi-card" id="kpi-tg">
+        <div class="label">Geral</div>
+        <div class="value" id="tg">— <span class="arrow" id="arrow-tg"></span></div>
+        <div class="sub">Média ponderada de todos os blocos</div>
+        <div class="meter"><div class="scale"></div><div class="needle" id="needle-tg" style="left:50%"></div></div>
+        <div class="meter-ticks"><span>−1</span><span>0</span><span>+1</span></div>
+      </div>
     </div>
-  </header>
 
-  <main>
-    <div class="grid">
-      <section class="card">
-        <h2>Termômetros</h2>
-        <div class="kpis">
-          <div class="kpi">
-            <div class="label">Bloco 1</div>
-            <div class="val" id="t1">—</div>
-            
-          </div>
-          <div class="kpi">
-            <div class="label">Bloco 2</div>
-            <div class="val" id="t2">—</div>
-            
-          </div>
-          <div class="kpi">
-            <div class="label">Geral</div>
-            <div class="val" id="tg">—</div>
-            <div class="sub">Média ponderada (todos os blocos)</div>
-          </div>
+    <!-- Diagnóstico IA -->
+    <section class="ai-card" id="aiCard" style="display:none">
+      <div class="ai-head">
+        <h2>
+          <span class="dot"></span> Diagnóstico (IA)
+          <span class="meta-date" id="aiDate">—</span>
+        </h2>
+        <div class="ai-tags">
+          <span class="ai-tag" id="aiBias">—</span>
+          <span class="ai-tag" id="aiConf">—</span>
         </div>
-      </section>
-            <!-- AI Diagnóstico (banner) -->
-      <section class="ai-banner ai-hidden" id="aiBanner">
-        <div class="ai-head">
-          <div>
-            <h2 class="ai-title">Diagnóstico (IA)</h2>
-            <div class="small" id="aiDate">—</div>
-          </div>
-          <div style="text-align:right">
-            <span class="ai-badge" id="aiBias">—</span>
-            <span class="ai-badge conf" id="aiConf">—</span>
-          </div>
+      </div>
+      <p class="ai-summary" id="aiSummary">—</p>
+      <div class="ai-drivers">
+        <div class="ai-col bull">
+          <h4><span class="ico">▲</span> Fatores altistas</h4>
+          <ul id="aiBull"></ul>
         </div>
-
-        <p class="ai-summary" id="aiSummary">—</p>
-        <ul class="ai-bullets" id="aiDrivers"></ul>
-      </section>
-
-      <section class="card">
-        <h2>Variáveis</h2>
-        <div id="errBox" class="err" style="display:none"></div>
-        <div style="overflow:auto">
-          <table>
-            <thead>
-              <tr>
-                <th>Bloco</th>
-                <th>Variável</th>
-                <th class="right">Último</th>
-                <th>Nível</th>
-                <th>Tendência</th>
-                <th>Momento</th>
-                <th class="right">Score Ponderado</th>
-                <th>Frequência</th>
-                <th>Última Atualização</th>
-              </tr>
-            </thead>
-            <tbody id="tbody"></tbody>
-          </table>
+        <div class="ai-col bear">
+          <h4><span class="ico">▼</span> Fatores baixistas</h4>
+          <ul id="aiBear"></ul>
         </div>
-      </section>
-    </div>
-  </main>
+        <div class="ai-col limited">
+          <h4><span class="ico">→</span> Impacto limitado</h4>
+          <ul id="aiLim"></ul>
+        </div>
+      </div>
+    </section>
 
-  <script>
-    const SNAPSHOT_URL = "data/cafe/painel_snapshot.json";
-    const AI_URL = "data/cafe/ai_diagnostico.json";
-    const DECIMALS_BY_ID = {
-      clima_soil: 2,
-      cot_report: 0,
-      fertilizante_urea: 2,
-      gscpi: 2,
-      preco_arabica: 2,
-      usd_brl: 2,
-      estoques_certificados: 0,
-      fundamental_stu: 4,
-      ico_ia: 0,
-      mdic_export: 0,
-    };
-
-    function fmtNumber(x, decimals = 2){
-      if(x===null || x===undefined || x==="") return "";
-      const n = Number(x);
-      if(!Number.isFinite(n)) return "";
-      const d = Number(decimals);
-      return n.toLocaleString("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d });
-    }
-
-    function fmtDate(x){
-      if(!x) return "";
-      return String(x);
-    }
-    function showError(msg){
-      const box = document.getElementById("errBox");
-      box.style.display = "block";
-      box.textContent = msg;
-    }
-    function biasClass(bias){
-      const b = String(bias || "").toUpperCase();
-      if(b === "ALTA") return "alt";
-      if(b === "QUEDA") return "bai";
-      if(b === "LATERAL") return "lat";
-      return "";
-    }
-
-    function safeText(x){
-      if(x === null || x === undefined) return "";
-      return String(x);
-    }
-
-    async function loadAIDiagnostico(){
-      // Não pode quebrar o site se o JSON ainda não existir
-      try{
-        const res = await fetch(AI_URL, {cache:"no-store"});
-        if(!res.ok){
-          // se 404/500 etc: apenas não mostra
-          return;
-        }
-        const d = await res.json();
-
-        const banner = document.getElementById("aiBanner");
-        const aiDate = document.getElementById("aiDate");
-        const aiBias = document.getElementById("aiBias");
-        const aiConf = document.getElementById("aiConf");
-        const aiSummary = document.getElementById("aiSummary");
-        const aiDrivers = document.getElementById("aiDrivers");
-
-        const dateTxt = d.date ? `Atualizado em: ${safeText(d.date)}` : "—";
-        aiDate.textContent = dateTxt;
-
-        const bias = safeText(d.bias).toUpperCase();
-        const conf = safeText(d.confidence).toUpperCase();
-
-        aiBias.textContent = bias ? `Viés: ${bias}` : "—";
-        aiBias.className = "ai-badge " + biasClass(bias);
-
-        aiConf.textContent = conf ? `Confiança: ${conf}` : "—";
-        aiSummary.textContent = safeText(d.summary) || "—";
-
-        // Bullets
-        aiDrivers.innerHTML = "";
-        const drivers = Array.isArray(d.drivers) ? d.drivers : [];
-        for(const s of drivers){
-          const li = document.createElement("li");
-          li.textContent = safeText(s);
-          aiDrivers.appendChild(li);
-        }
-
-        // Mostrar banner só se tiver conteúdo
-        if((safeText(d.summary).trim()) || drivers.length){
-          banner.classList.remove("ai-hidden");
-        }
-      }catch(e){
-        // silencioso: não quebra o painel
-        return;
-      }
-    }
-
-    function normBloco(x){
-      const n = Number(x);
-      return Number.isFinite(n) ? n : 999;
-    }
-    function normName(r){
-      return String(r.variavel ?? r.id ?? "").toUpperCase();
-    }
-
-    async function load(){
-      try{
-        const res = await fetch(SNAPSHOT_URL,{cache:"no-store"});
-        if(!res.ok) throw new Error("Falha ao carregar painel_snapshot.json: " + res.status);
-        const data = await res.json();
-
-        document.getElementById("updatedAt").textContent = "Atualizado em: " + (data.updated_at ?? "—");
-
-        const t = data.thermometers ?? {};
-        document.getElementById("t1").textContent = (t.bloco_1 ?? "—");
-        document.getElementById("t2").textContent = (t.bloco_2 ?? "—");
-        document.getElementById("tg").textContent = (t.geral ?? "—");
-
-        const rows0 = Array.isArray(data.rows) ? data.rows : [];
-
-        // ORDENAÇÃO: Bloco 1 primeiro, depois Bloco 2; dentro do bloco: peso (desc), depois nome
-        const rows = rows0.slice().sort((a,b)=>{
-          const da = normBloco(a.bloco), db = normBloco(b.bloco);
-          if(da !== db) return da - db;
-        
-          const pa = Number(a.peso), pb = Number(b.peso);
-          const ppa = Number.isFinite(pa) ? pa : -999;
-          const ppb = Number.isFinite(pb) ? pb : -999;
-          if(ppa !== ppb) return ppb - ppa; // maior peso primeiro
-        
-          return normName(a).localeCompare(normName(b), "pt-BR");
-        });
-
-
-        const tbody = document.getElementById("tbody");
-        tbody.innerHTML = "";
-
-        for(const r of rows){
-          const scoreP = Number(r.score_ponderado);
-          tbody.innerHTML += `
+    <!-- Variáveis -->
+    <section class="vars-card">
+      <div class="vars-head">
+        <h2>Variáveis monitoradas</h2>
+        <div class="filters" id="blockFilters">
+          <button class="filter-btn active" data-bloco="all">Todas</button>
+          <button class="filter-btn" data-bloco="1">Bloco 1</button>
+          <button class="filter-btn" data-bloco="2">Bloco 2</button>
+        </div>
+      </div>
+      <div id="errBox" class="err" style="display:none;margin:14px 22px"></div>
+      <div style="overflow-x:auto">
+        <table class="vars-table">
+          <thead>
             <tr>
-              <td><span class="tag">${r.bloco ?? ""}</span></td>
-              <td>
-                <div class="row-title">${r.variavel ?? r.id ?? ""}</div>
-                <div class="src">${(r.fonte ?? "").slice(0, 80)}${(r.fonte ?? "").length>80?"…":""}</div>
-              </td>
-              <td class="right">${fmtNumber(r.ultimo_valor, DECIMALS_BY_ID[r.id] ?? 2)}</td>
-              <td>${r.nivel ?? ""}</td>
-              <td>${r.tendencia ?? ""}</td>
-              <td>${r.momento ?? ""}</td>
-              <td class="right">${Number.isFinite(scoreP) ? scoreP.toFixed(2) : ""}</td>
-              <td>${r.frequencia ?? ""}</td>
-              <td>${fmtDate(r.ultima_atualizacao)}</td>
+              <th style="width:60px">Bloco</th>
+              <th>Variável</th>
+              <th class="right">Último</th>
+              <th>Nível</th>
+              <th>Tendência</th>
+              <th>Momento</th>
+              <th class="right">Score</th>
+              <th>Frequência</th>
+              <th>Atualizado</th>
             </tr>
-          `;
-        }
-      }catch(err){
-        showError(String(err));
-      }
-    }
-    load();
-    loadAIDiagnostico();
-  </script>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+/* =========================================================================
+   CONFIG
+   ========================================================================= */
+const SNAPSHOT_URL = "data/cafe/painel_snapshot.json";
+const AI_URL = "data/cafe/ai_diagnostico.json";
+
+const DECIMALS_BY_ID = {
+  clima_soil: 2, cot_report: 0, fertilizante_urea: 2, gscpi: 2,
+  preco_arabica: 2, usd_brl: 2, estoques_certificados: 0,
+  fundamental_stu: 4, ico_ia: 0, mdic_export: 0
+};
+
+/* =========================================================================
+   HELPERS
+   ========================================================================= */
+function fmtNumber(x, decimals = 2){
+  if(x === null || x === undefined || x === "") return "—";
+  const n = Number(x);
+  if(!Number.isFinite(n)) return "—";
+  const d = Number(decimals);
+  return n.toLocaleString("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+function fmtDate(x){
+  if(!x) return "—";
+  return String(x);
+}
+function safeText(x){
+  if(x === null || x === undefined) return "";
+  return String(x);
+}
+function showError(msg){
+  const box = document.getElementById("errBox");
+  box.style.display = "block";
+  box.textContent = msg;
+}
+function pillClassFromText(txt){
+  const t = String(txt || "").toUpperCase().trim();
+  if(t.includes("MUITO BAIXO")) return "muito-baixo";
+  if(t.includes("MUITO ALTO"))  return "muito-alto";
+  if(t === "BAIXO")             return "baixo";
+  if(t === "ALTO")              return "alto";
+  if(t === "QUEDA")             return "queda";
+  if(t === "ALTA")              return "alta";
+  if(t === "LATERAL")           return "lateral";
+  if(t === "NEUTRO")            return "neutro";
+  if(t === "BULLISH")           return "bullish";
+  if(t === "BEARISH")           return "bearish";
+  if(t === "NEUTRAL")           return "neutral";
+  return "";
+}
+function normBloco(x){
+  const n = Number(x);
+  return Number.isFinite(n) ? n : 999;
+}
+function normName(r){
+  return String(r.variavel ?? r.id ?? "").toUpperCase();
+}
+
+/* =========================================================================
+   KPI TERMÔMETROS
+   ========================================================================= */
+function setKpi(idCard, idValue, idArrow, idNeedle, raw, scaleMin, scaleMax){
+  const card = document.getElementById(idCard);
+  const valueEl = document.getElementById(idValue);
+  const arrowEl = document.getElementById(idArrow);
+  const needleEl = document.getElementById(idNeedle);
+
+  if(raw === null || raw === undefined || !Number.isFinite(Number(raw))){
+    valueEl.firstChild.nodeValue = "— ";
+    arrowEl.textContent = "";
+    card.classList.remove("up","down","neutral");
+    card.classList.add("neutral");
+    return;
+  }
+
+  const n = Number(raw);
+  // formato: número com 2 casas, com sinal explícito
+  const txt = (n >= 0 ? "+" : "") + n.toFixed(2);
+  valueEl.firstChild.nodeValue = txt + " ";
+
+  card.classList.remove("up","down","neutral");
+  if(n > 0.01){
+    card.classList.add("up");
+    arrowEl.textContent = "▲";
+  } else if(n < -0.01){
+    card.classList.add("down");
+    arrowEl.textContent = "▼";
+  } else {
+    card.classList.add("neutral");
+    arrowEl.textContent = "→";
+  }
+
+  // agulha na escala
+  let pct = ((n - scaleMin) / (scaleMax - scaleMin)) * 100;
+  if(pct < 0) pct = 0;
+  if(pct > 100) pct = 100;
+  needleEl.style.left = pct + "%";
+}
+
+/* =========================================================================
+   AI DIAGNÓSTICO
+   ========================================================================= */
+function biasClassFromText(bias){
+  const b = String(bias || "").toUpperCase();
+  if(b === "ALTA")    return "bias-alt";
+  if(b === "QUEDA")   return "bias-bai";
+  if(b === "LATERAL") return "bias-lat";
+  return "";
+}
+function biasLabel(bias){
+  const b = String(bias || "").toUpperCase();
+  if(b === "ALTA")    return "Viés: ALTA";
+  if(b === "QUEDA")   return "Viés: QUEDA";
+  if(b === "LATERAL") return "Viés: LATERAL";
+  return "Viés: —";
+}
+function confClassFromText(conf){
+  const c = String(conf || "").toUpperCase();
+  if(c === "ALTA")  return "conf-alta";
+  if(c === "MEDIA") return "conf-media";
+  if(c === "BAIXA") return "conf-baixa";
+  return "";
+}
+function confLabel(conf){
+  const c = String(conf || "").toUpperCase();
+  if(c === "ALTA")  return "Confiança: ALTA";
+  if(c === "MEDIA") return "Confiança: MÉDIA";
+  if(c === "BAIXA") return "Confiança: BAIXA";
+  return "Confiança: —";
+}
+function fillDriversList(ulId, items){
+  const ul = document.getElementById(ulId);
+  ul.innerHTML = "";
+  const arr = Array.isArray(items) ? items : [];
+  if(arr.length === 0){
+    const li = document.createElement("li");
+    li.className = "empty";
+    li.style.paddingLeft = "0";
+    li.textContent = "Nenhum fator relevante no momento.";
+    ul.appendChild(li);
+    return;
+  }
+  for(const s of arr){
+    const li = document.createElement("li");
+    li.textContent = safeText(s);
+    ul.appendChild(li);
+  }
+}
+
+async function loadAIDiagnostico(){
+  try{
+    const res = await fetch(AI_URL, {cache:"no-store"});
+    if(!res.ok) return;
+    const d = await res.json();
+
+    const card = document.getElementById("aiCard");
+    document.getElementById("aiDate").textContent = d.date ? `Atualizado em ${safeText(d.date)}` : "—";
+
+    const biasEl = document.getElementById("aiBias");
+    biasEl.textContent = biasLabel(d.bias);
+    biasEl.className = "ai-tag " + biasClassFromText(d.bias);
+
+    const confEl = document.getElementById("aiConf");
+    confEl.textContent = confLabel(d.confidence);
+    confEl.className = "ai-tag " + confClassFromText(d.confidence);
+
+    document.getElementById("aiSummary").textContent = safeText(d.summary) || "—";
+
+    fillDriversList("aiBull", d.drivers_bull);
+    fillDriversList("aiBear", d.drivers_bear);
+    fillDriversList("aiLim",  d.limited_impact);
+
+    // mostra o card só se tiver conteúdo
+    const hasContent = safeText(d.summary).trim()
+      || (Array.isArray(d.drivers_bull) && d.drivers_bull.length)
+      || (Array.isArray(d.drivers_bear) && d.drivers_bear.length)
+      || (Array.isArray(d.limited_impact) && d.limited_impact.length);
+
+    if(hasContent) card.style.display = "block";
+  }catch(e){
+    // silencioso — não quebra o painel se o JSON faltar
+    return;
+  }
+}
+
+/* =========================================================================
+   VARIÁVEIS — render + filtro
+   ========================================================================= */
+let allRows = [];
+
+function renderRows(filterBloco){
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
+
+  const filtered = filterBloco === "all"
+    ? allRows
+    : allRows.filter(r => String(r.bloco) === String(filterBloco));
+
+  if(filtered.length === 0){
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:30px">Nenhuma variável encontrada.</td></tr>`;
+    return;
+  }
+
+  for(const r of filtered){
+    const scoreP = Number(r.score_ponderado);
+    const dec = DECIMALS_BY_ID[r.id] ?? 2;
+
+    const nivelClass = pillClassFromText(r.nivel);
+    const tendClass = pillClassFromText(r.tendencia);
+
+    const scoreClass = !Number.isFinite(scoreP) ? "score-neu"
+      : (scoreP > 0.001 ? "score-pos" : (scoreP < -0.001 ? "score-neg" : "score-neu"));
+    const scoreTxt = !Number.isFinite(scoreP) ? "—"
+      : (scoreP >= 0 ? "+" : "") + scoreP.toFixed(2);
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><span class="bloco-tag">${r.bloco ?? "—"}</span></td>
+      <td>
+        <div class="var-name">${r.variavel ?? r.id ?? ""}</div>
+        <div class="var-source">${safeText(r.fonte)}</div>
+      </td>
+      <td class="right">${fmtNumber(r.ultimo_valor, dec)}</td>
+      <td>${nivelClass ? `<span class="pill ${nivelClass}">${r.nivel}</span>` : (r.nivel || "—")}</td>
+      <td>${tendClass ? `<span class="pill ${tendClass}">${r.tendencia}</span>` : (r.tendencia || "—")}</td>
+      <td><span style="font-size:12px;color:var(--muted)">${r.momento ?? "—"}</span></td>
+      <td class="right score-cell ${scoreClass}">${scoreTxt}</td>
+      <td><span style="font-size:12px;color:var(--muted)">${r.frequencia ?? "—"}</span></td>
+      <td><span style="font-size:12px;color:var(--muted)">${fmtDate(r.ultima_atualizacao)}</span></td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+function setupFilters(){
+  const buttons = Array.from(document.querySelectorAll("#blockFilters .filter-btn"));
+  buttons.forEach(b => {
+    b.addEventListener("click", () => {
+      buttons.forEach(x => x.classList.remove("active"));
+      b.classList.add("active");
+      renderRows(b.dataset.bloco);
+    });
+  });
+}
+
+/* =========================================================================
+   MAIN
+   ========================================================================= */
+async function load(){
+  try{
+    const res = await fetch(SNAPSHOT_URL, {cache:"no-store"});
+    if(!res.ok) throw new Error("Falha ao carregar painel_snapshot.json: " + res.status);
+    const data = await res.json();
+
+    // Termômetros
+    const t = data.thermometers ?? {};
+    setKpi("kpi-b1", "t1", "arrow-b1", "needle-b1", t.bloco_1, -10, 10);
+    setKpi("kpi-b2", "t2", "arrow-b2", "needle-b2", t.bloco_2, -10, 10);
+    setKpi("kpi-tg", "tg", "arrow-tg", "needle-tg", t.geral, -1, 1);
+
+    // Ordenação: bloco asc, peso desc, nome asc
+    const rows0 = Array.isArray(data.rows) ? data.rows : [];
+    allRows = rows0.slice().sort((a,b)=>{
+      const da = normBloco(a.bloco), db = normBloco(b.bloco);
+      if(da !== db) return da - db;
+      const pa = Number(a.peso), pb = Number(b.peso);
+      const ppa = Number.isFinite(pa) ? pa : -999;
+      const ppb = Number.isFinite(pb) ? pb : -999;
+      if(ppa !== ppb) return ppb - ppa;
+      return normName(a).localeCompare(normName(b), "pt-BR");
+    });
+
+    renderRows("all");
+    setupFilters();
+
+  }catch(err){
+    showError(String(err));
+    console.error(err);
+  }
+}
+
+load();
+loadAIDiagnostico();
+</script>
 </body>
 </html>
