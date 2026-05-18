@@ -346,11 +346,12 @@ function baseChartOptions(series, opts){
     yDecimals: 2,
     yMin: undefined,
     yMax: undefined,
-    yLabels: null,             // array de {value,label} para eixos categóricos como ICO
-    xType: 'datetime',         // 'datetime' ou 'category'
-    xCategories: null,         // se xType='category'
+    yLabels: null,
+    xType: 'datetime',
+    xCategories: null,
     height: 230,
-    showMarkers: false
+    showMarkers: false,
+    curve: 'smooth'
   }, (opts || {}));
 
   const yFormatter = (v) => {
@@ -394,7 +395,7 @@ function baseChartOptions(series, opts){
     },
     colors:colors,
     stroke:{
-      curve:'smooth',
+      curve: o.curve,
       width: series.map((_,i) => i === 0 ? 2.5 : 1.8)
     },
     fill:{
@@ -681,7 +682,9 @@ async function loadSeriesIntoCard(card, url){
             {value: 1,  label: 'BULLISH'},
             {value: 0,  label: 'NEUTRAL'},
             {value: -1, label: 'BEARISH'}
-          ]
+          ],
+          curve: 'stepline',
+          showMarkers: true
         }
       ));
       return;
