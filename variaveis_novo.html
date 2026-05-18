@@ -1,0 +1,957 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Variáveis – Café</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- ApexCharts (MIT license, CDN público jsDelivr) -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.45.1/dist/apexcharts.min.js"></script>
+
+  <style>
+    :root{
+      --bg: #0a0e1a;
+      --bg-2: #0e1424;
+      --panel: #111828;
+      --panel-2: #151d31;
+      --line: rgba(255,255,255,.06);
+      --line-2: rgba(255,255,255,.1);
+      --text: #e8edf7;
+      --muted: #8a93a8;
+      --muted-2: #6b7488;
+      --accent: #4fa3ff;
+      --accent-2: #7cc5ff;
+      --good: #22c55e;
+      --bad: #ef4444;
+      --warn: #f59e0b;
+      --neutral: #94a3b8;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.5}
+
+    .shell{display:grid;grid-template-columns:72px 1fr;min-height:100vh}
+
+    /* Sidebar */
+    .sidebar{
+      background:var(--bg-2);border-right:1px solid var(--line);
+      display:flex;flex-direction:column;align-items:center;
+      padding:20px 0;gap:8px;position:sticky;top:0;height:100vh;
+    }
+    .sidebar .logo{
+      width:40px;height:40px;border-radius:12px;
+      background:linear-gradient(135deg,#4fa3ff,#1f6fbf);
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Space Grotesk';font-weight:700;color:#fff;font-size:18px;margin-bottom:16px;
+    }
+    .sidebar .nav-item{
+      width:44px;height:44px;border-radius:12px;
+      display:flex;align-items:center;justify-content:center;
+      color:var(--muted);cursor:pointer;transition:all .15s ease;position:relative;
+      text-decoration:none;
+    }
+    .sidebar .nav-item:hover{background:rgba(255,255,255,.04);color:var(--text)}
+    .sidebar .nav-item.active{
+      background:linear-gradient(135deg,rgba(79,163,255,.18),rgba(79,163,255,.06));
+      color:var(--accent-2);
+      box-shadow:inset 0 0 0 1px rgba(79,163,255,.25);
+    }
+    .sidebar .nav-item .tip{
+      position:absolute;left:54px;top:50%;transform:translateY(-50%);
+      background:#1a2236;color:var(--text);padding:6px 10px;border-radius:8px;
+      font-size:12px;white-space:nowrap;border:1px solid var(--line-2);
+      opacity:0;pointer-events:none;transition:opacity .15s ease;z-index:10;
+    }
+    .sidebar .nav-item:hover .tip{opacity:1}
+    .sidebar .divider{width:24px;height:1px;background:var(--line);margin:8px 0}
+
+    .main{padding:24px 32px 60px;max-width:1500px;margin:0 auto;width:100%}
+
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+    .topbar h1{
+      margin:0;font-family:'Space Grotesk';font-size:24px;font-weight:700;letter-spacing:-.5px;
+      display:flex;align-items:center;gap:10px;
+    }
+    .topbar h1 .badge{
+      font-family:'Inter';font-size:11px;font-weight:600;
+      background:rgba(79,163,255,.12);color:var(--accent-2);
+      padding:3px 8px;border-radius:6px;border:1px solid rgba(79,163,255,.2);
+    }
+    .topbar .subtitle{color:var(--muted);font-size:12px;margin-top:4px;max-width:680px}
+    .topbar .tabs{display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px}
+    .topbar .tabs a{
+      text-decoration:none;color:var(--muted);padding:8px 14px;border-radius:8px;
+      font-size:13px;font-weight:500;transition:all .15s ease;
+    }
+    .topbar .tabs a:hover{color:var(--text)}
+    .topbar .tabs a.active{background:rgba(79,163,255,.14);color:var(--accent-2)}
+
+    .vars-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+    @media(max-width:1100px){.vars-grid{grid-template-columns:1fr}}
+
+    .var-card{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:18px 20px 16px;
+      position:relative;
+    }
+    .var-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    .var-card-head h3{
+      margin:0;font-family:'Space Grotesk';font-size:15px;font-weight:600;letter-spacing:-.2px;
+      display:flex;align-items:center;gap:8px;
+    }
+    .var-card-head h3 .bloco-tag{
+      font-family:'Inter';font-size:10px;font-weight:700;
+      background:rgba(79,163,255,.12);color:var(--accent-2);
+      padding:3px 8px;border-radius:6px;
+    }
+    .var-card-head .meta{font-size:11px;color:var(--muted);margin-top:5px}
+    .var-card-head .toggle{
+      display:flex;background:var(--bg-2);border:1px solid var(--line);
+      border-radius:9px;padding:3px;flex-shrink:0;
+    }
+    .var-card-head .toggle button{
+      background:transparent;border:0;color:var(--muted);font-size:11px;font-weight:500;
+      padding:5px 10px;border-radius:6px;cursor:pointer;font-family:inherit;
+    }
+    .var-card-head .toggle button.active{background:rgba(79,163,255,.14);color:var(--accent-2)}
+
+    .chart-wrap{margin:8px -4px 4px;min-height:220px}
+    .tablebox{margin:10px -4px 4px;border:1px solid var(--line);border-radius:10px;overflow:auto;max-height:260px;display:none;background:var(--bg-2)}
+    .tablebox table{width:100%;border-collapse:collapse}
+    .tablebox th,.tablebox td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:12px}
+    .tablebox th{color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;font-size:10px;background:rgba(255,255,255,.02);position:sticky;top:0}
+    .tablebox td.right,.tablebox th.right{text-align:right;font-variant-numeric:tabular-nums}
+    .tablebox td.muted{color:var(--muted);font-style:italic}
+
+    .var-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:8px}
+    .var-stat{background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:9px 10px}
+    .var-stat .k{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+    .var-stat .v{font-family:'Space Grotesk';font-size:13.5px;font-weight:600;margin-top:3px;letter-spacing:-.2px}
+    .var-stat .v.pos{color:var(--good)}
+    .var-stat .v.neg{color:var(--bad)}
+    .var-stat .v.neu{color:var(--neutral)}
+    .pill-mini{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:999px}
+    .pill-mini.muito-baixo{background:rgba(239,68,68,.15);color:#ffb4b4}
+    .pill-mini.muito-alto{background:rgba(34,197,94,.15);color:#7ff3c7}
+    .pill-mini.baixo{background:rgba(239,68,68,.10);color:#ffc4c4}
+    .pill-mini.alto{background:rgba(34,197,94,.10);color:#a8e6bf}
+    .pill-mini.queda{background:rgba(239,68,68,.12);color:#ffb4b4}
+    .pill-mini.alta{background:rgba(34,197,94,.12);color:#7ff3c7}
+    .pill-mini.lateral{background:rgba(148,163,184,.12);color:#cbd5e1}
+    .pill-mini.neutro{background:rgba(148,163,184,.12);color:#cbd5e1}
+
+    details{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+    details summary{cursor:pointer;color:var(--muted);font-size:11px;font-weight:500;list-style:none}
+    details summary::-webkit-details-marker{display:none}
+    details summary::before{content:'▸ ';transition:transform .2s ease;display:inline-block;color:var(--accent)}
+    details[open] summary::before{transform:rotate(90deg)}
+    details .small{font-size:11.5px;color:#b6c0d4;margin-top:8px;line-height:1.5}
+    details .small b{color:var(--text)}
+
+    .err{padding:10px;border:1px solid rgba(239,68,68,.35);background:rgba(239,68,68,.08);border-radius:10px;color:#ffd0d0;font-size:12px;margin-top:10px}
+
+    ::-webkit-scrollbar{width:10px;height:10px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:10px}
+    ::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.14)}
+
+    @media(max-width:900px){
+      .shell{grid-template-columns:1fr}
+      .sidebar{display:none}
+      .main{padding:16px}
+      .var-stats{grid-template-columns:repeat(2,1fr)}
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="logo" href="index.html" style="text-decoration:none">L</a>
+
+    <a class="nav-item active" href="variaveis.html">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>
+      <span class="tip">Café</span>
+    </a>
+    <div class="nav-item" title="Soja">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><circle cx="9" cy="10" r="1"/><circle cx="15" cy="10" r="1"/></svg>
+      <span class="tip">Soja (em breve)</span>
+    </div>
+    <div class="nav-item" title="Milho">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c2 4 2 8 2 12s0 6-2 8c-2-2-2-4-2-8s0-8 2-12z"/><path d="M12 6c-2 0-4 1-4 4"/><path d="M12 6c2 0 4 1 4 4"/></svg>
+      <span class="tip">Milho (em breve)</span>
+    </div>
+    <div class="nav-item" title="Algodão">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="12" r="3"/><circle cx="12" cy="9" r="3"/><circle cx="17" cy="12" r="3"/><circle cx="12" cy="15" r="3"/></svg>
+      <span class="tip">Algodão (em breve)</span>
+    </div>
+    <div class="nav-item" title="Trigo">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22V2"/><path d="M12 8c-2-2-4-2-6 0 2 2 4 2 6 0z"/><path d="M12 8c2-2 4-2 6 0-2 2-4 2-6 0z"/><path d="M12 14c-2-2-4-2-6 0 2 2 4 2 6 0z"/><path d="M12 14c2-2 4-2 6 0-2 2-4 2-6 0z"/></svg>
+      <span class="tip">Trigo (em breve)</span>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1>Variáveis – Café <span class="badge">ICEUS · KC</span></h1>
+        <div class="subtitle" id="subtitle">Carregando…</div>
+      </div>
+      <div class="tabs">
+        <a href="index.html">Home</a>
+        <a href="painel.html">Painel</a>
+        <a href="variaveis.html" class="active">Variáveis</a>
+      </div>
+    </div>
+
+    <div class="vars-grid" id="grid">
+      <div class="var-card">Carregando…</div>
+    </div>
+  </main>
+</div>
+
+<script>
+/* =========================================================================
+   CONFIG — mantida idêntica à versão anterior
+   ========================================================================= */
+const SNAP_URL = "data/cafe/painel_snapshot.json";
+
+const SERIES_MAP = {
+  "preco_arabica":         "data/cafe/series/preco_arabica.json",
+  "usd_brl":               "data/cafe/series/usd_brl.json",
+  "gscpi":                 "data/cafe/series/gscpi_fretes.json",
+  "cot_report":            "data/cafe/series/cot_report.json",
+  "estoques_certificados": "data/cafe/series/estoques_certificados.json",
+  "fertilizante_urea":     "data/cafe/series/fertilizante_urea.json",
+  "fundamental_stu":       "data/cafe/series/fundamental_stu.json",
+  "clima_soil":            "data/cafe/series/clima_soil.json",
+  "ico_ia":                "data/cafe/series/ico_ia.json",
+  "mdic_export":           "data/cafe/series/mdic_export.json"
+};
+
+const DECIMALS_BY_ID = {
+  clima_soil: 2, cot_report: 0, fertilizante_urea: 2, gscpi: 2,
+  preco_arabica: 2, usd_brl: 2, estoques_certificados: 0,
+  fundamental_stu: 4, ico_ia: 0, mdic_export: 0
+};
+
+/* =========================================================================
+   HELPERS
+   ========================================================================= */
+function fmtNumber(n, decimals = 2){
+  if(n === null || n === undefined || Number.isNaN(n)) return "—";
+  const d = Number(decimals);
+  return new Intl.NumberFormat("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d }).format(n);
+}
+function fmtPercent(p){
+  if(p === null || p === undefined || Number.isNaN(p)) return "—";
+  return new Intl.NumberFormat("pt-BR", { style:"percent", maximumFractionDigits: 2 }).format(p);
+}
+function parseISODate(s){
+  const [y,m,d] = String(s).split("-").map(Number);
+  return new Date(y, (m||1)-1, d||1);
+}
+function fmtDateBR(iso){
+  if(!iso) return "—";
+  const dt = parseISODate(iso);
+  const dd = String(dt.getDate()).padStart(2,"0");
+  const mm = String(dt.getMonth()+1).padStart(2,"0");
+  const yy = dt.getFullYear();
+  return `${dd}/${mm}/${yy}`;
+}
+
+function scoreClass(x){
+  if(x === null || x === undefined || Number.isNaN(x)) return "neu";
+  if(x > 0.00001) return "pos";
+  if(x < -0.00001) return "neg";
+  return "neu";
+}
+function pillClassFromText(txt){
+  const t = String(txt || "").toUpperCase().trim();
+  if(t.includes("MUITO BAIXO")) return "muito-baixo";
+  if(t.includes("MUITO ALTO"))  return "muito-alto";
+  if(t === "BAIXO")             return "baixo";
+  if(t === "ALTO")              return "alto";
+  if(t === "QUEDA")             return "queda";
+  if(t === "ALTA")              return "alta";
+  if(t === "LATERAL")           return "lateral";
+  if(t === "NEUTRO")            return "neutro";
+  return "";
+}
+
+/* =========================================================================
+   MODOS — mesma lógica de getSeriesModeById da versão original
+   ========================================================================= */
+function getSeriesModeById(varId){
+  if(varId === "gscpi") return "CLOSE_ONLY";
+  if(varId === "cot_report") return "COT_MM12W";
+  if(varId === "estoques_certificados") return "MM12M";
+  if(varId === "fertilizante_urea") return "M4_M12";
+  if(varId === "fundamental_stu") return "FUNDAMENTAL_STU";
+  if(varId === "clima_soil") return "CLIMA_SOIL";
+  if(varId === "ico_ia") return "ICO_IA";
+  if(varId === "mdic_export") return "MDIC_EXPORT";
+  return "DEFAULT";
+}
+function colSpanByMode(mode){
+  if(mode === "CLOSE_ONLY") return 2;
+  if(mode === "COT_MM12W") return 3;
+  if(mode === "MM12M") return 3;
+  if(mode === "M4_M12") return 4;
+  if(mode === "FUNDAMENTAL_STU") return 5;
+  if(mode === "CLIMA_SOIL") return 3;
+  if(mode === "ICO_IA") return 3;
+  if(mode === "MDIC_EXPORT") return 3;
+  return 4;
+}
+function setTableHeaderByMode(card, mode){
+  const theadRow = card.querySelector(".tablebox thead tr");
+  if(!theadRow) return;
+  if(mode === "CLOSE_ONLY"){
+    theadRow.innerHTML = `<th>Data</th><th class="right">Close</th>`; return;
+  }
+  if(mode === "COT_MM12W"){
+    theadRow.innerHTML = `<th>Data</th><th class="right">Close</th><th class="right">MM12W</th>`; return;
+  }
+  if(mode === "MM12M"){
+    theadRow.innerHTML = `<th>Data</th><th class="right">Total</th><th class="right">MM12M</th>`; return;
+  }
+  if(mode === "M4_M12"){
+    theadRow.innerHTML = `<th>Data</th><th class="right">Urea</th><th class="right">M4</th><th class="right">M12</th>`; return;
+  }
+  if(mode === "FUNDAMENTAL_STU"){
+    theadRow.innerHTML = `<th>País</th><th class="right">Peso (Prod. 5y)</th><th class="right">Produção (t)</th><th class="right">Δ YoY</th><th class="right">Contrib.</th>`; return;
+  }
+  if(mode === "CLIMA_SOIL"){
+    theadRow.innerHTML = `<th>Data</th><th class="right">SWVL3</th><th class="right">Stress_6m</th>`; return;
+  }
+  if(mode === "ICO_IA"){
+    theadRow.innerHTML = `<th>Data</th><th class="right">Score</th><th>Diagnóstico</th>`; return;
+  }
+  if(mode === "MDIC_EXPORT"){
+    theadRow.innerHTML = `<th>Data</th><th class="right">Sacas</th><th class="right">Kg</th>`; return;
+  }
+  theadRow.innerHTML = `<th>Data</th><th class="right">Close</th><th class="right">MM50</th><th class="right">MM252</th>`;
+}
+
+/* =========================================================================
+   APEXCHARTS — base options compartilhada
+   ========================================================================= */
+function baseChartOptions(series, opts){
+  const o = Object.assign({
+    yDecimals: 2,
+    yMin: undefined,
+    yMax: undefined,
+    yLabels: null,             // array de {value,label} para eixos categóricos como ICO
+    xType: 'datetime',         // 'datetime' ou 'category'
+    xCategories: null,         // se xType='category'
+    height: 230,
+    showMarkers: false
+  }, (opts || {}));
+
+  const yFormatter = (v) => {
+    if(v === null || v === undefined || Number.isNaN(v)) return "";
+    if(o.yLabels){
+      const match = o.yLabels.find(t => Math.abs(t.value - v) < 1e-6);
+      if(match) return match.label;
+      return "";
+    }
+    const dec = Number(o.yDecimals);
+    if(Math.abs(v) >= 1000){
+      return new Intl.NumberFormat("pt-BR", {
+        minimumFractionDigits: 0, maximumFractionDigits: 0
+      }).format(v);
+    }
+    return new Intl.NumberFormat("pt-BR", {
+      minimumFractionDigits: dec, maximumFractionDigits: dec
+    }).format(v);
+  };
+
+  const tooltipFormatter = (v) => yFormatter(v);
+
+  // Cores: a primeira série é destacada (gradiente), as outras são linhas finas
+  const colors = ['#7cc5ff','#4fa3ff','#fb7185','#f59e0b'];
+
+  // fill: gradient só para a 1ª série; demais solid invisível
+  const fillOpacity = series.map((_,i) => i === 0 ? 1 : 0);
+
+  return {
+    series: series,
+    chart: {
+      type:'area', height:o.height, background:'transparent',
+      foreColor:'#8a93a8',
+      fontFamily:'Inter, system-ui, sans-serif',
+      toolbar:{
+        show:true,
+        tools:{download:false, selection:true, zoom:true, zoomin:true, zoomout:true, pan:true, reset:true}
+      },
+      animations:{enabled:true, speed:400, animateGradually:{enabled:false}},
+      zoom:{enabled:true, type:'x', autoScaleYaxis:true}
+    },
+    colors:colors,
+    stroke:{
+      curve:'smooth',
+      width: series.map((_,i) => i === 0 ? 2.5 : 1.8)
+    },
+    fill:{
+      type: series.map((_,i) => i === 0 ? 'gradient' : 'solid'),
+      gradient:{
+        shadeIntensity:1, opacityFrom:0.35, opacityTo:0.02, stops:[0,100]
+      },
+      opacity: fillOpacity
+    },
+    markers:{
+      size: o.showMarkers ? 3 : 0,
+      strokeWidth:0,
+      hover:{size:5}
+    },
+    dataLabels:{enabled:false},
+    grid:{
+      borderColor:'rgba(255,255,255,.05)',
+      strokeDashArray:3,
+      padding:{left:5, right:10, top:0, bottom:0},
+      xaxis:{lines:{show:false}},
+      yaxis:{lines:{show:true}}
+    },
+    xaxis: o.xType === 'category' ? {
+      type:'category',
+      categories: o.xCategories || [],
+      labels:{style:{colors:'#8a93a8', fontSize:'11px', fontFamily:'Inter'}},
+      axisBorder:{show:false},
+      axisTicks:{show:false}
+    } : {
+      type:'datetime',
+      labels:{
+        style:{colors:'#8a93a8', fontSize:'11px', fontFamily:'Inter'},
+        datetimeUTC:false
+      },
+      axisBorder:{show:false},
+      axisTicks:{show:false}
+    },
+    yaxis:{
+      min: o.yMin, max: o.yMax,
+      tickAmount: o.yLabels ? o.yLabels.length - 1 : 5,
+      labels:{
+        style:{colors:'#8a93a8', fontSize:'11px', fontFamily:'Inter'},
+        formatter: yFormatter
+      }
+    },
+    legend:{
+      position:'top', horizontalAlign:'left', offsetY:-4,
+      labels:{colors:'#cbd5e1'},
+      fontSize:'12px', fontFamily:'Inter',
+      markers:{width:10, height:10, radius:5},
+      itemMargin:{horizontal:10}
+    },
+    tooltip:{
+      theme:'dark',
+      shared:true,
+      x: o.xType === 'datetime' ? {format:'dd MMM yyyy'} : {},
+      y:{formatter: tooltipFormatter},
+      style:{fontSize:'12px', fontFamily:'Inter'}
+    }
+  };
+}
+
+/* Renderiza ou re-renderiza o gráfico do card */
+function renderChart(card, options){
+  const wrap = card.querySelector('.chart-wrap');
+  if(card._apexInstance){
+    try{ card._apexInstance.destroy(); }catch(e){}
+    card._apexInstance = null;
+  }
+  wrap.innerHTML = "";
+  const instance = new ApexCharts(wrap, options);
+  instance.render();
+  card._apexInstance = instance;
+}
+
+function renderEmptyChart(card, msg){
+  const wrap = card.querySelector('.chart-wrap');
+  if(card._apexInstance){
+    try{ card._apexInstance.destroy(); }catch(e){}
+    card._apexInstance = null;
+  }
+  wrap.innerHTML = `<div style="height:230px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px">${msg}</div>`;
+}
+
+/* =========================================================================
+   BUILD CARD
+   ========================================================================= */
+function buildCard(snapshotRow){
+  const id = snapshotRow.id;
+  const dec = DECIMALS_BY_ID[id] ?? 2;
+  const mode = getSeriesModeById(id);
+
+  const card = document.createElement("div");
+  card.className = "var-card";
+  card.dataset.varid = id;
+
+  const bloco = snapshotRow.bloco ?? "";
+  const nivelClass = pillClassFromText(snapshotRow.nivel);
+  const tendClass = pillClassFromText(snapshotRow.tendencia);
+  const scoreP = Number(snapshotRow.score_ponderado);
+
+  card.innerHTML = `
+    <div class="var-card-head">
+      <div>
+        <h3><span class="bloco-tag">${bloco || "—"}</span> ${snapshotRow.variavel || id}</h3>
+        <div class="meta">Frequência: ${snapshotRow.frequencia || "—"} · Última atualização: ${snapshotRow.ultima_atualizacao || "—"}</div>
+      </div>
+      <div class="toggle">
+        <button class="active" data-mode="chart">Gráfico</button>
+        <button data-mode="table">Tabela</button>
+      </div>
+    </div>
+
+    <div class="chart-wrap"></div>
+
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>Data</th><th class="right">Close</th><th class="right">MM50</th><th class="right">MM252</th></tr></thead>
+        <tbody data-tbody="1"><tr><td colspan="4" class="muted">Carregando…</td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="var-stats">
+      <div class="var-stat">
+        <div class="k">Último</div>
+        <div class="v">${fmtNumber(Number(snapshotRow.ultimo_valor), dec)}</div>
+      </div>
+      <div class="var-stat">
+        <div class="k">Nível</div>
+        <div class="v">${nivelClass ? `<span class="pill-mini ${nivelClass}">${snapshotRow.nivel}</span>` : (snapshotRow.nivel || "—")}</div>
+      </div>
+      <div class="var-stat">
+        <div class="k">Tendência</div>
+        <div class="v">${tendClass ? `<span class="pill-mini ${tendClass}">${snapshotRow.tendencia}</span>` : (snapshotRow.tendencia || "—")}</div>
+      </div>
+      <div class="var-stat">
+        <div class="k">Momento</div>
+        <div class="v" style="font-size:11px">${snapshotRow.momento || "—"}</div>
+      </div>
+      <div class="var-stat">
+        <div class="k">Score</div>
+        <div class="v ${scoreClass(scoreP)}">${Number.isFinite(scoreP) ? (scoreP >= 0 ? "+" : "") + scoreP.toFixed(2) : "—"}</div>
+      </div>
+    </div>
+
+    <details>
+      <summary>Ver regra de sinal e fonte</summary>
+      <div class="small"><b>Regra:</b> ${snapshotRow.regra_de_sinal || "—"}</div>
+      <div class="small" style="margin-top:4px"><b>Fonte:</b> ${snapshotRow.fonte || "—"}</div>
+    </details>
+  `;
+
+  setTableHeaderByMode(card, mode);
+
+  const btns = Array.from(card.querySelectorAll(".toggle button"));
+  const wrap = card.querySelector(".chart-wrap");
+  const tablebox = card.querySelector(".tablebox");
+
+  btns.forEach(b=>{
+    b.addEventListener("click", ()=>{
+      btns.forEach(x=>x.classList.remove("active"));
+      b.classList.add("active");
+      if(b.dataset.mode === "table"){
+        wrap.style.display = "none";
+        tablebox.style.display = "block";
+      } else {
+        tablebox.style.display = "none";
+        wrap.style.display = "block";
+        // re-render para garantir tamanho correto após display:none/block
+        if(card._apexInstance){
+          try{ card._apexInstance.render(); }catch(e){}
+        }
+      }
+    });
+  });
+
+  const seriesUrl = SERIES_MAP[id];
+  if(seriesUrl){
+    loadSeriesIntoCard(card, seriesUrl);
+  } else {
+    const tb = card.querySelector('[data-tbody="1"]');
+    const colSpan = colSpanByMode(mode);
+    tb.innerHTML = `<tr><td colspan="${colSpan}" class="muted">Série histórica ainda não publicada.</td></tr>`;
+    renderEmptyChart(card, "Série histórica ainda não publicada.");
+  }
+
+  return card;
+}
+
+/* =========================================================================
+   LOAD SERIES — preserva todos os modos especiais
+   ========================================================================= */
+async function loadSeriesIntoCard(card, url){
+  const tbody = card.querySelector('[data-tbody="1"]');
+  const varId = card.dataset.varid || "";
+  const dec = DECIMALS_BY_ID[varId] ?? 2;
+  const mode = getSeriesModeById(varId);
+
+  try{
+    const res = await fetch(url, { cache:"no-store" });
+    if(!res.ok) throw new Error("Falha ao carregar série: " + res.status);
+    const data = await res.json();
+
+    let raw = [];
+    if(Array.isArray(data.series)) raw = data.series.slice();
+    else if(Array.isArray(data.data)) raw = data.data.slice();
+
+    /* ---------- CLIMA_SOIL ---------- */
+    if(varId === "clima_soil"){
+      setTableHeaderByMode(card, "CLIMA_SOIL");
+      const rows = raw
+        .map(p => ({
+          date: (p.date || p.Data || p.data),
+          swvl3: (p.close ?? p.Close ?? p.value ?? null),
+          stress_6m: (p.stress_6m ?? null)
+        }))
+        .filter(p => !!p.date)
+        .sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+
+      const tail = rows.slice(-24).reverse();
+      tbody.innerHTML = "";
+      if(tail.length === 0){
+        tbody.innerHTML = `<tr><td colspan="3" class="muted">Série vazia.</td></tr>`;
+      } else {
+        for(const r of tail){
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${fmtDateBR(r.date)}</td>
+            <td class="right">${fmtNumber(Number(r.swvl3), dec)}</td>
+            <td class="right">${(r.stress_6m === null || r.stress_6m === undefined) ? "—" : fmtNumber(Number(r.stress_6m), dec)}</td>
+          `;
+          tbody.appendChild(tr);
+        }
+      }
+
+      const pts = rows
+        .map(r => ({ x: parseISODate(r.date).getTime(), y: Number(r.stress_6m) }))
+        .filter(p => !Number.isNaN(p.y));
+
+      renderChart(card, baseChartOptions(
+        [{name:'Stress_6m', data: pts}],
+        {yDecimals: dec}
+      ));
+      return;
+    }
+
+    /* ---------- ICO_IA ---------- */
+    if(mode === "ICO_IA"){
+      setTableHeaderByMode(card, mode);
+      const rows = raw
+        .map(p => ({
+          date: (p.date || p.Data || p.data),
+          score: (p.close ?? p.signal ?? null),
+          label: (p.label ?? "")
+        }))
+        .filter(p => !!p.date)
+        .sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+
+      const tail = rows.slice(-24).reverse();
+      tbody.innerHTML = "";
+      if(tail.length === 0){
+        tbody.innerHTML = `<tr><td colspan="3" class="muted">Série vazia.</td></tr>`;
+      } else {
+        for(const r of tail){
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${fmtDateBR(r.date)}</td>
+            <td class="right">${fmtNumber(Number(r.score), dec)}</td>
+            <td>${String(r.label || "—")}</td>
+          `;
+          tbody.appendChild(tr);
+        }
+      }
+
+      const pts = rows
+        .map(r => ({ x: parseISODate(r.date).getTime(), y: Number(r.score) }))
+        .filter(p => !Number.isNaN(p.y));
+
+      renderChart(card, baseChartOptions(
+        [{name:'Score', data: pts}],
+        {
+          yMin: -1, yMax: 1,
+          yLabels: [
+            {value: 1,  label: 'BULLISH'},
+            {value: 0,  label: 'NEUTRAL'},
+            {value: -1, label: 'BEARISH'}
+          ]
+        }
+      ));
+      return;
+    }
+
+    /* ---------- FUNDAMENTAL_STU ---------- */
+    if(mode === "FUNDAMENTAL_STU"){
+      setTableHeaderByMode(card, mode);
+      tbody.innerHTML = "";
+      const decompRows = (data && data.decomp && Array.isArray(data.decomp.rows)) ? data.decomp.rows : [];
+      if(decompRows.length === 0){
+        tbody.innerHTML = `<tr><td colspan="5" class="muted">Decomposição vazia.</td></tr>`;
+      } else {
+        for(const r of decompRows){
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${String(r.country ?? "—")}</td>
+            <td class="right">${fmtPercent(Number(r.w_prod_5y))}</td>
+            <td class="right">${fmtNumber(Number(r.prod))}</td>
+            <td class="right">${fmtNumber(Number(r.d_prod_yoy))}</td>
+            <td class="right">${fmtNumber(Number(r.contrib))}</td>
+          `;
+          tbody.appendChild(tr);
+        }
+      }
+
+      const pts = raw
+        .map(p => ({
+          x: parseISODate(p.date || p.Data || p.data).getTime(),
+          y: Number(p.close ?? p.Close ?? p.value)
+        }))
+        .filter(p => !Number.isNaN(p.y) && p.x)
+        .sort((a,b) => a.x - b.x);
+
+      renderChart(card, baseChartOptions(
+        [{name:'STU (World)', data: pts}],
+        {yDecimals: dec}
+      ));
+      return;
+    }
+
+    /* ---------- MDIC_EXPORT ---------- */
+    if(mode === "MDIC_EXPORT"){
+      setTableHeaderByMode(card, mode);
+      const MONTHS_PT = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+
+      const rowsAll = raw
+        .map(p => ({
+          date: (p.date || p.Data || p.data),
+          kg: (p.kg ?? p.KG ?? null),
+          bags: (p.bags_60kg ?? p.bags ?? p.sacas ?? null)
+        }))
+        .filter(r => !!r.date)
+        .sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+
+      const years = Array.from(new Set(
+        rowsAll.map(r => Number(String(r.date).slice(0,4))).filter(n => !Number.isNaN(n))
+      ));
+      const yearCur = years.length ? Math.max(...years) : null;
+      const yearPrev = (yearCur !== null) ? (yearCur - 1) : null;
+
+      if(yearCur === null){
+        tbody.innerHTML = `<tr><td colspan="3" class="muted">Série vazia.</td></tr>`;
+        renderEmptyChart(card, "Série vazia.");
+        return;
+      }
+
+      const byYM = new Map();
+      for(const r of rowsAll){
+        const y = String(r.date).slice(0,4);
+        const m = String(r.date).slice(5,7);
+        if(y && m) byYM.set(`${y}-${m}`, { kg: Number(r.kg), bags: Number(r.bags) });
+      }
+      const baseYears = [];
+      for(let y = yearCur - 5; y <= yearCur - 1; y++) baseYears.push(y);
+
+      function getVal(y, mm){
+        const obj = byYM.get(`${y}-${mm}`);
+        if(!obj) return { kg: NaN, bags: NaN };
+        return { kg: Number(obj.kg), bags: Number(obj.bags) };
+      }
+      function avgBagsForMonth(mm){
+        const vals = [];
+        for(const y of baseYears){
+          const v = getVal(y, mm).bags;
+          if(!Number.isNaN(v)) vals.push(v);
+        }
+        if(vals.length === 0) return NaN;
+        return vals.reduce((a,b)=>a+b,0) / vals.length;
+      }
+
+      const sCur = [], sPrev = [], sAvg = [];
+      for(let mi=1; mi<=12; mi++){
+        const mm = String(mi).padStart(2,"0");
+        const cur = getVal(yearCur, mm).bags;
+        const prev = (yearPrev !== null) ? getVal(yearPrev, mm).bags : NaN;
+        const avg5 = avgBagsForMonth(mm);
+        sCur.push(Number.isNaN(cur) ? null : cur);
+        sPrev.push(Number.isNaN(prev) ? null : prev);
+        sAvg.push(Number.isNaN(avg5) ? null : avg5);
+      }
+
+      // Tabela: últimos 5 anos completos (mais recente em cima)
+      const minYear = yearCur - 4;
+      const rowsLast5Y = rowsAll
+        .filter(r => Number(String(r.date).slice(0,4)) >= minYear)
+        .sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+
+      tbody.innerHTML = "";
+      if(rowsLast5Y.length === 0){
+        tbody.innerHTML = `<tr><td colspan="3" class="muted">Sem dados nos últimos 5 anos.</td></tr>`;
+      } else {
+        for(let i=rowsLast5Y.length-1; i>=0; i--){
+          const r = rowsLast5Y[i];
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${fmtDateBR(r.date)}</td>
+            <td class="right">${fmtNumber(Number(r.bags), 0)}</td>
+            <td class="right">${fmtNumber(Number(r.kg), 0)}</td>
+          `;
+          tbody.appendChild(tr);
+        }
+      }
+
+      renderChart(card, baseChartOptions([
+        {name: String(yearCur),       data: sCur},
+        {name: 'Média 5y',            data: sAvg},
+        {name: String(yearPrev),      data: sPrev}
+      ], {
+        xType:'category',
+        xCategories: MONTHS_PT,
+        yDecimals: 0,
+        showMarkers: true
+      }));
+      return;
+    }
+
+    /* ---------- MODOS PADRÃO ---------- */
+    const pts = raw.map(p => {
+      const date = (p.date || p.Data || p.data);
+      const close = (p.close ?? p.Close ?? p.basis_med5 ?? p.basis ?? p.value);
+      let mm50  = (p.mm12w ?? p.mm12W ?? p.mm4m ?? p.mm50 ?? p.MM50);
+      let mm252 = (p.mm252 ?? p.MM252);
+
+      if(mode === "MM12M"){
+        mm50 = (p.mm12m ?? mm50);
+        mm252 = NaN;
+      } else if(mode === "M4_M12"){
+        mm252 = (p.mm12m ?? mm252);
+      } else {
+        if(mm252 == null) mm252 = (p.mm12m ?? mm252);
+      }
+
+      return { date, close, mm50, mm252 };
+    }).filter(p => !!p.date);
+
+    pts.sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+    setTableHeaderByMode(card, mode);
+
+    // Tabela
+    tbody.innerHTML = "";
+    if(pts.length === 0){
+      const colSpan = colSpanByMode(mode);
+      tbody.innerHTML = `<tr><td colspan="${colSpan}" class="muted">Série vazia.</td></tr>`;
+    } else {
+      for(let i=pts.length-1; i>=0; i--){
+        const p = pts[i];
+        const tr = document.createElement("tr");
+        if(mode === "CLOSE_ONLY"){
+          tr.innerHTML = `<td>${fmtDateBR(p.date)}</td><td class="right">${fmtNumber(Number(p.close), dec)}</td>`;
+        } else if(mode === "COT_MM12W" || mode === "MM12M"){
+          tr.innerHTML = `<td>${fmtDateBR(p.date)}</td><td class="right">${fmtNumber(Number(p.close), dec)}</td><td class="right">${fmtNumber(Number(p.mm50), 2)}</td>`;
+        } else if(mode === "M4_M12"){
+          tr.innerHTML = `<td>${fmtDateBR(p.date)}</td><td class="right">${fmtNumber(Number(p.close), dec)}</td><td class="right">${fmtNumber(Number(p.mm50), 2)}</td><td class="right">${fmtNumber(Number(p.mm252), 2)}</td>`;
+        } else {
+          tr.innerHTML = `<td>${fmtDateBR(p.date)}</td><td class="right">${fmtNumber(Number(p.close), dec)}</td><td class="right">${fmtNumber(Number(p.mm50), 2)}</td><td class="right">${fmtNumber(Number(p.mm252), 2)}</td>`;
+        }
+        tbody.appendChild(tr);
+      }
+    }
+
+    // Gráfico — montar séries conforme o modo
+    const toSeries = (key) => pts
+      .map(p => ({ x: parseISODate(p.date).getTime(), y: Number(p[key]) }))
+      .filter(p => !Number.isNaN(p.y));
+
+    let chartSeries = [];
+    if(mode === "CLOSE_ONLY"){
+      chartSeries = [{name:'Close', data: toSeries('close')}];
+    } else if(mode === "COT_MM12W"){
+      chartSeries = [
+        {name:'Net long', data: toSeries('close')},
+        {name:'MM12W',    data: toSeries('mm50')}
+      ];
+    } else if(mode === "MM12M"){
+      chartSeries = [
+        {name:'Total', data: toSeries('close')},
+        {name:'MM12M', data: toSeries('mm50')}
+      ];
+    } else if(mode === "M4_M12"){
+      chartSeries = [
+        {name:'Urea', data: toSeries('close')},
+        {name:'M4',   data: toSeries('mm50')},
+        {name:'M12',  data: toSeries('mm252')}
+      ];
+    } else {
+      chartSeries = [
+        {name:'Close', data: toSeries('close')},
+        {name:'MM50',  data: toSeries('mm50')},
+        {name:'MM252', data: toSeries('mm252')}
+      ];
+    }
+
+    renderChart(card, baseChartOptions(chartSeries, {yDecimals: dec}));
+
+  } catch(err){
+    const colSpan = colSpanByMode(getSeriesModeById(card.dataset.varid || ""));
+    tbody.innerHTML = `<tr><td colspan="${colSpan}" class="muted">Erro: ${String(err.message || err)}</td></tr>`;
+    renderEmptyChart(card, "Erro ao carregar série.");
+    console.error(err);
+  }
+}
+
+/* =========================================================================
+   MAIN
+   ========================================================================= */
+async function main(){
+  const subtitle = document.getElementById("subtitle");
+  const grid = document.getElementById("grid");
+
+  try{
+    const res = await fetch(SNAP_URL, { cache:"no-store" });
+    if(!res.ok) throw new Error("Falha ao carregar snapshot: " + res.status);
+    const snap = await res.json();
+
+    subtitle.textContent =
+      `Séries históricas das variáveis que impactam o preço do café. ` +
+      `Clique em "Tabela" em qualquer card para alternar a visualização. ` +
+      `Atualizado em: ${snap.updated_at || "—"}.`;
+
+    const rows = Array.isArray(snap.rows) ? snap.rows.slice() : [];
+
+    // Mesma ordenação do painel: bloco asc, peso desc, nome
+    rows.sort((a,b)=>{
+      const da = Number(a.bloco), db = Number(b.bloco);
+      const ba = Number.isFinite(da) ? da : 999;
+      const bb = Number.isFinite(db) ? db : 999;
+      if(ba !== bb) return ba - bb;
+      const pa = Number(a.peso), pb = Number(b.peso);
+      const ppa = Number.isFinite(pa) ? pa : -999;
+      const ppb = Number.isFinite(pb) ? pb : -999;
+      if(ppa !== ppb) return ppb - ppa;
+      return String(a.variavel || a.id || "").localeCompare(String(b.variavel || b.id || ""), "pt-BR");
+    });
+
+    grid.innerHTML = "";
+    rows.forEach(r => grid.appendChild(buildCard(r)));
+
+    if(rows.length === 0){
+      grid.innerHTML = `<div class="var-card">Snapshot sem variáveis.</div>`;
+    }
+
+  } catch(err){
+    subtitle.textContent = "Erro ao carregar dados.";
+    grid.innerHTML = `<div class="var-card"><div class="err">Erro: ${String(err.message || err)}</div></div>`;
+    console.error(err);
+  }
+}
+
+main();
+</script>
+</body>
+</html>
