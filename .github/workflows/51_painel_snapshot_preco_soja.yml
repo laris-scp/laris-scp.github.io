@@ -32,11 +32,11 @@ jobs:
       - run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if git diff --quiet; then
+          git add data/soja/painel_snapshot.json
+          if git diff --cached --quiet; then
             echo "No changes detected. Skipping commit."
             exit 0
           fi
-          git add data/soja/painel_snapshot.json
           git commit -m "data(soja): update painel_snapshot (preco_soja)"
           git pull --rebase origin main
 
