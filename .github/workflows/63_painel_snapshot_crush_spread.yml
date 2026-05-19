@@ -1,0 +1,55 @@
+name: 63 - Update Painel Snapshot Soja (Crush Spread)
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["62 - Update Crush Spread Soja (series/crush_spread.json)"]
+    types:
+      - completed
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cafe-main-push
+  cancel-in-progress: false
+
+jobs:
+  update:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy pandas
+
+      - name: Run snapshot script
+        run: |
+          python scripts/soja/update_painel_snapshot_crush_spread.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add data/soja/painel_snapshot.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "data(soja): update painel_snapshot.json (crush_spread)"
+          git pull --rebase origin main
+          git push
