@@ -39,8 +39,8 @@ WINDOW_5Y_TOLERANCE_DAYS = 7   # margem para matching de "mesma semana" no hist�
 
 REGRA_DE_SINAL = (
     "Crop Condition (Good + Excellent) mede a saúde da lavoura americana de soja. "
-    "Lavoura ruim/deteriorando tende a ser positivo para o preço (menor oferta esperada); "
-    "lavoura boa/melhorando tende a ser negativo. "
+    "Lavoura ruim/deteriorando tende a fazer o preço subir (menor oferta esperada); "
+    "lavoura boa/melhorando tende a fazer o preço cair. "
     "Nível: condição absoluta atual. Tendência: comparação com média histórica de 5 anos para a mesma semana. "
     "Momento: variação versus a semana anterior. Fora da janela de safra (out-mai), Tendência e Momento ficam neutros."
 )
@@ -242,6 +242,12 @@ def main() -> None:
 
     score = (float(valor_nivel) + float(valor_tendencia) + float(valor_momento)) * float(mult_bloco)
     score_pond = float(score) * float(peso)
+
+    # Normaliza -0.0 -> 0.0 (artefato IEEE 754 quando soma é zero e mult_bloco é -1)
+    if score == 0.0:
+        score = 0.0
+    if score_pond == 0.0:
+        score_pond = 0.0
 
     item.update({
         "id": VAR_ID,
