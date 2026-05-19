@@ -1,0 +1,55 @@
+name: 57 - Update Painel Snapshot Soja (Fundamental STU)
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["56 - Update Fundamental STU Soja (series/fundamental_stu.json)"]
+    types:
+      - completed
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cafe-main-push
+  cancel-in-progress: false
+
+jobs:
+  update:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy
+
+      - name: Run snapshot script
+        run: |
+          python scripts/soja/update_painel_snapshot_fundamental_stu.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add data/soja/painel_snapshot.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "data(soja): update painel_snapshot.json (fundamental_stu)"
+          git pull --rebase origin main
+          git push
