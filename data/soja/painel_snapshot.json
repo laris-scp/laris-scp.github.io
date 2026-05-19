@@ -1,13 +1,13 @@
 {
   "commodity": "soja",
-  "updated_at": "2026-05-18 20:12:11",
+  "updated_at": "2026-05-19 13:44:27",
   "rows": [
     {
       "id": "preco_soja",
       "bloco": 1,
       "variavel": "PREÇO SOJA",
-      "ultimo_valor": 1177.0,
-      "percentil": 0.8154,
+      "ultimo_valor": 1213.0,
+      "percentil": 0.8613,
       "nivel": "MUITO ALTO",
       "valor_nivel": 1.0,
       "tendencia": "ALTA",
@@ -18,10 +18,10 @@
       "peso": 1.0,
       "score_ponderado": 2.5,
       "frequencia": "Diária",
-      "ultima_atualizacao": "2026-05-15",
+      "ultima_atualizacao": "2026-05-18",
       "regra_de_sinal": "Nível indica se o preço da soja está baixo ou alto versus o histórico recente; Tendência mostra a direção atual comparando o preço com médias de curto e longo prazo; Momento indica se essa tendência está ganhando ou perdendo força ao observar a evolução mensal da média de curto prazo; Score combina Nível, Tendência e Momento (com peso) em um único indicador.",
       "fonte": "Yahoo Finance (ZS=F).",
-      "ultima_data_serie": "2026-05-15"
+      "ultima_data_serie": "2026-05-18"
     }
   ],
   "thermometers": {
