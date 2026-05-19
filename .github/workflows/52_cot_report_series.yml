@@ -31,12 +31,11 @@ jobs:
       - run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if git diff --quiet; then
+          git add data/soja/series/cot_report.json
+          if [ -z "$(git status --porcelain)" ]; then
             echo "No changes detected. Skipping commit."
             exit 0
           fi
-          git add data/soja/series/cot_report.json
           git commit -m "data(soja): update cot_report.json"
           git pull --rebase origin main
-
           git push
