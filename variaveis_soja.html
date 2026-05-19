@@ -864,8 +864,10 @@ async function loadSeriesIntoCard(card, url){
 
     // Gráfico — montar séries conforme o modo
     const toSeries = (key) => pts
-      .map(p => ({ x: parseISODate(p.date).getTime(), y: Number(p[key]) }))
-      .filter(p => !Number.isNaN(p.y));
+      .map(p => {
+        const v = p[key];
+        return { x: parseISODate(p.date).getTime(), y: (v === null || v === undefined ? null : Number(v)) };
+      });
 
     let chartSeries = [];
     if(mode === "CLOSE_ONLY"){
