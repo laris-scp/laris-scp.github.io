@@ -776,8 +776,8 @@ async function loadSeriesIntoCard(card, url){
         return matched.reduce((a,b) => a+b, 0) / matched.length;
       }
 
-      // Últimas 12 semanas na tabela (ou todas se houver menos)
-      const tail = pts.slice(-12);
+      // Últimas 12 semanas na tabela (mais recente em cima)
+      const tail = pts.slice(-12).slice().reverse();
       for(let i = 0; i < tail.length; i++){
         const p = tail[i];
         const m5 = media5yForDate(p.date);
@@ -806,11 +806,25 @@ async function loadSeriesIntoCard(card, url){
         tbody.appendChild(tr);
       }
 
-      // Gráfico: G+E ao longo do tempo
-      const chartPts = pts.map(p => ({
-        x: parseISODate(p.date).getTime(),
-        y: p.close
-      }));
+      // Gráfico: G+E ao longo do tempo, com gaps entre safras
+      // (insere ponto null sempre que a distância entre dois pontos > 30 dias,
+      //  o que separa visualmente cada safra anual)
+      const chartPts = [];
+      for(let i = 0; i < pts.length; i++){
+        if(i > 0){
+          const dPrev = parseISODate(pts[i-1].date);
+          const dCur  = parseISODate(pts[i].date);
+          const diffDays = Math.round((dCur - dPrev) / 86400000);
+          if(diffDays > 30){
+            // ponto "no man's land" entre safras: força quebra de linha
+            chartPts.push({ x: dPrev.getTime() + 86400000, y: null });
+          }
+        }
+        chartPts.push({
+          x: parseISODate(pts[i].date).getTime(),
+          y: pts[i].close
+        });
+      }
 
       renderChart(card, baseChartOptions(
         [{name:'G+E (Good + Excellent)', data: chartPts}],
