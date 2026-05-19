@@ -156,6 +156,29 @@ def main():
     if len(merged) < 30:
         raise RuntimeError(f"Série final tem só {len(merged)} pontos. Bootstrap pode ter falhado.")
 
+    # Calcular MM50 e MM252 sobre a série completa (não só sobre o batch novo)
+    # Garante consistência mesmo no modo incremental
+    merged_df = pd.DataFrame(merged).sort_values("date").reset_index(drop=True)
+    close = pd.to_numeric(merged_df["close"], errors="coerce")
+    merged_df["mm50"] = close.rolling(window=50, min_periods=50).mean()
+    merged_df["mm252"] = close.rolling(window=252, min_periods=252).mean()
+
+    # Reescreve a lista com mm50/mm252 incluídos
+    merged = []
+    for _, r in merged_df.iterrows():
+        pt = {
+            "date": str(r["date"]),
+            "close": round(float(r["close"]), 4),
+            "zs": round(float(r["zs"]), 2),
+            "zm": round(float(r["zm"]), 2),
+            "zl": round(float(r["zl"]), 2),
+        }
+        if pd.notna(r["mm50"]):
+            pt["mm50"] = round(float(r["mm50"]), 4)
+        if pd.notna(r["mm252"]):
+            pt["mm252"] = round(float(r["mm252"]), 4)
+        merged.append(pt)
+
     out = {
         "meta": {
             "id": "crush_spread",
@@ -176,6 +199,7 @@ def main():
     print(f">> OK ({mode}). Total: {len(merged)} pontos.")
     print(f">> Último: date={last['date']} | crush=${last['close']:.3f}/bu")
     print(f"   ZS={last['zs']} | ZM={last['zm']} | ZL={last['zl']}")
+    print(f"   MM50={last.get('mm50', '—')} | MM252={last.get('mm252', '—')}")
 
 
 if __name__ == "__main__":
