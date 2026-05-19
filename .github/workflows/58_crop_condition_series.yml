@@ -1,0 +1,57 @@
+name: 58 - Update Crop Condition Soja (series/crop_condition.json)
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Toda terça e quarta às 22:00 UTC
+    # NASS publica segunda-feira ~21h UTC (16h ET); terça/quarta cobre fuso + revisões
+    - cron: "0 22 * * 2"
+    - cron: "0 22 * * 3"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cafe-main-push
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Run series script
+        env:
+          NASS_API_KEY: ${{ secrets.NASS_API_KEY }}
+        run: |
+          python scripts/soja/update_crop_condition_series.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add data/soja/series/crop_condition.json
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "data(soja): update crop_condition.json"
+          git pull --rebase origin main
+          git push
