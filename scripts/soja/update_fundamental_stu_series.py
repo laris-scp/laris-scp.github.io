@@ -9,7 +9,8 @@
 # - Série (gráfico): STU World anual
 # - Tabela (decomp): Top 6 países por peso de produção 5y (w_prod_5y) e ΔYoY
 # - STU = ending_stocks / (domestic_consumption + exports)
-# - Revisão: reprocessar os últimos 3 marketYears disponíveis
+# - Revisão: reprocessar os últimos 3 marketYears disponíveis (modo incremental)
+# - Bootstrap: se o JSON não existe, busca histórico de 1960 ate o ano atual
 # - Se API falhar: workflow deve falhar (vermelho)
 # - Se não houver dado novo: workflow verde e "No changes to commit"
 #
@@ -33,10 +34,9 @@ import requests
 # -------------------------
 
 # PSD commodityCode para "Oilseed, Soybean".
-# Pode ser sobrescrito via env var PSD_SOYBEAN_CODE no workflow se precisar.
 SOYBEAN_COMMODITY_CODE = os.getenv("PSD_SOYBEAN_CODE", "2222000")
 
-# Attribute IDs conforme padrao USDA PSD (mesmos do cafe)
+# Attribute IDs conforme padrao USDA PSD
 ATTR_PRODUCTION = 28
 ATTR_EXPORTS = 88
 ATTR_DOM_CONS = 125
@@ -55,6 +55,9 @@ REQ_SLEEP_S = 1.05
 TIMEOUT_S = 45
 MAX_RETRIES = 3
 
+# Bootstrap: ano inicial do histórico (PSD tem dados desde 1960)
+BOOTSTRAP_START_YEAR = 1960
+
 
 # -------------------------
 # HELPERS
@@ -67,9 +70,6 @@ def die(msg: str) -> None:
     raise RuntimeError(msg)
 
 def api_get(url: str) -> Any:
-    """
-    GET com retry simples. Se falhar, levanta erro (para workflow ficar vermelho).
-    """
     if not API_KEY:
         die("Secret FAS_PSD_API_KEY não encontrado no ambiente. Configure no GitHub Secrets.")
 
@@ -97,6 +97,10 @@ def api_get(url: str) -> Any:
                 return resp.json()
             except Exception as e:
                 die(f"[api_get] Falha ao decodificar JSON: {repr(e)}")
+
+        # 404 em year especifico do PSD costuma significar "ano sem dado" - retorna None
+        if resp.status_code == 404:
+            return None
 
         if resp.status_code == 429 or 500 <= resp.status_code < 600:
             if attempt == MAX_RETRIES:
@@ -169,6 +173,7 @@ def resolve_country_name(rec: Dict[str, Any]) -> str:
 # -------------------------
 
 def get_available_market_years(commodity: str) -> List[int]:
+    """Retorna apenas os marketYears que tiveram release - tipicamente os mais recentes."""
     url = f"{API_BASE}/commodity/{commodity}/dataReleaseDates"
     data = api_get(url)
     time.sleep(REQ_SLEEP_S)
@@ -177,10 +182,13 @@ def get_available_market_years(commodity: str) -> List[int]:
         die("[dataReleaseDates] Não consegui obter marketYears disponíveis (resposta vazia/inesperada).")
     return years
 
-def fetch_world_year(commodity: str, year: int) -> List[Dict[str, Any]]:
+def fetch_world_year(commodity: str, year: int) -> Optional[List[Dict[str, Any]]]:
+    """Retorna None se o ano nao tiver dado (404)."""
     url = f"{API_BASE}/commodity/{commodity}/world/year/{year}"
     data = api_get(url)
     time.sleep(REQ_SLEEP_S)
+    if data is None:
+        return None
     if not isinstance(data, list):
         die(f"[world/year] Resposta inesperada (não-list) para year={year}.")
     return data
@@ -189,6 +197,8 @@ def fetch_all_countries_year(commodity: str, year: int) -> List[Dict[str, Any]]:
     url = f"{API_BASE}/commodity/{commodity}/country/all/year/{year}"
     data = api_get(url)
     time.sleep(REQ_SLEEP_S)
+    if data is None:
+        return []
     if not isinstance(data, list):
         die(f"[country/all/year] Resposta inesperada (não-list) para year={year}.")
     return data
@@ -297,32 +307,53 @@ def main() -> None:
     existing_points = (existing or {}).get("data", []) if existing else []
     existing_meta = (existing or {}).get("meta", {}) if existing else {}
 
+    is_bootstrap = len(existing_points) == 0
+
     years = get_available_market_years(SOYBEAN_COMMODITY_CODE)
     latest_year = max(years)
 
-    refresh_years = [y for y in [latest_year - 2, latest_year - 1, latest_year] if y in years]
-    if len(refresh_years) < 1:
-        die("Não consegui determinar refresh_years (lista vazia).")
-
-    window_years = [latest_year - 4, latest_year - 3, latest_year - 2, latest_year - 1, latest_year]
-
-    world_by_year: Dict[int, List[Dict[str, Any]]] = {}
-    prod_world_by_year: Dict[int, Optional[float]] = {}
-
-    for y in window_years:
-        recs = fetch_world_year(SOYBEAN_COMMODITY_CODE, y)
-        world_by_year[y] = recs
-        prod_world_by_year[y] = pick_values(recs, ATTR_PRODUCTION)
-
-    refresh_map: Dict[int, Optional[float]] = {}
-    for y in refresh_years:
-        recs = world_by_year.get(y)
-        if recs is None:
+    # ----- Modo BOOTSTRAP (primeira execucao): buscar histórico completo -----
+    if is_bootstrap:
+        print(f"BOOTSTRAP: nenhum histórico encontrado. Buscando series completa de {BOOTSTRAP_START_YEAR} a {latest_year}.")
+        full_refresh_map: Dict[int, Optional[float]] = {}
+        for y in range(BOOTSTRAP_START_YEAR, latest_year + 1):
             recs = fetch_world_year(SOYBEAN_COMMODITY_CODE, y)
-            world_by_year[y] = recs
-        refresh_map[y] = compute_stu_for_year(recs)
+            if recs is None or len(recs) == 0:
+                continue  # ano sem dado, pula
+            stu = compute_stu_for_year(recs)
+            if stu is not None:
+                full_refresh_map[y] = stu
+
+        refresh_map = full_refresh_map
+        print(f"BOOTSTRAP: coletados {len(refresh_map)} anos de STU.")
+    else:
+        # ----- Modo INCREMENTAL: revisar últimos 3 marketYears -----
+        refresh_years = [y for y in [latest_year - 2, latest_year - 1, latest_year] if y in years]
+        if len(refresh_years) < 1:
+            die("Não consegui determinar refresh_years (lista vazia).")
+
+        refresh_map: Dict[int, Optional[float]] = {}
+        for y in refresh_years:
+            recs = fetch_world_year(SOYBEAN_COMMODITY_CODE, y)
+            if recs is None:
+                continue
+            refresh_map[y] = compute_stu_for_year(recs)
 
     updated_points = series_update(existing_points, refresh_map)
+
+    if len(updated_points) < 5:
+        die(f"Apos atualizacao, serie ainda tem menos de 5 pontos (n={len(updated_points)}). Bootstrap pode ter falhado.")
+
+    # ----- Decomposicao (sempre busca janela 5y para o latest_year) -----
+    window_years = [latest_year - 4, latest_year - 3, latest_year - 2, latest_year - 1, latest_year]
+
+    prod_world_by_year: Dict[int, Optional[float]] = {}
+    for y in window_years:
+        recs = fetch_world_year(SOYBEAN_COMMODITY_CODE, y)
+        if recs is None:
+            prod_world_by_year[y] = None
+        else:
+            prod_world_by_year[y] = pick_values(recs, ATTR_PRODUCTION)
 
     prod_by_year_country: Dict[int, Dict[str, Tuple[str, Optional[float]]]] = {}
 
@@ -380,7 +411,8 @@ def main() -> None:
     write_json_atomic(OUT_PATH, out)
 
     print("OK: data/soja/series/fundamental_stu.json atualizado.")
-    print(f"Commodity: {SOYBEAN_COMMODITY_CODE} | latest_year={latest_year} | refresh_years={refresh_years}")
+    print(f"Commodity: {SOYBEAN_COMMODITY_CODE} | latest_year={latest_year} | modo={'BOOTSTRAP' if is_bootstrap else 'INCREMENTAL'}")
+    print(f"Total de pontos: {len(updated_points)}")
     last_pt = updated_points[-1] if updated_points else {}
     print(f"Último ponto: {last_pt}")
     print(f"Decomp rows: {len(decomp.get('rows', []))} | mean_world_5y={mean_world_5y:.4f}")
