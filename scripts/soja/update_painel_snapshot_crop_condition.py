@@ -194,8 +194,10 @@ def main() -> None:
     nivel, valor_nivel = nivel_from_ge(ge_atual)
 
     if out_of_window:
-        tendencia, valor_tendencia = ("FORA DE JANELA", 0.0)
-        momento, valor_momento = ("FORA DE JANELA", 0.0)
+        # Fora da janela de safra: tendência e momento perdem sentido
+        # (rótulo visual = NEUTRO, mas o flag fora_de_janela=True permanece no JSON)
+        tendencia, valor_tendencia = ("NEUTRO", 0.0)
+        momento, valor_momento = ("NEUTRO", 0.0)
     else:
         # Tendência: precisa da média 5y; se não houver, marca LATERAL
         if ge_5y is None:
