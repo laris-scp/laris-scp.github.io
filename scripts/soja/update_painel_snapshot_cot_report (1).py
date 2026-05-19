@@ -1,0 +1,219 @@
+import json
+from pathlib import Path
+from datetime import datetime
+
+import pandas as pd
+
+SERIES_PATH = Path("data/soja/series/cot_report.json")
+SNAPSHOT_PATH = Path("data/soja/painel_snapshot.json")
+
+LOOKBACK_YEARS_LEVEL = 5
+WEEKS_A = (25, 36)
+WEEKS_B = (13, 24)
+WEEKS_C = (0, 12)
+
+SERIES_LAST_DATE_FIELD = "ultima_data_serie"
+
+
+def percentile_rank(series, value):
+    s = pd.to_numeric(series, errors="coerce").dropna()
+    return float((s <= value).sum() / len(s)) if len(s) else float("nan")
+
+
+def pct_to_level_and_value(p):
+    if pd.isna(p):
+        return "INDEFINIDO", 0.0
+    if p < 0.20:
+        return "MUITO BAIXO", -1.0
+    if p < 0.40:
+        return "BAIXO", -0.5
+    if p < 0.60:
+        return "NEUTRO", 0.0
+    if p < 0.80:
+        return "ALTO", 0.5
+    return "MUITO ALTO", 1.0
+
+
+def tendencia_to_value(t):
+    if t == "ALTA":
+        return 1.0
+    if t == "QUEDA":
+        return -1.0
+    return 0.0
+
+
+def momento_to_value(m):
+    if m == "QUEDA ACELERANDO":
+        return -1.0
+    if m == "QUEDA DESACELERANDO":
+        return -0.5
+    if m == "ALTA DESACELERANDO":
+        return 0.5
+    if m == "ALTA ACELERANDO":
+        return 1.0
+    return 0.0
+
+
+def window_mean_weeks(df, end_idx, w_start, w_end, col="close"):
+    """
+    Média do bloco olhando para trás por OBSERVACOES (linhas),
+    mantendo a mesma ideia da regra atual (A/B/C).
+    Ex.: w_start=36, w_end=25 => pega end_idx-36 .. end_idx-25
+    """
+    i0 = end_idx - w_start
+    i1 = end_idx - w_end
+    if i0 < 0 or i1 < 0 or i0 > i1:
+        return float("nan")
+    s = pd.to_numeric(df[col].iloc[i0:i1 + 1], errors="coerce").dropna()
+    return float(s.mean()) if len(s) else float("nan")
+
+
+def main():
+    # ---- Load series ----
+    series_json = json.loads(SERIES_PATH.read_text(encoding="utf-8"))
+    pts = series_json.get("series", [])
+    if not pts:
+        raise RuntimeError("cot_report.json (soja) sem dados em 'series'.")
+
+    df = pd.DataFrame(pts)
+    df["date"] = pd.to_datetime(df["date"], errors="coerce")
+    df["close"] = pd.to_numeric(df["close"], errors="coerce")
+    df = df.dropna().sort_values("date").reset_index(drop=True)
+
+    if df.empty:
+        raise RuntimeError("cot_report.json (soja) nao possui pontos validos apos limpeza.")
+
+    ult = float(df.iloc[-1]["close"])
+    last_date = df.iloc[-1]["date"]
+    series_last_date = last_date.date().isoformat()
+
+    # ---- Load snapshot e localizar/criar row do cot_report ----
+    snapshot = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))
+    rows = snapshot.get("rows")
+    if not isinstance(rows, list):
+        raise RuntimeError("painel_snapshot.json (soja) esperado com chave 'rows' (lista).")
+
+    row = None
+    for r in rows:
+        if r.get("id") == "cot_report":
+            row = r
+            break
+
+    # Se a row do cot_report ainda nao existe (primeira execucao), cria
+    if row is None:
+        row = {
+            "id": "cot_report",
+            "bloco": 1,
+            "variavel": "COT REPORT",
+            "peso": 4.0,
+        }
+        rows.append(row)
+
+    # ---- DEBUG (A/B/C) ANTES DO EARLY-EXIT ----
+    last_idx = len(df) - 1
+    A_dbg = window_mean_weeks(df, last_idx, WEEKS_A[1], WEEKS_A[0], col="close")  # 36..25
+    B_dbg = window_mean_weeks(df, last_idx, WEEKS_B[1], WEEKS_B[0], col="close")  # 24..13
+    C_dbg = window_mean_weeks(df, last_idx, WEEKS_C[1], WEEKS_C[0], col="close")  # 12..0
+    print("DEBUG A,B,C:", A_dbg, B_dbg, C_dbg, "| last_idx:", last_idx, "| last_date:", last_date)
+
+    # ---- Early exit: não atualiza se a série não mudou ----
+    prev_series_last_date = row.get(SERIES_LAST_DATE_FIELD)
+    if prev_series_last_date is not None and str(prev_series_last_date) == str(series_last_date):
+
+        # corrige legado: ultima_atualizacao com timestamp
+        if str(row.get("ultima_atualizacao")) != str(series_last_date):
+            row["ultima_atualizacao"] = str(series_last_date)
+            row[SERIES_LAST_DATE_FIELD] = str(series_last_date)
+
+            snapshot["updated_at"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+            SNAPSHOT_PATH.write_text(
+                json.dumps(snapshot, ensure_ascii=False, separators=(",", ":")) + "\n",
+                encoding="utf-8"
+            )
+
+            print(f"Sem dados novos para cot_report (soja), mas corrigi ultima_atualizacao para {series_last_date}.")
+            return
+
+        print(f"Sem dados novos para cot_report (soja) no snapshot. Última data: {series_last_date}")
+        return
+
+    # ---- Nível (percentil 5y) ----
+    cutoff = last_date - pd.DateOffset(years=LOOKBACK_YEARS_LEVEL)
+    w_level = df.loc[df["date"] >= cutoff, "close"]
+    percentil = percentile_rank(w_level, ult)
+    nivel_txt, valor_nivel = pct_to_level_and_value(percentil)
+
+    # ---- Tendência & Momento ----
+    last_idx = len(df) - 1
+
+    A = window_mean_weeks(df, last_idx, WEEKS_A[1], WEEKS_A[0], col="close")  # 36..25
+    B = window_mean_weeks(df, last_idx, WEEKS_B[1], WEEKS_B[0], col="close")  # 24..13
+    C = window_mean_weeks(df, last_idx, WEEKS_C[1], WEEKS_C[0], col="close")  # 12..0
+
+    tendencia = "INDEFINIDA"
+    momento = "NEUTRO"
+
+    if pd.notna(A) and pd.notna(B) and pd.notna(C):
+        if A < B < C:
+            tendencia = "ALTA"
+        elif A > B > C:
+            tendencia = "QUEDA"
+        else:
+            tendencia = "LATERAL"
+
+        d1 = B - A
+        d2 = C - B
+
+        if tendencia == "ALTA":
+            momento = "ALTA ACELERANDO" if abs(d2) > abs(d1) else "ALTA DESACELERANDO"
+        elif tendencia == "QUEDA":
+            momento = "QUEDA ACELERANDO" if abs(d2) > abs(d1) else "QUEDA DESACELERANDO"
+
+    valor_tendencia = tendencia_to_value(tendencia)
+    valor_momento = momento_to_value(momento)
+
+    # ---- Score ----
+    score = float(valor_nivel + valor_tendencia + valor_momento)
+
+    peso = float(row.get("peso", 4.0))
+    score_ponderado = float(score * peso)
+
+    row.update({
+        "id": "cot_report",
+        "bloco": 1,
+        "variavel": "COT REPORT",
+        "ultimo_valor": ult,
+        "percentil": round(float(percentil), 4),
+        "nivel": nivel_txt,
+        "valor_nivel": float(valor_nivel),
+        "tendencia": tendencia,
+        "valor_tendencia": float(valor_tendencia),
+        "momento": momento,
+        "valor_momento": float(valor_momento),
+        "score": float(score),
+        "peso": peso,
+        "score_ponderado": score_ponderado,
+        "frequencia": "Semanal",
+        "ultima_atualizacao": str(series_last_date),
+        "fonte": "CFTC COT (Disaggregated) | Soybeans (CBOT) | Managed Money (net long - short)",
+        "regra_de_sinal": (
+            "Nível mostra se o posicionamento líquido dos fundos (Managed Money) está baixo ou alto em relação aos últimos 5 anos; "
+            "Tendência indica se esse posicionamento vem aumentando, diminuindo ou ficando estável ao comparar médias de períodos mais antigos e mais recentes; "
+            "Momento mostra se essa tendência está ganhando ou perdendo força ao comparar a mudança entre as janelas; "
+            "Score combina Nível, Tendência e Momento (com peso) em um indicador único."
+        ),
+        SERIES_LAST_DATE_FIELD: str(series_last_date),
+    })
+
+    snapshot["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    SNAPSHOT_PATH.write_text(
+        json.dumps(snapshot, ensure_ascii=False, separators=(",", ":")) + "\n",
+        encoding="utf-8"
+    )
+
+    print("OK: data/soja/painel_snapshot.json atualizado (COT Report Soybeans).")
+    print("Última data:", series_last_date, "| Último valor:", ult)
+
+
+if __name__ == "__main__":
+    main()
