@@ -6,7 +6,7 @@
     "formula": "(ZM × 0.022) + (ZL × 0.11) - (ZS/100)",
     "unit": "$/bushel",
     "source": "Yahoo Finance (ZS=F, ZM=F, ZL=F)",
-    "updated_at": "2026-05-19 20:55:27"
+    "updated_at": "2026-05-19 23:13:55"
   },
   "data": [
     {
