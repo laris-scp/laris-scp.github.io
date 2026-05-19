@@ -84,15 +84,28 @@ def main():
     cot["date"] = pd.to_datetime(cot["Report_Date_as_YYYY-MM-DD"], errors="coerce")
     cot = cot.dropna(subset=["date"])
 
-    # Filtro: Soybeans (CBOT) — exclui MEAL e OIL para nao pegar Soybean Meal/Oil
+    # Filtro: Soybeans (CBOT) contrato cheio
+    # - Inclui "SOYBEANS - CHICAGO BOARD OF TRADE"
+    # - Exclui MEAL e OIL (para nao pegar Soybean Meal/Oil)
+    # - Exclui MINI (o contrato mini-Soybeans tem baixo volume e muitas
+    #   linhas zeradas, gerando duplicacao por data se nao excluido)
     mkt = cot["Market_and_Exchange_Names"].astype(str).str.upper()
     mask = (
         mkt.str.contains("SOYBEANS", na=False)
         & mkt.str.contains("CHICAGO BOARD OF TRADE", na=False)
         & ~mkt.str.contains("MEAL", na=False)
         & ~mkt.str.contains("OIL", na=False)
+        & ~mkt.str.contains("MINI", na=False)
     )
     cot = cot.loc[mask].copy()
+
+    # Sanity check: garantir que sobrou apenas 1 mercado apos o filtro
+    n_markets = cot["Market_and_Exchange_Names"].nunique()
+    if n_markets != 1:
+        raise RuntimeError(
+            f"Filtro retornou {n_markets} mercados (esperado: 1). "
+            f"Mercados: {sorted(cot['Market_and_Exchange_Names'].unique().tolist())}"
+        )
 
     # Managed Money NET
     cot["long"] = pd.to_numeric(cot["M_Money_Positions_Long_All"], errors="coerce")
@@ -100,6 +113,12 @@ def main():
     cot["close"] = cot["long"] - cot["short"]
 
     cot = cot.dropna(subset=["close"]).sort_values("date").reset_index(drop=True)
+
+    # Sanity check extra: nao pode haver duplicatas de data
+    dups = cot["date"].duplicated().sum()
+    if dups > 0:
+        raise RuntimeError(f"Encontradas {dups} datas duplicadas apos o filtro. Algo errado.")
+
     if len(cot) < 20:
         raise RuntimeError(f"Série COT curta demais (n={len(cot)}).")
 
