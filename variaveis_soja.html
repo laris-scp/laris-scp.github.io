@@ -232,7 +232,8 @@ const SERIES_MAP = {
   "cot_report": "data/soja/series/cot_report.json",
   "usd_brl":    "data/soja/series/usd_brl.json",
   "fundamental_stu": "data/soja/series/fundamental_stu.json",
-  "crop_condition":  "data/soja/series/crop_condition.json"
+  "crop_condition":  "data/soja/series/crop_condition.json",
+  "mdic_export": "data/soja/series/mdic_export.json"
 };
 
 const DECIMALS_BY_ID = {
@@ -335,7 +336,7 @@ function setTableHeaderByMode(card, mode){
     theadRow.innerHTML = `<th>Data</th><th class="right">Score</th><th>Diagnóstico</th>`; return;
   }
   if(mode === "MDIC_EXPORT"){
-    theadRow.innerHTML = `<th>Data</th><th class="right">Sacas</th><th class="right">Kg</th>`; return;
+    theadRow.innerHTML = `<th>Data</th><th class="right">Toneladas</th><th class="right">Kg</th>`; return;
   }
   if(mode === "CROP_CONDITION"){
     theadRow.innerHTML = `<th>Semana</th><th class="right">2026</th><th class="right">2025</th><th class="right">Média 5y</th>`; return;
@@ -878,7 +879,7 @@ async function loadSeriesIntoCard(card, url){
         .map(p => ({
           date: (p.date || p.Data || p.data),
           kg: (p.kg ?? p.KG ?? null),
-          bags: (p.bags_60kg ?? p.bags ?? p.sacas ?? null)
+          toneladas: (p.toneladas ?? p.t ?? p.ton ?? null)
         }))
         .filter(r => !!r.date)
         .sort((a,b)=> String(a.date).localeCompare(String(b.date)));
@@ -899,20 +900,20 @@ async function loadSeriesIntoCard(card, url){
       for(const r of rowsAll){
         const y = String(r.date).slice(0,4);
         const m = String(r.date).slice(5,7);
-        if(y && m) byYM.set(`${y}-${m}`, { kg: Number(r.kg), bags: Number(r.bags) });
+        if(y && m) byYM.set(`${y}-${m}`, { kg: Number(r.kg), toneladas: Number(r.toneladas) });
       }
       const baseYears = [];
       for(let y = yearCur - 5; y <= yearCur - 1; y++) baseYears.push(y);
 
       function getVal(y, mm){
         const obj = byYM.get(`${y}-${mm}`);
-        if(!obj) return { kg: NaN, bags: NaN };
-        return { kg: Number(obj.kg), bags: Number(obj.bags) };
+        if(!obj) return { kg: NaN, toneladas: NaN };
+        return { kg: Number(obj.kg), toneladas: Number(obj.toneladas) };
       }
-      function avgBagsForMonth(mm){
+      function avgTonForMonth(mm){
         const vals = [];
         for(const y of baseYears){
-          const v = getVal(y, mm).bags;
+          const v = getVal(y, mm).toneladas;
           if(!Number.isNaN(v)) vals.push(v);
         }
         if(vals.length === 0) return NaN;
@@ -922,9 +923,9 @@ async function loadSeriesIntoCard(card, url){
       const sCur = [], sPrev = [], sAvg = [];
       for(let mi=1; mi<=12; mi++){
         const mm = String(mi).padStart(2,"0");
-        const cur = getVal(yearCur, mm).bags;
-        const prev = (yearPrev !== null) ? getVal(yearPrev, mm).bags : NaN;
-        const avg5 = avgBagsForMonth(mm);
+        const cur = getVal(yearCur, mm).toneladas;
+        const prev = (yearPrev !== null) ? getVal(yearPrev, mm).toneladas : NaN;
+        const avg5 = avgTonForMonth(mm);
         sCur.push(Number.isNaN(cur) ? null : cur);
         sPrev.push(Number.isNaN(prev) ? null : prev);
         sAvg.push(Number.isNaN(avg5) ? null : avg5);
@@ -945,7 +946,7 @@ async function loadSeriesIntoCard(card, url){
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td>${fmtDateBR(r.date)}</td>
-            <td class="right">${fmtNumber(Number(r.bags), 0)}</td>
+            <td class="right">${fmtNumber(Number(r.toneladas), 0)}</td>
             <td class="right">${fmtNumber(Number(r.kg), 0)}</td>
           `;
           tbody.appendChild(tr);
