@@ -1,0 +1,1836 @@
+{
+  "meta": {
+    "id": "crop_condition",
+    "title": "CROP CONDITION (Soja EUA · G+E)",
+    "frequency": "Semanal (jun-set)",
+    "metric": "good + excellent (pct)",
+    "source": "USDA NASS Quick Stats",
+    "updated_at": "2026-05-19 19:21:40"
+  },
+  "data": [
+    {
+      "date": "2010-06-06",
+      "close": 75.0,
+      "good": 61.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2010-06-13",
+      "close": 73.0,
+      "good": 58.0,
+      "excellent": 15.0
+    },
+    {
+      "date": "2010-06-20",
+      "close": 69.0,
+      "good": 54.0,
+      "excellent": 15.0
+    },
+    {
+      "date": "2010-06-27",
+      "close": 67.0,
+      "good": 53.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2010-07-04",
+      "close": 66.0,
+      "good": 51.0,
+      "excellent": 15.0
+    },
+    {
+      "date": "2010-07-11",
+      "close": 65.0,
+      "good": 50.0,
+      "excellent": 15.0
+    },
+    {
+      "date": "2010-07-18",
+      "close": 67.0,
+      "good": 52.0,
+      "excellent": 15.0
+    },
+    {
+      "date": "2010-07-25",
+      "close": 67.0,
+      "good": 49.0,
+      "excellent": 18.0
+    },
+    {
+      "date": "2010-08-01",
+      "close": 66.0,
+      "good": 48.0,
+      "excellent": 18.0
+    },
+    {
+      "date": "2010-08-08",
+      "close": 66.0,
+      "good": 48.0,
+      "excellent": 18.0
+    },
+    {
+      "date": "2010-08-15",
+      "close": 66.0,
+      "good": 47.0,
+      "excellent": 19.0
+    },
+    {
+      "date": "2010-08-22",
+      "close": 64.0,
+      "good": 46.0,
+      "excellent": 18.0
+    },
+    {
+      "date": "2010-08-29",
+      "close": 64.0,
+      "good": 46.0,
+      "excellent": 18.0
+    },
+    {
+      "date": "2010-09-05",
+      "close": 64.0,
+      "good": 46.0,
+      "excellent": 18.0
+    },
+    {
+      "date": "2010-09-12",
+      "close": 63.0,
+      "good": 46.0,
+      "excellent": 17.0
+    },
+    {
+      "date": "2010-09-19",
+      "close": 63.0,
+      "good": 46.0,
+      "excellent": 17.0
+    },
+    {
+      "date": "2010-09-26",
+      "close": 63.0,
+      "good": 46.0,
+      "excellent": 17.0
+    },
+    {
+      "date": "2010-10-03",
+      "close": 64.0,
+      "good": 46.0,
+      "excellent": 18.0
+    },
+    {
+      "date": "2010-10-10",
+      "close": 64.0,
+      "good": 46.0,
+      "excellent": 18.0
+    },
+    {
+      "date": "2011-06-12",
+      "close": 67.0,
+      "good": 57.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2011-06-19",
+      "close": 68.0,
+      "good": 57.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2011-06-26",
+      "close": 65.0,
+      "good": 54.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2011-07-03",
+      "close": 66.0,
+      "good": 53.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2011-07-10",
+      "close": 66.0,
+      "good": 52.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2011-07-17",
+      "close": 64.0,
+      "good": 51.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2011-07-24",
+      "close": 62.0,
+      "good": 49.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2011-07-31",
+      "close": 60.0,
+      "good": 46.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2011-08-07",
+      "close": 61.0,
+      "good": 48.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2011-08-14",
+      "close": 61.0,
+      "good": 48.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2011-08-21",
+      "close": 59.0,
+      "good": 46.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2011-08-28",
+      "close": 57.0,
+      "good": 44.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2011-09-04",
+      "close": 56.0,
+      "good": 45.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2011-09-11",
+      "close": 56.0,
+      "good": 44.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2011-09-18",
+      "close": 53.0,
+      "good": 43.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2011-09-25",
+      "close": 53.0,
+      "good": 43.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2011-10-02",
+      "close": 54.0,
+      "good": 43.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2011-10-09",
+      "close": 56.0,
+      "good": 44.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2012-06-03",
+      "close": 65.0,
+      "good": 55.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2012-06-10",
+      "close": 60.0,
+      "good": 51.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2012-06-17",
+      "close": 56.0,
+      "good": 48.0,
+      "excellent": 8.0
+    },
+    {
+      "date": "2012-06-24",
+      "close": 53.0,
+      "good": 45.0,
+      "excellent": 8.0
+    },
+    {
+      "date": "2012-07-01",
+      "close": 45.0,
+      "good": 39.0,
+      "excellent": 6.0
+    },
+    {
+      "date": "2012-07-08",
+      "close": 40.0,
+      "good": 35.0,
+      "excellent": 5.0
+    },
+    {
+      "date": "2012-07-15",
+      "close": 34.0,
+      "good": 30.0,
+      "excellent": 4.0
+    },
+    {
+      "date": "2012-07-22",
+      "close": 31.0,
+      "good": 27.0,
+      "excellent": 4.0
+    },
+    {
+      "date": "2012-07-29",
+      "close": 29.0,
+      "good": 26.0,
+      "excellent": 3.0
+    },
+    {
+      "date": "2012-08-05",
+      "close": 29.0,
+      "good": 25.0,
+      "excellent": 4.0
+    },
+    {
+      "date": "2012-08-12",
+      "close": 30.0,
+      "good": 26.0,
+      "excellent": 4.0
+    },
+    {
+      "date": "2012-08-19",
+      "close": 31.0,
+      "good": 27.0,
+      "excellent": 4.0
+    },
+    {
+      "date": "2012-08-26",
+      "close": 30.0,
+      "good": 26.0,
+      "excellent": 4.0
+    },
+    {
+      "date": "2012-09-02",
+      "close": 30.0,
+      "good": 26.0,
+      "excellent": 4.0
+    },
+    {
+      "date": "2012-09-09",
+      "close": 32.0,
+      "good": 27.0,
+      "excellent": 5.0
+    },
+    {
+      "date": "2012-09-16",
+      "close": 33.0,
+      "good": 28.0,
+      "excellent": 5.0
+    },
+    {
+      "date": "2012-09-23",
+      "close": 35.0,
+      "good": 29.0,
+      "excellent": 6.0
+    },
+    {
+      "date": "2012-09-30",
+      "close": 35.0,
+      "good": 29.0,
+      "excellent": 6.0
+    },
+    {
+      "date": "2012-10-07",
+      "close": 37.0,
+      "good": 30.0,
+      "excellent": 7.0
+    },
+    {
+      "date": "2013-06-16",
+      "close": 64.0,
+      "good": 54.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2013-06-23",
+      "close": 65.0,
+      "good": 54.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2013-06-30",
+      "close": 67.0,
+      "good": 55.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2013-07-07",
+      "close": 67.0,
+      "good": 55.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2013-07-14",
+      "close": 65.0,
+      "good": 52.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2013-07-21",
+      "close": 64.0,
+      "good": 51.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2013-07-28",
+      "close": 63.0,
+      "good": 50.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2013-08-04",
+      "close": 64.0,
+      "good": 51.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2013-08-11",
+      "close": 64.0,
+      "good": 50.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2013-08-18",
+      "close": 62.0,
+      "good": 48.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2013-08-25",
+      "close": 58.0,
+      "good": 46.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2013-09-01",
+      "close": 54.0,
+      "good": 43.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2013-09-08",
+      "close": 52.0,
+      "good": 42.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2013-09-15",
+      "close": 50.0,
+      "good": 41.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2013-09-22",
+      "close": 50.0,
+      "good": 41.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2013-09-29",
+      "close": 53.0,
+      "good": 43.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2013-10-20",
+      "close": 57.0,
+      "good": 44.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2014-06-08",
+      "close": 74.0,
+      "good": 62.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2014-06-15",
+      "close": 73.0,
+      "good": 60.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2014-06-22",
+      "close": 72.0,
+      "good": 58.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2014-06-29",
+      "close": 72.0,
+      "good": 57.0,
+      "excellent": 15.0
+    },
+    {
+      "date": "2014-07-06",
+      "close": 72.0,
+      "good": 57.0,
+      "excellent": 15.0
+    },
+    {
+      "date": "2014-07-13",
+      "close": 72.0,
+      "good": 56.0,
+      "excellent": 16.0
+    },
+    {
+      "date": "2014-07-20",
+      "close": 73.0,
+      "good": 57.0,
+      "excellent": 16.0
+    },
+    {
+      "date": "2014-07-27",
+      "close": 71.0,
+      "good": 55.0,
+      "excellent": 16.0
+    },
+    {
+      "date": "2014-08-03",
+      "close": 71.0,
+      "good": 55.0,
+      "excellent": 16.0
+    },
+    {
+      "date": "2014-08-10",
+      "close": 70.0,
+      "good": 53.0,
+      "excellent": 17.0
+    },
+    {
+      "date": "2014-08-17",
+      "close": 71.0,
+      "good": 54.0,
+      "excellent": 17.0
+    },
+    {
+      "date": "2014-08-24",
+      "close": 70.0,
+      "good": 52.0,
+      "excellent": 18.0
+    },
+    {
+      "date": "2014-08-31",
+      "close": 72.0,
+      "good": 54.0,
+      "excellent": 18.0
+    },
+    {
+      "date": "2014-09-07",
+      "close": 72.0,
+      "good": 53.0,
+      "excellent": 19.0
+    },
+    {
+      "date": "2014-09-14",
+      "close": 72.0,
+      "good": 53.0,
+      "excellent": 19.0
+    },
+    {
+      "date": "2014-09-21",
+      "close": 71.0,
+      "good": 53.0,
+      "excellent": 18.0
+    },
+    {
+      "date": "2014-09-28",
+      "close": 72.0,
+      "good": 53.0,
+      "excellent": 19.0
+    },
+    {
+      "date": "2014-10-05",
+      "close": 73.0,
+      "good": 53.0,
+      "excellent": 20.0
+    },
+    {
+      "date": "2014-10-12",
+      "close": 73.0,
+      "good": 53.0,
+      "excellent": 20.0
+    },
+    {
+      "date": "2014-10-19",
+      "close": 73.0,
+      "good": 53.0,
+      "excellent": 20.0
+    },
+    {
+      "date": "2015-06-07",
+      "close": 69.0,
+      "good": 58.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2015-06-14",
+      "close": 67.0,
+      "good": 56.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2015-06-21",
+      "close": 65.0,
+      "good": 54.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2015-06-28",
+      "close": 63.0,
+      "good": 52.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2015-07-05",
+      "close": 63.0,
+      "good": 52.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2015-07-12",
+      "close": 62.0,
+      "good": 50.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2015-07-19",
+      "close": 62.0,
+      "good": 50.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2015-07-26",
+      "close": 62.0,
+      "good": 49.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2015-08-02",
+      "close": 63.0,
+      "good": 50.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2015-08-09",
+      "close": 63.0,
+      "good": 49.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2015-08-16",
+      "close": 63.0,
+      "good": 49.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2015-08-23",
+      "close": 63.0,
+      "good": 49.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2015-08-30",
+      "close": 63.0,
+      "good": 48.0,
+      "excellent": 15.0
+    },
+    {
+      "date": "2015-09-06",
+      "close": 63.0,
+      "good": 49.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2015-09-13",
+      "close": 61.0,
+      "good": 46.0,
+      "excellent": 15.0
+    },
+    {
+      "date": "2015-09-20",
+      "close": 63.0,
+      "good": 48.0,
+      "excellent": 15.0
+    },
+    {
+      "date": "2015-09-27",
+      "close": 62.0,
+      "good": 47.0,
+      "excellent": 15.0
+    },
+    {
+      "date": "2015-10-04",
+      "close": 64.0,
+      "good": 48.0,
+      "excellent": 16.0
+    },
+    {
+      "date": "2015-10-11",
+      "close": 64.0,
+      "good": 48.0,
+      "excellent": 16.0
+    },
+    {
+      "date": "2016-06-05",
+      "close": 72.0,
+      "good": 62.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2016-06-12",
+      "close": 74.0,
+      "good": 62.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2016-06-19",
+      "close": 73.0,
+      "good": 61.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2016-06-26",
+      "close": 72.0,
+      "good": 60.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2016-07-03",
+      "close": 70.0,
+      "good": 57.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2016-07-10",
+      "close": 71.0,
+      "good": 57.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2016-07-17",
+      "close": 71.0,
+      "good": 57.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2016-07-24",
+      "close": 71.0,
+      "good": 56.0,
+      "excellent": 15.0
+    },
+    {
+      "date": "2016-07-31",
+      "close": 72.0,
+      "good": 56.0,
+      "excellent": 16.0
+    },
+    {
+      "date": "2016-08-07",
+      "close": 72.0,
+      "good": 55.0,
+      "excellent": 17.0
+    },
+    {
+      "date": "2016-08-14",
+      "close": 72.0,
+      "good": 55.0,
+      "excellent": 17.0
+    },
+    {
+      "date": "2016-08-21",
+      "close": 72.0,
+      "good": 54.0,
+      "excellent": 18.0
+    },
+    {
+      "date": "2016-08-28",
+      "close": 73.0,
+      "good": 55.0,
+      "excellent": 18.0
+    },
+    {
+      "date": "2016-09-04",
+      "close": 73.0,
+      "good": 55.0,
+      "excellent": 18.0
+    },
+    {
+      "date": "2016-09-11",
+      "close": 73.0,
+      "good": 55.0,
+      "excellent": 18.0
+    },
+    {
+      "date": "2016-09-18",
+      "close": 73.0,
+      "good": 54.0,
+      "excellent": 19.0
+    },
+    {
+      "date": "2016-09-25",
+      "close": 73.0,
+      "good": 54.0,
+      "excellent": 19.0
+    },
+    {
+      "date": "2016-10-02",
+      "close": 74.0,
+      "good": 54.0,
+      "excellent": 20.0
+    },
+    {
+      "date": "2016-10-09",
+      "close": 74.0,
+      "good": 54.0,
+      "excellent": 20.0
+    },
+    {
+      "date": "2016-10-16",
+      "close": 74.0,
+      "good": 53.0,
+      "excellent": 21.0
+    },
+    {
+      "date": "2017-06-11",
+      "close": 66.0,
+      "good": 57.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2017-06-18",
+      "close": 67.0,
+      "good": 57.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2017-06-25",
+      "close": 66.0,
+      "good": 56.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2017-07-02",
+      "close": 64.0,
+      "good": 54.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2017-07-09",
+      "close": 62.0,
+      "good": 52.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2017-07-16",
+      "close": 61.0,
+      "good": 51.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2017-07-23",
+      "close": 57.0,
+      "good": 47.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2017-07-30",
+      "close": 59.0,
+      "good": 49.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2017-08-06",
+      "close": 60.0,
+      "good": 50.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2017-08-13",
+      "close": 59.0,
+      "good": 49.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2017-08-20",
+      "close": 60.0,
+      "good": 50.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2017-08-27",
+      "close": 61.0,
+      "good": 50.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2017-09-03",
+      "close": 61.0,
+      "good": 50.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2017-09-10",
+      "close": 60.0,
+      "good": 49.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2017-09-17",
+      "close": 59.0,
+      "good": 48.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2017-09-24",
+      "close": 60.0,
+      "good": 49.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2017-10-01",
+      "close": 60.0,
+      "good": 48.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2017-10-08",
+      "close": 61.0,
+      "good": 49.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2017-10-15",
+      "close": 61.0,
+      "good": 48.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2018-06-03",
+      "close": 75.0,
+      "good": 61.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2018-06-10",
+      "close": 74.0,
+      "good": 60.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2018-06-17",
+      "close": 73.0,
+      "good": 58.0,
+      "excellent": 15.0
+    },
+    {
+      "date": "2018-06-24",
+      "close": 73.0,
+      "good": 58.0,
+      "excellent": 15.0
+    },
+    {
+      "date": "2018-07-01",
+      "close": 71.0,
+      "good": 55.0,
+      "excellent": 16.0
+    },
+    {
+      "date": "2018-07-08",
+      "close": 71.0,
+      "good": 55.0,
+      "excellent": 16.0
+    },
+    {
+      "date": "2018-07-15",
+      "close": 69.0,
+      "good": 53.0,
+      "excellent": 16.0
+    },
+    {
+      "date": "2018-07-22",
+      "close": 70.0,
+      "good": 52.0,
+      "excellent": 18.0
+    },
+    {
+      "date": "2018-07-29",
+      "close": 70.0,
+      "good": 53.0,
+      "excellent": 17.0
+    },
+    {
+      "date": "2018-08-05",
+      "close": 67.0,
+      "good": 51.0,
+      "excellent": 16.0
+    },
+    {
+      "date": "2018-08-12",
+      "close": 66.0,
+      "good": 50.0,
+      "excellent": 16.0
+    },
+    {
+      "date": "2018-08-19",
+      "close": 65.0,
+      "good": 49.0,
+      "excellent": 16.0
+    },
+    {
+      "date": "2018-08-26",
+      "close": 66.0,
+      "good": 49.0,
+      "excellent": 17.0
+    },
+    {
+      "date": "2018-09-02",
+      "close": 66.0,
+      "good": 49.0,
+      "excellent": 17.0
+    },
+    {
+      "date": "2018-09-09",
+      "close": 68.0,
+      "good": 50.0,
+      "excellent": 18.0
+    },
+    {
+      "date": "2018-09-16",
+      "close": 67.0,
+      "good": 49.0,
+      "excellent": 18.0
+    },
+    {
+      "date": "2018-09-23",
+      "close": 68.0,
+      "good": 49.0,
+      "excellent": 19.0
+    },
+    {
+      "date": "2018-09-30",
+      "close": 68.0,
+      "good": 49.0,
+      "excellent": 19.0
+    },
+    {
+      "date": "2018-10-07",
+      "close": 68.0,
+      "good": 49.0,
+      "excellent": 19.0
+    },
+    {
+      "date": "2018-10-14",
+      "close": 66.0,
+      "good": 48.0,
+      "excellent": 18.0
+    },
+    {
+      "date": "2018-10-21",
+      "close": 66.0,
+      "good": 48.0,
+      "excellent": 18.0
+    },
+    {
+      "date": "2019-06-23",
+      "close": 54.0,
+      "good": 47.0,
+      "excellent": 7.0
+    },
+    {
+      "date": "2019-06-30",
+      "close": 54.0,
+      "good": 47.0,
+      "excellent": 7.0
+    },
+    {
+      "date": "2019-07-07",
+      "close": 53.0,
+      "good": 46.0,
+      "excellent": 7.0
+    },
+    {
+      "date": "2019-07-14",
+      "close": 54.0,
+      "good": 46.0,
+      "excellent": 8.0
+    },
+    {
+      "date": "2019-07-21",
+      "close": 54.0,
+      "good": 46.0,
+      "excellent": 8.0
+    },
+    {
+      "date": "2019-07-28",
+      "close": 54.0,
+      "good": 45.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2019-08-04",
+      "close": 54.0,
+      "good": 45.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2019-08-11",
+      "close": 54.0,
+      "good": 46.0,
+      "excellent": 8.0
+    },
+    {
+      "date": "2019-08-18",
+      "close": 53.0,
+      "good": 44.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2019-08-25",
+      "close": 55.0,
+      "good": 46.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2019-09-01",
+      "close": 55.0,
+      "good": 46.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2019-09-08",
+      "close": 55.0,
+      "good": 45.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2019-09-15",
+      "close": 54.0,
+      "good": 45.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2019-09-22",
+      "close": 54.0,
+      "good": 45.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2019-09-29",
+      "close": 55.0,
+      "good": 46.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2019-10-06",
+      "close": 53.0,
+      "good": 45.0,
+      "excellent": 8.0
+    },
+    {
+      "date": "2019-10-13",
+      "close": 54.0,
+      "good": 45.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2019-10-20",
+      "close": 54.0,
+      "good": 45.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2020-05-31",
+      "close": 70.0,
+      "good": 60.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2020-06-07",
+      "close": 72.0,
+      "good": 60.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2020-06-14",
+      "close": 72.0,
+      "good": 60.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2020-06-21",
+      "close": 70.0,
+      "good": 58.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2020-06-28",
+      "close": 71.0,
+      "good": 58.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2020-07-05",
+      "close": 71.0,
+      "good": 57.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2020-07-12",
+      "close": 68.0,
+      "good": 54.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2020-07-19",
+      "close": 69.0,
+      "good": 54.0,
+      "excellent": 15.0
+    },
+    {
+      "date": "2020-07-26",
+      "close": 72.0,
+      "good": 57.0,
+      "excellent": 15.0
+    },
+    {
+      "date": "2020-08-02",
+      "close": 73.0,
+      "good": 58.0,
+      "excellent": 15.0
+    },
+    {
+      "date": "2020-08-09",
+      "close": 74.0,
+      "good": 57.0,
+      "excellent": 17.0
+    },
+    {
+      "date": "2020-08-16",
+      "close": 72.0,
+      "good": 56.0,
+      "excellent": 16.0
+    },
+    {
+      "date": "2020-08-23",
+      "close": 69.0,
+      "good": 55.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2020-08-30",
+      "close": 66.0,
+      "good": 53.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2020-09-06",
+      "close": 65.0,
+      "good": 52.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2020-09-13",
+      "close": 63.0,
+      "good": 50.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2020-09-20",
+      "close": 63.0,
+      "good": 51.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2020-09-27",
+      "close": 64.0,
+      "good": 51.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2020-10-04",
+      "close": 64.0,
+      "good": 50.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2020-10-11",
+      "close": 63.0,
+      "good": 49.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2021-06-06",
+      "close": 67.0,
+      "good": 57.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2021-06-13",
+      "close": 62.0,
+      "good": 53.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2021-06-20",
+      "close": 60.0,
+      "good": 51.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2021-06-27",
+      "close": 60.0,
+      "good": 50.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2021-07-04",
+      "close": 59.0,
+      "good": 49.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2021-07-11",
+      "close": 59.0,
+      "good": 49.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2021-07-18",
+      "close": 60.0,
+      "good": 49.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2021-07-25",
+      "close": 58.0,
+      "good": 47.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2021-08-01",
+      "close": 60.0,
+      "good": 48.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2021-08-08",
+      "close": 60.0,
+      "good": 48.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2021-08-15",
+      "close": 57.0,
+      "good": 45.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2021-08-22",
+      "close": 56.0,
+      "good": 45.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2021-08-29",
+      "close": 56.0,
+      "good": 45.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2021-09-05",
+      "close": 57.0,
+      "good": 46.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2021-09-12",
+      "close": 57.0,
+      "good": 45.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2021-09-19",
+      "close": 58.0,
+      "good": 47.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2021-09-26",
+      "close": 58.0,
+      "good": 47.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2021-10-03",
+      "close": 58.0,
+      "good": 46.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2021-10-10",
+      "close": 59.0,
+      "good": 46.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2022-06-12",
+      "close": 70.0,
+      "good": 59.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2022-06-19",
+      "close": 68.0,
+      "good": 58.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2022-06-26",
+      "close": 65.0,
+      "good": 55.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2022-07-03",
+      "close": 63.0,
+      "good": 54.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2022-07-10",
+      "close": 62.0,
+      "good": 52.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2022-07-17",
+      "close": 61.0,
+      "good": 51.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2022-07-24",
+      "close": 59.0,
+      "good": 49.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2022-07-31",
+      "close": 60.0,
+      "good": 49.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2022-08-07",
+      "close": 59.0,
+      "good": 49.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2022-08-14",
+      "close": 58.0,
+      "good": 48.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2022-08-21",
+      "close": 57.0,
+      "good": 47.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2022-08-28",
+      "close": 57.0,
+      "good": 46.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2022-09-04",
+      "close": 57.0,
+      "good": 47.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2022-09-11",
+      "close": 56.0,
+      "good": 45.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2022-09-18",
+      "close": 55.0,
+      "good": 46.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2022-09-25",
+      "close": 55.0,
+      "good": 46.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2022-10-02",
+      "close": 55.0,
+      "good": 46.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2022-10-09",
+      "close": 57.0,
+      "good": 47.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2022-10-16",
+      "close": 57.0,
+      "good": 47.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2023-06-04",
+      "close": 62.0,
+      "good": 53.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2023-06-11",
+      "close": 59.0,
+      "good": 51.0,
+      "excellent": 8.0
+    },
+    {
+      "date": "2023-06-18",
+      "close": 54.0,
+      "good": 47.0,
+      "excellent": 7.0
+    },
+    {
+      "date": "2023-06-25",
+      "close": 51.0,
+      "good": 45.0,
+      "excellent": 6.0
+    },
+    {
+      "date": "2023-07-02",
+      "close": 50.0,
+      "good": 44.0,
+      "excellent": 6.0
+    },
+    {
+      "date": "2023-07-09",
+      "close": 51.0,
+      "good": 44.0,
+      "excellent": 7.0
+    },
+    {
+      "date": "2023-07-16",
+      "close": 55.0,
+      "good": 47.0,
+      "excellent": 8.0
+    },
+    {
+      "date": "2023-07-23",
+      "close": 54.0,
+      "good": 46.0,
+      "excellent": 8.0
+    },
+    {
+      "date": "2023-07-30",
+      "close": 52.0,
+      "good": 44.0,
+      "excellent": 8.0
+    },
+    {
+      "date": "2023-08-06",
+      "close": 54.0,
+      "good": 45.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2023-08-13",
+      "close": 59.0,
+      "good": 48.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2023-08-20",
+      "close": 59.0,
+      "good": 49.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2023-08-27",
+      "close": 58.0,
+      "good": 48.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2023-09-03",
+      "close": 53.0,
+      "good": 44.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2023-09-10",
+      "close": 52.0,
+      "good": 43.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2023-09-17",
+      "close": 52.0,
+      "good": 44.0,
+      "excellent": 8.0
+    },
+    {
+      "date": "2023-09-24",
+      "close": 50.0,
+      "good": 42.0,
+      "excellent": 8.0
+    },
+    {
+      "date": "2023-10-01",
+      "close": 52.0,
+      "good": 43.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2023-10-08",
+      "close": 51.0,
+      "good": 43.0,
+      "excellent": 8.0
+    },
+    {
+      "date": "2023-10-15",
+      "close": 52.0,
+      "good": 43.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2024-06-09",
+      "close": 72.0,
+      "good": 60.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2024-06-16",
+      "close": 70.0,
+      "good": 58.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2024-06-23",
+      "close": 67.0,
+      "good": 56.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2024-06-30",
+      "close": 67.0,
+      "good": 55.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2024-07-07",
+      "close": 68.0,
+      "good": 55.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2024-07-14",
+      "close": 68.0,
+      "good": 56.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2024-07-21",
+      "close": 68.0,
+      "good": 56.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2024-07-28",
+      "close": 67.0,
+      "good": 54.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2024-08-04",
+      "close": 68.0,
+      "good": 54.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2024-08-11",
+      "close": 68.0,
+      "good": 55.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2024-08-18",
+      "close": 68.0,
+      "good": 54.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2024-08-25",
+      "close": 67.0,
+      "good": 54.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2024-09-01",
+      "close": 65.0,
+      "good": 52.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2024-09-08",
+      "close": 65.0,
+      "good": 52.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2024-09-15",
+      "close": 64.0,
+      "good": 52.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2024-09-22",
+      "close": 64.0,
+      "good": 52.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2024-09-29",
+      "close": 64.0,
+      "good": 52.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2024-10-06",
+      "close": 63.0,
+      "good": 51.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2025-06-01",
+      "close": 67.0,
+      "good": 58.0,
+      "excellent": 9.0
+    },
+    {
+      "date": "2025-06-08",
+      "close": 68.0,
+      "good": 58.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2025-06-15",
+      "close": 66.0,
+      "good": 56.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2025-06-22",
+      "close": 66.0,
+      "good": 56.0,
+      "excellent": 10.0
+    },
+    {
+      "date": "2025-06-29",
+      "close": 66.0,
+      "good": 55.0,
+      "excellent": 11.0
+    },
+    {
+      "date": "2025-07-06",
+      "close": 66.0,
+      "good": 54.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2025-07-13",
+      "close": 70.0,
+      "good": 58.0,
+      "excellent": 12.0
+    },
+    {
+      "date": "2025-07-20",
+      "close": 68.0,
+      "good": 54.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2025-07-27",
+      "close": 70.0,
+      "good": 55.0,
+      "excellent": 15.0
+    },
+    {
+      "date": "2025-08-03",
+      "close": 69.0,
+      "good": 54.0,
+      "excellent": 15.0
+    },
+    {
+      "date": "2025-08-10",
+      "close": 68.0,
+      "good": 53.0,
+      "excellent": 15.0
+    },
+    {
+      "date": "2025-08-17",
+      "close": 68.0,
+      "good": 53.0,
+      "excellent": 15.0
+    },
+    {
+      "date": "2025-08-24",
+      "close": 69.0,
+      "good": 54.0,
+      "excellent": 15.0
+    },
+    {
+      "date": "2025-08-31",
+      "close": 65.0,
+      "good": 51.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2025-09-07",
+      "close": 64.0,
+      "good": 50.0,
+      "excellent": 14.0
+    },
+    {
+      "date": "2025-09-14",
+      "close": 63.0,
+      "good": 50.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2025-09-21",
+      "close": 61.0,
+      "good": 48.0,
+      "excellent": 13.0
+    },
+    {
+      "date": "2025-09-28",
+      "close": 62.0,
+      "good": 49.0,
+      "excellent": 13.0
+    }
+  ]
+}
