@@ -338,7 +338,7 @@ function setTableHeaderByMode(card, mode){
     theadRow.innerHTML = `<th>Data</th><th class="right">Sacas</th><th class="right">Kg</th>`; return;
   }
   if(mode === "CROP_CONDITION"){
-    theadRow.innerHTML = `<th>Data</th><th class="right">G+E (%)</th><th class="right">vs. 5y (p.p.)</th><th class="right">vs. ant. (p.p.)</th>`; return;
+    theadRow.innerHTML = `<th>Semana</th><th class="right">2026</th><th class="right">2025</th><th class="right">Média 5y</th>`; return;
   }
   theadRow.innerHTML = `<th>Data</th><th class="right">Close</th><th class="right">MM50</th><th class="right">MM252</th>`;
 }
@@ -750,86 +750,122 @@ async function loadSeriesIntoCard(card, url){
         return;
       }
 
-      // Computa média 5y para a "mesma semana" (±7 dias do dia do ano)
-      function media5yForDate(targetIso){
-        const t = parseISODate(targetIso);
-        const targetDoy = Math.floor((t - new Date(t.getFullYear(),0,0)) / 86400000);
-        const targetYear = t.getFullYear();
-        const matched = [];
-        for(let offset = 1; offset <= 5; offset++){
-          const yearN = targetYear - offset;
-          let best = null;
-          for(const p of pts){
-            const d = parseISODate(p.date);
-            if(d.getFullYear() !== yearN) continue;
-            const doyN = Math.floor((d - new Date(d.getFullYear(),0,0)) / 86400000);
-            const dist = Math.abs(doyN - targetDoy);
-            if(dist <= 7){
-              if(best === null || dist < best.dist){
-                best = { dist, val: p.close };
-              }
-            }
-          }
-          if(best !== null) matched.push(best.val);
-        }
-        if(matched.length < 2) return null;
-        return matched.reduce((a,b) => a+b, 0) / matched.length;
+      // ---- Plot sazonal: 2026 vs 2025 vs Média 5y ----
+      // Ancoragem: cada ponto na safra é representado por seu "dia do ano".
+      // Assim, semanas equivalentes em anos diferentes ficam alinhadas no eixo X.
+
+      function doyOf(iso){
+        const d = parseISODate(iso);
+        return Math.floor((d - new Date(d.getFullYear(),0,0)) / 86400000);
+      }
+      function isoDateFromDoy(year, doy){
+        const d = new Date(year, 0, doy);
+        return d;
+      }
+      function fmtDayMonth(d){
+        const dd = String(d.getDate()).padStart(2,"0");
+        const meses = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+        return `${dd}/${meses[d.getMonth()]}`;
       }
 
-      // Últimas 12 semanas na tabela (mais recente em cima)
-      const tail = pts.slice(-12).slice().reverse();
-      for(let i = 0; i < tail.length; i++){
-        const p = tail[i];
-        const m5 = media5yForDate(p.date);
-        const dVs5y = (m5 !== null) ? (p.close - m5) : null;
+      const years = Array.from(new Set(pts.map(p => Number(String(p.date).slice(0,4))))).sort();
+      const yearMax = years.length ? Math.max(...years) : null;
 
-        // diff vs semana anterior - usa o ponto anterior em pts (não em tail) para não perder o anchor
-        const globalIdx = pts.indexOf(p);
-        let dVsPrev = null;
-        if(globalIdx > 0){
-          const prev = pts[globalIdx - 1];
-          const dPrev = parseISODate(prev.date);
-          const dCur = parseISODate(p.date);
-          const diffDays = Math.round((dCur - dPrev) / 86400000);
-          if(diffDays > 0 && diffDays <= 14){
-            dVsPrev = p.close - prev.close;
-          }
+      // yearCur = ano civil atual (não necessariamente tem dado ainda)
+      // yearPrev = ano civil anterior (safra fechada mais recente)
+      const todayYear = (new Date()).getFullYear();
+      const yearCur = todayYear;
+      const yearPrev = todayYear - 1;
+      // Janela 5y = os 5 anos antes de yearCur
+      const baseYears = [];
+      for(let y = yearCur - 5; y <= yearCur - 1; y++) baseYears.push(y);
+
+      // Indexa pontos por (ano, doy) para lookup O(1)
+      const byYearDoy = new Map();
+      for(const p of pts){
+        const y = Number(String(p.date).slice(0,4));
+        const doy = doyOf(p.date);
+        byYearDoy.set(`${y}-${doy}`, p.close);
+      }
+
+      // Eixo X canônico: usa os DOYs do yearPrev como referência (safra mais recente
+      // fechada). Isso garante ~20 semanas no eixo X, não 90+. Para os outros anos,
+      // faz match dentro de ±4 dias.
+      const doySet = new Set();
+      for(const p of pts){
+        const y = Number(String(p.date).slice(0,4));
+        if(y === yearPrev) doySet.add(doyOf(p.date));
+      }
+      // Se yearPrev não tiver dado (caso raro), usa o último ano com dado
+      if(doySet.size === 0 && yearMax !== null){
+        for(const p of pts){
+          const y = Number(String(p.date).slice(0,4));
+          if(y === yearMax) doySet.add(doyOf(p.date));
         }
+      }
+      const doyList = Array.from(doySet).sort((a,b)=>a-b);
 
+      // Tolerância: para cada DOY canônico, faz match com ponto do ano se estiver a ≤ 4 dias
+      function valueForYearAtDoy(year, doy){
+        // tenta exact match primeiro
+        const exact = byYearDoy.get(`${year}-${doy}`);
+        if(exact !== undefined) return exact;
+        // tenta ± 4 dias
+        let best = null;
+        for(let d = 1; d <= 4; d++){
+          const a = byYearDoy.get(`${year}-${doy-d}`);
+          if(a !== undefined && (best === null || d < best.dist)) best = { dist: d, val: a };
+          const b = byYearDoy.get(`${year}-${doy+d}`);
+          if(b !== undefined && (best === null || d < best.dist)) best = { dist: d, val: b };
+        }
+        return best === null ? null : best.val;
+      }
+      function avg5yAtDoy(doy){
+        const vals = [];
+        for(const y of baseYears){
+          const v = valueForYearAtDoy(y, doy);
+          if(v !== null && v !== undefined && !Number.isNaN(v)) vals.push(v);
+        }
+        if(vals.length === 0) return null;
+        return vals.reduce((a,b)=>a+b,0) / vals.length;
+      }
+
+      // Categorias do eixo X: rótulo "dd/Mmm" baseado em yearPrev (referência)
+      const xCategories = doyList.map(doy => fmtDayMonth(isoDateFromDoy(yearPrev, doy)));
+
+      // Séries
+      const sCur  = doyList.map(doy => valueForYearAtDoy(yearCur, doy));
+      const sPrev = doyList.map(doy => valueForYearAtDoy(yearPrev, doy));
+      const sAvg  = doyList.map(doy => avg5yAtDoy(doy));
+
+      // Tabela: 1 linha por DOY, colunas yearCur / yearPrev / Média 5y (ordem cronológica da safra)
+      for(let i = 0; i < doyList.length; i++){
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td>${fmtDateBR(p.date)}</td>
-          <td class="right">${fmtNumber(p.close, 1)}</td>
-          <td class="right">${dVs5y === null ? "—" : fmtNumber(dVs5y, 1)}</td>
-          <td class="right">${dVsPrev === null ? "—" : fmtNumber(dVsPrev, 1)}</td>
+          <td>${xCategories[i]}</td>
+          <td class="right">${sCur[i]  === null || sCur[i]  === undefined ? "—" : fmtNumber(sCur[i],  1)}</td>
+          <td class="right">${sPrev[i] === null || sPrev[i] === undefined ? "—" : fmtNumber(sPrev[i], 1)}</td>
+          <td class="right">${sAvg[i]  === null || sAvg[i]  === undefined ? "—" : fmtNumber(sAvg[i],  1)}</td>
         `;
         tbody.appendChild(tr);
       }
 
-      // Gráfico: G+E ao longo do tempo, com gaps entre safras
-      // (insere ponto null sempre que a distância entre dois pontos > 30 dias,
-      //  o que separa visualmente cada safra anual)
-      const chartPts = [];
-      for(let i = 0; i < pts.length; i++){
-        if(i > 0){
-          const dPrev = parseISODate(pts[i-1].date);
-          const dCur  = parseISODate(pts[i].date);
-          const diffDays = Math.round((dCur - dPrev) / 86400000);
-          if(diffDays > 30){
-            // ponto "no man's land" entre safras: força quebra de linha
-            chartPts.push({ x: dPrev.getTime() + 86400000, y: null });
-          }
-        }
-        chartPts.push({
-          x: parseISODate(pts[i].date).getTime(),
-          y: pts[i].close
-        });
+      // Atualiza dinamicamente o cabeçalho com os anos corretos (yearCur e yearPrev podem variar)
+      const theadRow = card.querySelector(".tablebox thead tr");
+      if(theadRow){
+        theadRow.innerHTML = `<th>Semana</th><th class="right">${yearCur}</th><th class="right">${yearPrev}</th><th class="right">Média 5y</th>`;
       }
 
-      renderChart(card, baseChartOptions(
-        [{name:'G+E (Good + Excellent)', data: chartPts}],
-        {yDecimals: 1}
-      ));
+      renderChart(card, baseChartOptions([
+        {name: String(yearCur),  data: sCur},
+        {name: 'Média 5y',       data: sAvg},
+        {name: String(yearPrev), data: sPrev}
+      ], {
+        xType: 'category',
+        xCategories: xCategories,
+        yDecimals: 1,
+        showMarkers: true
+      }));
       return;
     }
 
