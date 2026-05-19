@@ -1,0 +1,93 @@
+{
+  "meta": {
+    "id": "fundamental_stu",
+    "title": "FUNDAMENTAL S&D (STU Global)",
+    "frequency": "Anual",
+    "updated_at": "2026-05-19 17:31:29",
+    "world_name": "World",
+    "weight_method": "w_prod_5y = mean(prod_country,last5y)/mean(prod_world,last5y)",
+    "delta_method": "d_prod_yoy = prod(t) - prod(t-1)",
+    "contrib_method": "contrib = w_prod_5y * d_prod_yoy",
+    "window_years": [
+      2022,
+      2023,
+      2024,
+      2025,
+      2026
+    ],
+    "latest_year": 2026
+  },
+  "data": [
+    {
+      "date": "2024-01-01",
+      "close": 0.2111440736945727
+    },
+    {
+      "date": "2025-01-01",
+      "close": 0.2040861593461884
+    },
+    {
+      "date": "2026-01-01",
+      "close": 0.19809210536760072
+    }
+  ],
+  "decomp": {
+    "year": 2026,
+    "rows": [
+      {
+        "country": "BR",
+        "country_resolved": "BR",
+        "w_prod_5y": 0.41270772955721047,
+        "prod": 186000.0,
+        "prod_prev": 180000.0,
+        "d_prod_yoy": 6000.0,
+        "contrib": 2476.246377343263
+      },
+      {
+        "country": "US",
+        "country_resolved": "US",
+        "w_prod_5y": 0.28249047634677876,
+        "prod": 120701.0,
+        "prod_prev": 115989.0,
+        "d_prod_yoy": 4712.0,
+        "contrib": 1331.0951245460215
+      },
+      {
+        "country": "AR",
+        "country_resolved": "AR",
+        "w_prod_5y": 0.10731269826865487,
+        "prod": 50000.0,
+        "prod_prev": 48000.0,
+        "d_prod_yoy": 2000.0,
+        "contrib": 214.62539653730974
+      },
+      {
+        "country": "CH",
+        "country_resolved": "CH",
+        "w_prod_5y": 0.05004334637908098,
+        "prod": 21000.0,
+        "prod_prev": 20900.0,
+        "d_prod_yoy": 100.0,
+        "contrib": 5.004334637908098
+      },
+      {
+        "country": "IN",
+        "country_resolved": "IN",
+        "w_prod_5y": 0.028814722708675647,
+        "prod": 11500.0,
+        "prod_prev": 11027.0,
+        "d_prod_yoy": 473.0,
+        "contrib": 13.629363841203581
+      },
+      {
+        "country": "PA",
+        "country_resolved": "PA",
+        "w_prod_5y": 0.026379505754738658,
+        "prod": 11100.0,
+        "prod_prev": 12100.0,
+        "d_prod_yoy": -1000.0,
+        "contrib": -26.37950575473866
+      }
+    ]
+  }
+}
