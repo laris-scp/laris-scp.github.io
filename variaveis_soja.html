@@ -231,7 +231,8 @@ const SERIES_MAP = {
   "preco_soja": "data/soja/series/preco_soja.json",
   "cot_report": "data/soja/series/cot_report.json",
   "usd_brl":    "data/soja/series/usd_brl.json",
-  "fundamental_stu": "data/soja/series/fundamental_stu.json"
+  "fundamental_stu": "data/soja/series/fundamental_stu.json",
+  "crop_condition":  "data/soja/series/crop_condition.json"
 };
 
 const DECIMALS_BY_ID = {
@@ -294,6 +295,7 @@ function getSeriesModeById(varId){
   if(varId === "clima_soil") return "CLIMA_SOIL";
   if(varId === "ico_ia") return "ICO_IA";
   if(varId === "mdic_export") return "MDIC_EXPORT";
+  if(varId === "crop_condition") return "CROP_CONDITION";
   return "DEFAULT";
 }
 function colSpanByMode(mode){
@@ -305,7 +307,9 @@ function colSpanByMode(mode){
   if(mode === "CLIMA_SOIL") return 3;
   if(mode === "ICO_IA") return 3;
   if(mode === "MDIC_EXPORT") return 3;
+  if(mode === "CROP_CONDITION") return 4;
   return 4;
+}
 }
 function setTableHeaderByMode(card, mode){
   const theadRow = card.querySelector(".tablebox thead tr");
@@ -333,6 +337,9 @@ function setTableHeaderByMode(card, mode){
   }
   if(mode === "MDIC_EXPORT"){
     theadRow.innerHTML = `<th>Data</th><th class="right">Sacas</th><th class="right">Kg</th>`; return;
+  }
+  if(mode === "CROP_CONDITION"){
+    theadRow.innerHTML = `<th>Data</th><th class="right">G+E (%)</th><th class="right">vs. 5y (p.p.)</th><th class="right">vs. ant. (p.p.)</th>`; return;
   }
   theadRow.innerHTML = `<th>Data</th><th class="right">Close</th><th class="right">MM50</th><th class="right">MM252</th>`;
 }
@@ -718,6 +725,97 @@ async function loadSeriesIntoCard(card, url){
       renderChart(card, baseChartOptions(
         [{name:'STU (World)', data: pts}],
         {yDecimals: dec}
+      ));
+      return;
+    }
+
+    /* ---------- CROP_CONDITION ---------- */
+    if(mode === "CROP_CONDITION"){
+      setTableHeaderByMode(card, mode);
+      tbody.innerHTML = "";
+
+      // Constrói série de pontos
+      const pts = raw
+        .map(p => ({
+          date: (p.date || p.Data || p.data),
+          close: Number(p.close ?? p.Close ?? p.value),
+          good: Number(p.good ?? null),
+          excellent: Number(p.excellent ?? null)
+        }))
+        .filter(p => !!p.date && !Number.isNaN(p.close))
+        .sort((a,b) => String(a.date).localeCompare(String(b.date)));
+
+      if(pts.length === 0){
+        tbody.innerHTML = `<tr><td colspan="4" class="muted">Série vazia.</td></tr>`;
+        renderEmptyChart(card, "Série vazia.");
+        return;
+      }
+
+      // Computa média 5y para a "mesma semana" (±7 dias do dia do ano)
+      function media5yForDate(targetIso){
+        const t = parseISODate(targetIso);
+        const targetDoy = Math.floor((t - new Date(t.getFullYear(),0,0)) / 86400000);
+        const targetYear = t.getFullYear();
+        const matched = [];
+        for(let offset = 1; offset <= 5; offset++){
+          const yearN = targetYear - offset;
+          let best = null;
+          for(const p of pts){
+            const d = parseISODate(p.date);
+            if(d.getFullYear() !== yearN) continue;
+            const doyN = Math.floor((d - new Date(d.getFullYear(),0,0)) / 86400000);
+            const dist = Math.abs(doyN - targetDoy);
+            if(dist <= 7){
+              if(best === null || dist < best.dist){
+                best = { dist, val: p.close };
+              }
+            }
+          }
+          if(best !== null) matched.push(best.val);
+        }
+        if(matched.length < 2) return null;
+        return matched.reduce((a,b) => a+b, 0) / matched.length;
+      }
+
+      // Últimas 12 semanas na tabela (ou todas se houver menos)
+      const tail = pts.slice(-12);
+      for(let i = 0; i < tail.length; i++){
+        const p = tail[i];
+        const m5 = media5yForDate(p.date);
+        const dVs5y = (m5 !== null) ? (p.close - m5) : null;
+
+        // diff vs semana anterior - usa o ponto anterior em pts (não em tail) para não perder o anchor
+        const globalIdx = pts.indexOf(p);
+        let dVsPrev = null;
+        if(globalIdx > 0){
+          const prev = pts[globalIdx - 1];
+          const dPrev = parseISODate(prev.date);
+          const dCur = parseISODate(p.date);
+          const diffDays = Math.round((dCur - dPrev) / 86400000);
+          if(diffDays > 0 && diffDays <= 14){
+            dVsPrev = p.close - prev.close;
+          }
+        }
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${fmtDateBR(p.date)}</td>
+          <td class="right">${fmtNumber(p.close, 1)}</td>
+          <td class="right">${dVs5y === null ? "—" : fmtNumber(dVs5y, 1)}</td>
+          <td class="right">${dVsPrev === null ? "—" : fmtNumber(dVsPrev, 1)}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+
+      // Gráfico: G+E ao longo do tempo
+      const chartPts = pts.map(p => ({
+        x: parseISODate(p.date).getTime(),
+        y: p.close
+      }));
+
+      renderChart(card, baseChartOptions(
+        [{name:'G+E (Good + Excellent)', data: chartPts}],
+        {yDecimals: 1}
       ));
       return;
     }
