@@ -1,0 +1,53 @@
+name: 55 - Update Painel Snapshot Soja (USD/BRL)
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["54 - Update USD/BRL Soja (series/usd_brl.json)"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cafe-main-push
+  cancel-in-progress: false
+
+jobs:
+  update-snapshot-usdbrl-soja:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas
+
+      - name: Run updater
+        run: |
+          python scripts/soja/update_painel_snapshot_usd_brl.py
+
+      - name: Commit only if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet; then
+            echo "No changes detected. Skipping commit."
+            exit 0
+          fi
+
+          git add data/soja/painel_snapshot.json
+          git commit -m "data(soja): update painel_snapshot (usd_brl)"
+          git pull --rebase origin main
+          git push
