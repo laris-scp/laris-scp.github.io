@@ -120,6 +120,20 @@ def main() -> None:
     pts = sorted(pts, key=lambda x: str(x.get("date", "")))
     series_last_date = str(pts[-1].get("date"))
 
+    # Data exibida no card "Última atualização":
+    # usa meta.updated_at (data real da última revisão do USDA / execução do
+    # workflow de série), não a data do ponto anual. O fundamental_stu é uma
+    # variável anual cujo ponto fica carimbado em AAAA-01-01; mostrar essa data
+    # daria a falsa impressão de que a variável está parada desde janeiro.
+    # meta.updated_at tem o formato "YYYY-MM-DD HH:MM:SS"; pegamos só a data.
+    meta = series.get("meta", {})
+    meta_updated = str(meta.get("updated_at", "")).strip()
+    if len(meta_updated) >= 10 and meta_updated[4] == "-" and meta_updated[7] == "-":
+        ultima_atualizacao_card = meta_updated[:10]
+    else:
+        # fallback: se meta.updated_at faltar ou vier malformado, mantém a data do ponto
+        ultima_atualizacao_card = series_last_date
+
     # extrair valores válidos
     vals = []
     for p in pts:
@@ -193,7 +207,7 @@ def main() -> None:
         "peso": float(peso),
         "score_ponderado": float(score_pond),
         "frequencia": FREQUENCIA,
-        "ultima_atualizacao": series_last_date,
+        "ultima_atualizacao": ultima_atualizacao_card,
         "regra_de_sinal": REGRA_DE_SINAL,
         "fonte": FONTE,
     })
