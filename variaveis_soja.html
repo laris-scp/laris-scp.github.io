@@ -360,7 +360,8 @@ function baseChartOptions(series, opts){
     xType: 'datetime',         // 'datetime' ou 'category'
     xCategories: null,         // se xType='category'
     height: 230,
-    showMarkers: false
+    showMarkers: false,
+    curve: 'smooth'
   }, (opts || {}));
 
   const yFormatter = (v) => {
@@ -404,7 +405,7 @@ function baseChartOptions(series, opts){
     },
     colors:colors,
     stroke:{
-      curve:'smooth',
+      curve: o.curve,
       width: series.map((_,i) => i === 0 ? 2.5 : 1.8)
     },
     fill:{
@@ -573,9 +574,10 @@ function buildCard(snapshotRow){
       } else {
         tablebox.style.display = "none";
         wrap.style.display = "block";
-        // re-render para garantir tamanho correto após display:none/block
+        // reajusta o tamanho após display:none/block (resize NÃO redesenha,
+        // evita o ApexCharts criar um segundo SVG no mesmo container)
         if(card._apexInstance){
-          try{ card._apexInstance.render(); }catch(e){}
+          try{ card._apexInstance.resize(); }catch(e){}
         }
       }
     });
@@ -691,7 +693,9 @@ async function loadSeriesIntoCard(card, url){
             {value: 1,  label: 'BULLISH'},
             {value: 0,  label: 'NEUTRAL'},
             {value: -1, label: 'BEARISH'}
-          ]
+          ],
+          curve: 'stepline',
+          showMarkers: true
         }
       ));
       return;
