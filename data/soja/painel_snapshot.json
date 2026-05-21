@@ -1,6 +1,6 @@
 {
   "commodity": "soja",
-  "updated_at": "2026-05-21 13:47:40",
+  "updated_at": "2026-05-21 19:21:28",
   "rows": [
     {
       "id": "preco_soja",
@@ -155,6 +155,27 @@
       "mm60": 2.9779,
       "ratio_trend": 1.2064,
       "ratio_momento": 1.213
+    },
+    {
+      "id": "oil_crops_outlook",
+      "bloco": 1,
+      "variavel": "OIL CROPS OUTLOOK (IA)",
+      "peso": 1.0,
+      "ultimo_valor": 0.0,
+      "percentil": null,
+      "nivel": "NEUTRAL",
+      "valor_nivel": 0.0,
+      "tendencia": "NEUTRO",
+      "valor_tendencia": 0.0,
+      "momento": "NEUTRO",
+      "valor_momento": 0.0,
+      "score": 0.0,
+      "score_ponderado": 0.0,
+      "frequencia": "Mensal",
+      "ultima_atualizacao": "2026-05-01",
+      "regra_de_sinal": "Este indicador lê o relatório mensal Oil Crops Outlook (USDA/ERS) e classifica o impacto para o preço da soja. O agente pondera cada fato de oferta e demanda: mais oferta (produção/estoques/área) tende a BEARISH; mais demanda (esmagamento/exportações) tende a BULLISH. O veredito sai pela diferença de evidências (margem mínima de 2). Se os sinais forem equilibrados, fica NEUTRAL.",
+      "fonte": "USDA, Economic Research Service — Oil Crops Outlook.",
+      "ultima_data_serie": "2026-05-01"
     }
   ],
   "thermometers": {
