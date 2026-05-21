@@ -1,0 +1,19 @@
+{
+  "date": "2026-05-21",
+  "summary": "O mercado de soja apresenta um cenário de forças opostas equilibradas, com leve viés de alta. Do lado altista, o posicionamento dos fundos está em nível muito alto e acelerando (Posição de fundos na soja), a Margem de Esmagamento encontra-se em patamar muito alto e em alta acelerada (indicando forte demanda industrial), e as Exportações de soja em grão do Brasil seguem em nível alto com tendência de alta. Do lado baixista, o Dólar está em nível muito baixo e em queda (real forte), reduzindo o incentivo exportador e a sustentação nominal do preço no curto prazo. Os Estoques Globais, embora em queda (sinal estrutural altista de médio prazo), desaceleram, reduzindo a força marginal de alta. A Condição da Lavoura dos EUA e o Relatório Oil Crops Outlook estão neutros, exercendo impacto limitado no momento. A combinação de demanda derivada aquecida e posicionamento especulativo comprado enfrenta a pressão cambial desfavorável, resultando em equilíbrio instável com leve inclinação de alta, mas com confiança média dada a magnitude da força baixista do câmbio.",
+  "drivers_bull": [
+    "Posição de fundos na soja em nível muito alto e acelerando, indicando forte apetite especulativo comprado e suporte de curto prazo ao preço",
+    "Margem de Esmagamento em nível muito alto e em alta acelerada, sinalizando forte demanda industrial por soja e incentivo robusto ao esmagamento",
+    "Exportações de soja em grão do Brasil em nível alto e tendência de alta, refletindo fluxo efetivo de demanda no curto prazo"
+  ],
+  "drivers_bear": [
+    "Dólar em nível muito baixo e em queda (real forte), reduzindo o incentivo exportador e a sustentação nominal do preço da soja no mercado brasileiro no curto prazo",
+    "Estoques Globais em queda desacelerando, mantendo viés altista estrutural, mas com menor força marginal de alta no momento"
+  ],
+  "limited_impact": [
+    "Condição da Lavoura dos EUA neutra (fora da janela crítica de safra), sem sinalização de risco ou oportunidade de oferta",
+    "Relatório Oil Crops Outlook neutro, exercendo apenas validação cruzada sem direcionamento claro"
+  ],
+  "bias": "ALTA",
+  "confidence": "MEDIA"
+}
