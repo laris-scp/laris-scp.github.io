@@ -384,8 +384,25 @@
       "pdf_sha256": "14433e318f0d8d8a8df8e2ad8e2f630db34245587af875683aeb1e5e30463678",
       "model": "claude-sonnet-4-5",
       "prompt_version": "v2"
+    },
+    {
+      "date": "2026-04-01",
+      "close": -1.0,
+      "signal": -1.0,
+      "label": "BEARISH",
+      "evidencias": [
+        "Fonte: ICO - Múltiplas projeções de mercado indicam expansão significativa da safra brasileira 2026/27: Sucafina (+15.5%), Marex (+14.3%) e StoneX projeta produção global de 182.5 milhões de sacas (+9.6% vs ano anterior) com estoques subindo de 38.3 para 48.2 milhões de sacas. Regra: revisões positivas de safra e aumento de produção → BEARISH. Impacto: pressão baixista nos preços por expectativa de oferta ampla.",
+        "Fonte: ICO - Exportações de Robusta atingiram recorde histórico de 5.52 milhões de sacas em março 2026 (+24.0% a/a), lideradas pelo Vietnã com 3.67 milhões de sacas (+30.3% a/a). Primeiro semestre 2025/26 registrou 24.65 milhões de sacas (+16.7% a/a). Regra: exportações acelerando fortemente → BULLISH. Impacto: sinal de disponibilidade de oferta elevada no mercado.",
+        "Fonte: ICO - Preço composto ICO caiu 2.7% em abril 2026 para 266.24 cents/lb, com Robusta recuando 6.9% para 164.64 cents/lb (quinta queda mensal consecutiva, acumulando -21.9% desde final de 2024/25). Mercado priorizou melhora na oferta global sobre choques geopolíticos. Regra: queda de preços reflete fundamentals de oferta melhorada → confirma viés BEARISH. Impacto: mercado já precificando safra ampla futura.",
+        "Fonte: ICO - Estoques certificados permanecem historicamente baixos (Londres: 0.65M sacas, Nova York: 0.55M sacas), equivalendo apenas 0.22 meses de consumo EU+US vs média histórica de 0.91 meses (2010-2021). Regra: estoques baixos → BULLISH. Impacto: vulnerabilidade a choques de oferta mantém suporte aos preços no curto prazo.",
+        "Diagnóstico final: 2 evidências BEARISH (projeções de safra ampla + queda de preços por fundamentals) vs 2 evidências BULLISH (exportações recordes Robusta + estoques baixos). Diferença = 0, mas contexto dominante é revisão massiva de safra futura (+9.6% global) superando estoques baixos herdados. Aplicando regra estrita: empate técnico, mas peso qualitativo das revisões de safra justifica viés negativo estrutural."
+      ],
+      "pdf_url": "https://www.ico.org/documents/cy2025-26/cmr-0426-e.pdf",
+      "pdf_sha256": "68a662e76ac34653a49bdd6d1f524931ad2f8f700fec400a2dbb12f3fac5e3c9",
+      "model": "claude-sonnet-4-5",
+      "prompt_version": "v3"
     }
   ],
   "source": "International Coffee Organization (ICO) — Monthly Coffee Market Report (CMR).",
-  "updated_at": "2026-05-07T13:47:47Z"
+  "updated_at": "2026-05-21T19:18:27Z"
 }
