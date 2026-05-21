@@ -1,0 +1,82 @@
+{
+  "id": "oil_crops_outlook",
+  "name": "Oil Crops Outlook (IA) — Relatório Mensal",
+  "unit": "score",
+  "frequency": "Mensal",
+  "series": [
+    {
+      "date": "2026-01-01",
+      "close": -1.0,
+      "signal": -1.0,
+      "label": "BEARISH",
+      "regime": "MENSAL",
+      "evidencias": [
+        "Regime MENSAL (janeiro 2026): revisões do ano-safra 2025/26 em curso. Contagem final: 7 BEARISH vs 4 BULLISH (diferença de 3 ≥ 2).",
+        "BEARISH dominantes: produção EUA +9 mi bu, Brasil +3 MMT (recorde 178 MMT), estoques finais EUA saltam +60 mi bu para 350 mi bu, estoques globais recordes (124,4 MMT), exportações EUA cortadas, preço-alvo reduzido -$0,30 para $10,20/bu, desaparecimento set-nov -20%.",
+        "BULLISH limitados: crush EUA +15 mi bu (recorde diário out/25), crush Brasil +1 MMT, demanda farelo +2,4%, exportações óleo de soja dos EUA aumentadas.",
+        "Brasil com condições favoráveis e área +0,3 mi ha amplia competitividade nas exportações globais, pressionando participação dos EUA (inspeções set-nov -45% a/a).",
+        "Impacto esperado: pressão baixista sobre CBOT pela combinação de oferta recorde (Brasil + EUA), estoques elevados em todos os níveis e perda de market share nas exportações americanas."
+      ],
+      "pdf_url": "https://ers.usda.gov/sites/default/files/_laserfiche/outlooks/113678/OCS-26a.pdf",
+      "pdf_sha256": "85e49c95b1006cac270b4de133bd525d39f5d9ca20c88ae9be2e89b23c39c894",
+      "model": "claude-sonnet-4-5",
+      "prompt_version": "v1"
+    },
+    {
+      "date": "2026-02-01",
+      "close": -1.0,
+      "signal": -1.0,
+      "label": "BEARISH",
+      "regime": "MENSAL",
+      "evidencias": [
+        "Regime MENSAL (fevereiro 2026): revisa MY 2025/26 em curso. Contagem final: 6 BEARISH vs 4 BULLISH → diferença de 2 → BEARISH.",
+        "Produção global de soja aumentada em 2,5 MMT para recorde de 428,2 MMT; Brasil atinge 180 MMT (recorde) e Paraguai 11,5 MMT (recorde) por clima favorável e maior área/produtividade.",
+        "Estoques globais sobem 1,1 MMT para recorde de 125,5 MMT, sinalizando excesso de oferta no mercado mundial.",
+        "Exportações dos EUA desaceleram (-35% set-jan vs ano anterior) por forte concorrência do Brasil recorde, indicando perda de competitividade americana.",
+        "Pressão baixista domina: oferta ampla (Brasil/Paraguai), estoques recordes e competitividade dos EUA em queda devem pesar sobre preços da soja CBOT."
+      ],
+      "pdf_url": "https://ers.usda.gov/sites/default/files/_laserfiche/outlooks/113803/OCS-26b.pdf",
+      "pdf_sha256": "3e6bc91d8751f8c30effd7889162cb540377c5ab0747866f54f67b5251e744d3",
+      "model": "claude-sonnet-4-5",
+      "prompt_version": "v1"
+    },
+    {
+      "date": "2026-04-01",
+      "close": -1.0,
+      "signal": -1.0,
+      "label": "BEARISH",
+      "regime": "MENSAL",
+      "evidencias": [
+        "Regime MENSAL identificado (relatório de abril/2026 revisando MY 2025/26). Contagem final: 6 BEARISH vs 4 BULLISH, diferença de 2 resulta em classificação BEARISH obrigatória.",
+        "Principais fatores BEARISH: Exportações EUA reduzidas em 35 mi bu por competição brasileira e preços menos competitivos; estoques EUA inalterados em nível elevado (350 mi bu); intenção de plantio EUA sobe 3.5 mi acres (+4.3%); produção Brasil revisada para cima (172.5 MT em 24/25); exportações Brasil recordes (115 MT) com preços mais competitivos.",
+        "Principais fatores BULLISH: Esmagamento EUA recorde (+35 mi bu para 2.61 bi bu) com taxas diárias históricas; demanda de farelo (+0.8 mi ton) e óleo (+0.3 bi lb) domésticos mais fortes; esmagamento Brasil recorde (61.5 MT); uso de óleo de soja para biodiesel mantém participação elevada (43% em jan/26).",
+        "A perda de competitividade americana frente ao Brasil (que amplia market share global) e a expansão de área plantada nos EUA superam os ganhos de demanda doméstica por derivados.",
+        "Impacto esperado: Pressão baixista moderada nos preços CBOT no curto prazo pela combinação de oferta ampla, perda de exportações e aumento de área plantada para safra seguinte."
+      ],
+      "pdf_url": "https://ers.usda.gov/sites/default/files/_laserfiche/outlooks/114038/OCS-26d.pdf",
+      "pdf_sha256": "5c09cfcc4a95c499a14c8d856e8bd2fd679c1b3693eb5d28f71b2dba49862925",
+      "model": "claude-sonnet-4-5",
+      "prompt_version": "v1"
+    },
+    {
+      "date": "2026-05-01",
+      "close": 0.0,
+      "signal": 0.0,
+      "label": "NEUTRAL",
+      "regime": "NOVA_SAFRA",
+      "evidencias": [
+        "Regime: NOVA SAFRA (maio 2026) – projeção MY 2026/27 vs MY 2025/26. Contagem: 6 BEARISH x 6 BULLISH = diferença zero → NEUTRAL obrigatório.",
+        "BEARISH: produção EUA +4% (4,4 bi bu), área +3,5 mi acres, produção global +9,2 MMT, produção Brasil +3% (186 MMT recorde), Argentina +5% área (50 MMT), estoques EUA revisados para cima em 2025/26 (340→310 MMT queda menor que esperado).",
+        "BULLISH: crush EUA recorde +5% (2,75 bi bu), exportações EUA +100 mi bu, estoques finais EUA caem 30 mi bu (310 MMT), demanda óleo soja biocombustível +25% (17,8 bi lb), exportações farelo EUA +1,9 MMT recorde, crush China +2%.",
+        "Esmagamento doméstico forte (EUA, China, Brasil, Argentina) absorve aumento de oferta; uso industrial de óleo cresce globalmente, especialmente em biocombustíveis (EUA, Brasil, Indonésia).",
+        "Impacto: forças opostas equilibradas – oferta ampla vs demanda robusta por derivados. Preço projetado $11,40/bu (vs $10,40 anterior) reflete aperto relativo de estoques, mas aumento moderado não configura sinal direcional forte."
+      ],
+      "pdf_url": "https://ers.usda.gov/sites/default/files/_laserfiche/outlooks/114151/OCS-26e.pdf",
+      "pdf_sha256": "da0cf164d754a278fb90ce477dcdfc0f99ded0c8f9301e817c99f7c923ecb217",
+      "model": "claude-sonnet-4-5",
+      "prompt_version": "v1"
+    }
+  ],
+  "source": "USDA, Economic Research Service — Oil Crops Outlook.",
+  "updated_at": "2026-05-21T19:21:09Z"
+}
