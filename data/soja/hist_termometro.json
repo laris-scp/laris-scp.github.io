@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "id": "hist_termometro",
+    "title": "Histórico do Termômetro Geral",
+    "source": "painel_snapshot.json (thermometers.geral)",
+    "frequency": "Diária",
+    "value_name": "TERMOMETRO GERAL",
+    "updated_at": "2026-05-21 20:37:42"
+  },
+  "series": [
+    {
+      "date": "2026-05-21",
+      "value": 0.45
+    }
+  ]
+}
