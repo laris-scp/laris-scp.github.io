@@ -87,9 +87,9 @@ para definir o cenário final do mercado de café:
 - Conte quantas evidências são BEARISH e quantas são BULLISH.
 - Ignore evidências classificadas como NEUTRAL.
 
-Regras:
-1) Se BEARISH ≥ 2 e BULLISH ≤ 1 → label = BEARISH e signal = -1.0
-2) Se BULLISH ≥ 2 e BEARISH ≤ 1 → label = BULLISH e signal = 1.0
+Regras (regra de diferença, sem assimetria):
+1) Se (BEARISH - BULLISH) >= 2 → label = BEARISH e signal = -1.0
+2) Se (BULLISH - BEARISH) >= 2 → label = BULLISH e signal = 1.0
 3) Em qualquer outro caso → label = NEUTRAL e signal = 0.0
 
 Esta regra deve ser seguida obrigatoriamente, sem exceções ou julgamentos subjetivos.
@@ -539,7 +539,7 @@ def main():
             "pdf_url": pdf_url,
             "pdf_sha256": pdf_sha,
             "model": MODEL,
-            "prompt_version": "v2",
+            "prompt_version": "v3",
         }
 
         series.append(point)
