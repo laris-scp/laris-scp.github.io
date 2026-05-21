@@ -35,7 +35,7 @@ ERS_SERIES_URL = "https://www.ers.usda.gov/publications?series=OCS"
 FALLBACK_PDFS = [
     "https://ers.usda.gov/sites/default/files/_laserfiche/outlooks/114151/OCS-26e.pdf",
     "https://ers.usda.gov/sites/default/files/_laserfiche/outlooks/114038/OCS-26d.pdf",
-    "https://ers.usda.gov/sites/default/files/_laserfiche/outlooks/113932/OCS-26c.pdf",
+    "https://ers.usda.gov/sites/default/files/_laserfiche/outlooks/113933/OCS-26c.pdf",
     "https://ers.usda.gov/sites/default/files/_laserfiche/outlooks/113803/OCS-26b.pdf",
     "https://ers.usda.gov/sites/default/files/_laserfiche/outlooks/113678/OCS-26a.pdf",
 ]
