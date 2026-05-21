@@ -1,0 +1,59 @@
+name: 66 - Painel Termômetros Soja
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows:
+      # ATENÇÃO: confira os nomes EXATOS dos workflows de snapshot da soja.
+      # Cada um deve corresponder ao campo "name:" interno do respectivo .yml.
+      - "51 - Update Painel Snapshot (Preço Soja)"
+      - "53 - Update Painel Snapshot (COT Report)"
+      - "55 - Update Painel Snapshot (USD/BRL)"
+      - "57 - Update Painel Snapshot (Fundamental STU)"
+      - "59 - Update Painel Snapshot (Crop Condition)"
+      - "61 - Update Painel Snapshot (MDIC Export)"
+      - "63 - Update Painel Snapshot Soja (Crush Spread)"
+      - "65 - Update Painel Snapshot Soja (Oil Crops Outlook)"
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cafe-main-push
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+
+      - name: Run thermometros script
+        run: |
+          python scripts/soja/update_painel_thermometros.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/soja/painel_snapshot.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "data(soja): update painel_snapshot.json (thermometros)"
+          git pull --rebase origin main
+          git push

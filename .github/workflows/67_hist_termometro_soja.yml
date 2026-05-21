@@ -1,0 +1,52 @@
+name: 67 - Hist Termômetro Soja
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - "66 - Painel Termômetros Soja"
+    types:
+      - completed
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cafe-main-push
+  cancel-in-progress: false
+
+jobs:
+  update:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run hist_termometro updater
+        run: |
+          python scripts/soja/update_hist_termometro.py
+
+      - name: Commit and push if changed
+        run: |
+          git status --porcelain
+          git add data/soja/hist_termometro.json
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "data(soja): update hist_termometro.json"
+          git pull --rebase origin main
+          git push
