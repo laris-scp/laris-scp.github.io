@@ -571,9 +571,10 @@ function buildCard(snapshotRow){
       } else {
         tablebox.style.display = "none";
         wrap.style.display = "block";
-        // re-render para garantir tamanho correto após display:none/block
+        // reajusta o tamanho após display:none/block (resize NÃO redesenha,
+        // evita o ApexCharts criar um segundo SVG no mesmo container)
         if(card._apexInstance){
-          try{ card._apexInstance.render(); }catch(e){}
+          try{ card._apexInstance.resize(); }catch(e){}
         }
       }
     });
