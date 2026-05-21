@@ -4,14 +4,12 @@ on:
   workflow_dispatch:
   workflow_run:
     workflows:
-      # ATENÇÃO: confira os nomes EXATOS dos workflows de snapshot da soja.
-      # Cada um deve corresponder ao campo "name:" interno do respectivo .yml.
-      - "51 - Update Painel Snapshot (Preço Soja)"
-      - "53 - Update Painel Snapshot (COT Report)"
-      - "55 - Update Painel Snapshot (USD/BRL)"
-      - "57 - Update Painel Snapshot (Fundamental STU)"
-      - "59 - Update Painel Snapshot (Crop Condition)"
-      - "61 - Update Painel Snapshot (MDIC Export)"
+      - "51 - Update Painel Snapshot Soja (Preço Soja)"
+      - "53 - Update Painel Snapshot Soja (COT Report)"
+      - "55 - Update Painel Snapshot Soja (USD/BRL)"
+      - "57 - Update Painel Snapshot Soja (Fundamental STU)"
+      - "59 - Update Painel Snapshot Soja (Crop Condition)"
+      - "61 - Update Painel Snapshot Soja (MDIC Export)"
       - "63 - Update Painel Snapshot Soja (Crush Spread)"
       - "65 - Update Painel Snapshot Soja (Oil Crops Outlook)"
     types: [completed]
