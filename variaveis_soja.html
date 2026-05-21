@@ -234,7 +234,8 @@ const SERIES_MAP = {
   "fundamental_stu": "data/soja/series/fundamental_stu.json",
   "crop_condition":  "data/soja/series/crop_condition.json",
   "mdic_export": "data/soja/series/mdic_export.json",
-  "crush_spread": "data/soja/series/crush_spread.json"
+  "crush_spread": "data/soja/series/crush_spread.json",
+  "oil_crops_outlook": "data/soja/series/oil_crops_outlook.json"
 };
 
 const DECIMALS_BY_ID = {
@@ -297,6 +298,7 @@ function getSeriesModeById(varId){
   if(varId === "fundamental_stu") return "FUNDAMENTAL_STU";
   if(varId === "clima_soil") return "CLIMA_SOIL";
   if(varId === "ico_ia") return "ICO_IA";
+  if(varId === "oil_crops_outlook") return "ICO_IA";
   if(varId === "mdic_export") return "MDIC_EXPORT";
   if(varId === "crop_condition") return "CROP_CONDITION";
   return "DEFAULT";
