@@ -41,6 +41,24 @@
       "prompt_version": "v1"
     },
     {
+      "date": "2026-03-01",
+      "close": 1.0,
+      "signal": 1.0,
+      "label": "BULLISH",
+      "regime": "MENSAL",
+      "evidencias": [
+        "Regime MENSAL (março 2026) revisando MY 2025/26. Contagem final: 2 BEARISH vs 6 BULLISH → diferença +4 favorável.",
+        "BULLISH: Esmagamento recorde de 2,58 bi bushels (+5 mi), demanda forte de farelo (+0,4 mi ton) e óleo, exportações mantidas em 1,58 bi bushels apesar de produção global maior.",
+        "BULLISH: Argentina reduz soja em 0,5 mi ton para 48,0 mi (rendimento menor), enquanto área de girassol cresce tirando hectares da soja por maior rentabilidade relativa.",
+        "BEARISH: Queda no uso de óleo para biodiesel (-22% out-dez vs ano anterior) devido incerteza regulatória; estoques finais dos EUA inalterados em 350 mi bushels (não apertaram).",
+        "Impacto esperado: Pressão ALTISTA moderada. Crush recorde absorve oferta doméstica, Argentina perde 0,5 mi ton, e demanda de produtos sustenta preços apesar de estoques confortáveis."
+      ],
+      "pdf_url": "https://ers.usda.gov/sites/default/files/_laserfiche/outlooks/113933/OCS-26c.pdf",
+      "pdf_sha256": "9439ce2faaa80894f8b5fba3766fff3e5c237fba48921ed4b625d129efbcd67c",
+      "model": "claude-sonnet-4-5",
+      "prompt_version": "v1"
+    },
+    {
       "date": "2026-04-01",
       "close": -1.0,
       "signal": -1.0,
@@ -78,5 +96,5 @@
     }
   ],
   "source": "USDA, Economic Research Service — Oil Crops Outlook.",
-  "updated_at": "2026-05-21T19:21:09Z"
+  "updated_at": "2026-05-21T19:44:51Z"
 }
