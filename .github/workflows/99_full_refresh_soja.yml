@@ -1,0 +1,112 @@
+name: 99_full_refresh_soja
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cafe-main-push
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # =========================
+      # 1) SERIES (todas as 9 variáveis)
+      # =========================
+      # ATENÇÃO: confira cada nome de arquivo contra o repositório.
+      # Os do mdic_export e esr estão confirmados; os demais seguem o
+      # padrão update_<var>_series.py — ajuste se o nome real for outro.
+      - name: Run series scripts
+        env:
+          CDS_API_KEY: ${{ secrets.CDS_API_KEY }}
+          FAS_PSD_API_KEY: ${{ secrets.FAS_PSD_API_KEY }}
+          NASS_API_KEY: ${{ secrets.NASS_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python scripts/soja/update_preco_soja_series.py          # CONFERIR nome
+          python scripts/soja/update_cot_report_series.py          # CONFERIR nome
+          python scripts/soja/update_usd_brl_series.py             # CONFERIR nome
+          python scripts/soja/update_fundamental_stu_series.py     # CONFERIR nome
+          python scripts/soja/update_crop_condition_series.py      # CONFERIR nome
+          python scripts/soja/update_crush_spread_series.py        # CONFERIR nome
+          python scripts/soja/update_oil_crops_outlook_series.py   # CONFERIR nome
+          python scripts/soja/update_mdic_export_series.py         # confirmado
+          python scripts/soja/update_esr_series.py                 # confirmado
+
+      # =========================
+      # 2) SNAPSHOT (todas as 9 variáveis)
+      # =========================
+      - name: Run snapshot scripts
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python scripts/soja/update_painel_snapshot_preco_soja.py        # CONFERIR nome
+          python scripts/soja/update_painel_snapshot_cot_report.py        # CONFERIR nome
+          python scripts/soja/update_painel_snapshot_usd_brl.py           # CONFERIR nome
+          python scripts/soja/update_painel_snapshot_fundamental_stu.py   # CONFERIR nome
+          python scripts/soja/update_painel_snapshot_crop_condition.py    # CONFERIR nome
+          python scripts/soja/update_painel_snapshot_crush_spread.py      # CONFERIR nome
+          python scripts/soja/update_painel_snapshot_oil_crops_outlook.py # CONFERIR nome
+          python scripts/soja/update_painel_snapshot_mdic_export.py       # confirmado
+          python scripts/soja/update_painel_snapshot_esr.py               # confirmado
+
+      # =========================
+      # 2.5) AI DIAGNÓSTICO (lê snapshot)
+      # =========================
+      # CONFERIR: este script já existe para a soja? Se ainda não,
+      # comente este passo até criá-lo.
+      - name: Update ai_diagnostico.json
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python scripts/soja/update_ai_diagnostico.py
+
+      # =========================
+      # 3) TERMÔMETROS + HIST
+      # =========================
+      - name: Update thermometros in painel_snapshot.json
+        run: |
+          python scripts/soja/update_painel_thermometros.py     # confirmado (wf66)
+
+      # CONFERIR: este script já existe para a soja?
+      - name: Update hist_termometro.json
+        run: |
+          python scripts/soja/update_hist_termometro.py
+
+      # =========================
+      # 4) COMMIT (apenas JSONs do site)
+      # =========================
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add data/soja/series/*.json
+          git add data/soja/painel_snapshot.json
+          git add data/soja/hist_termometro.json
+          git add data/soja/ai_diagnostico.json
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "data(soja): full refresh (series + snapshot + thermometros + ai)"
+          git push
