@@ -104,4 +104,5 @@ jobs:
           fi
 
           git commit -m "data(soja): full refresh (series + snapshot + thermometros + ai)"
+          git pull --rebase origin main
           git push
