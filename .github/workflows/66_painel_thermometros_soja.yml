@@ -12,6 +12,7 @@ on:
       - "61 - Update Painel Snapshot Soja (MDIC Export)"
       - "63 - Update Painel Snapshot Soja (Crush Spread)"
       - "65 - Update Painel Snapshot Soja (Oil Crops Outlook)"
+      - "70 - Update Painel Snapshot Soja (ESR Export)"
     types: [completed]
 
 permissions:
