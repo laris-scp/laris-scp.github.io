@@ -1,20 +1,20 @@
 {
-  "date": "2026-05-07",
-  "summary": "O mercado de café arábica enfrenta um cenário estruturalmente altista no médio/longo prazo, mas pressionado por ventos contrários de curto prazo. Os Estoques Globais permanecem em níveis muito baixos e continuam em queda, sinalizando aperto estrutural de oferta, enquanto os Estoques Certificados na ICE também seguem muito reduzidos, restringindo a oferta disponível imediata. O Fertilizante apresenta custo muito elevado e em aceleração, pressionando os custos marginais de produção futura. No entanto, o Dólar registra queda acentuada, reduzindo o incentivo à exportação e pressionando os preços em reais no curto prazo. A Posição de fundos no café mostra redução acelerada, sinalizando saída de capital especulativo e fraqueza técnica. As Exportações de café verde do Brasil caem de forma acelerada, indicando fraqueza da demanda efetiva de curto prazo. O Clima apresenta normalização (queda do estresse hídrico), removendo prêmio de risco climático. Os Fretes permanecem elevados, mas lateralizados, mantendo fricção logística sem novo impulso marginal. O Relatório da ICO indica viés baixista. A resultante é um conflito claro: fundamentos de médio prazo altistas versus dinâmica de fluxo e posicionamento baixista no curto prazo.",
+  "date": "2026-05-22",
+  "summary": "O mercado de café arábica apresenta um cenário misto, com pressões estruturais altistas contrastando com ventos contrários de curto prazo. Os Estoques Globais permanecem em níveis historicamente baixos e continuam em queda, ainda que desacelerando, reforçando o aperto estrutural de oferta no médio prazo. O Fertilizante (ureia) segue em trajetória ascendente acelerada, atingindo patamares muito elevados, o que eleva o custo marginal de produção e sustenta o viés altista de longo prazo. No curto prazo, contudo, o Dólar encontra-se em queda, reduzindo o incentivo ao exportador brasileiro e enfraquecendo a sustentação nominal do mercado. A Posição de fundos no café recua de forma consistente, sinalizando deterioração do apetite especulativo e pressão técnica baixista. As Exportações de café verde do Brasil apresentam queda acelerada, indicando fraqueza no fluxo físico de curto prazo. Os Estoques Certificados na ICE permanecem em níveis muito baixos, mas lateralizados, mantendo o viés altista estrutural sem, contudo, gerar novo impulso direcional. Os Fretes seguem muito elevados, porém estáveis, exercendo impacto marginal reduzido. O Clima registra melhora recente, reduzindo o prêmio de risco climático anteriormente precificado. O Relatório da ICO sinaliza tom levemente baixista, sem riscos relevantes apontados.",
   "drivers_bull": [
-    "Estoques Globais em nível muito baixo e ainda em queda, reforçando aperto estrutural de oferta",
-    "Estoques Certificados na ICE em nível muito baixo, restringindo oferta disponível imediata",
-    "Fertilizante em patamar muito elevado e em alta acelerada, pressionando custos marginais de produção futura"
+    "Estoques Globais em níveis muito baixos e em trajetória de queda, ainda que desacelerando, sustentam o aperto estrutural de oferta no médio prazo",
+    "Fertilizante (ureia) em alta acelerada e em patamar muito elevado, elevando o custo marginal de produção e limitando a oferta futura"
   ],
   "drivers_bear": [
-    "Dólar em queda acentuada, reduzindo incentivo à exportação e pressionando preços em reais no curto prazo",
-    "Posição de fundos no café em queda acelerada, sinalizando saída de capital especulativo e fraqueza técnica",
-    "Exportações de café verde do Brasil em queda acelerada, indicando fraqueza da demanda efetiva de curto prazo",
-    "Clima em normalização (queda do estresse hídrico), removendo prêmio de risco climático",
-    "Relatório da ICO indicando viés baixista"
+    "Dólar em queda, reduzindo o incentivo ao exportador brasileiro e enfraquecendo a sustentação nominal do mercado no curto prazo",
+    "Posição de fundos no café em queda consistente, sinalizando deterioração do apetite especulativo e gerando pressão técnica baixista",
+    "Exportações de café verde do Brasil em queda acelerada, indicando fraqueza no fluxo físico de oferta de curto prazo"
   ],
   "limited_impact": [
-    "Fretes elevados mas lateralizados, mantendo fricção logística sem novo impulso marginal"
+    "Estoques Certificados na ICE permanecem muito baixos, mas lateralizados, mantendo viés altista estrutural sem gerar novo impulso direcional",
+    "Fretes em patamar muito elevado, mas estáveis, exercendo impacto marginal reduzido",
+    "Clima apresenta melhora recente, reduzindo o prêmio de risco climático",
+    "Relatório da ICO com tom levemente baixista, sem riscos relevantes apontados"
   ],
   "bias": "LATERAL",
   "confidence": "MEDIA"
