@@ -33,7 +33,7 @@ MOM_ADESA = 1.15
 
 WINDOW_YEARS = 5
 
-DEFAULT_PESO = 3.0
+DEFAULT_PESO = 2.0
 
 
 def _now_utc_str():
