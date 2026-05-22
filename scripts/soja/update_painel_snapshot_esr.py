@@ -11,7 +11,7 @@ SNAPSHOT_PATH = Path("data/soja/painel_snapshot.json")
 VAR_ID = "esr_export"
 VAR_NAME = "EXPORTAÇÃO (USDA ESR) – SOJA EUA"
 FREQUENCIA = "Semanal"
-BLOCO = 2  # fundamental, mult_bloco = -1
+BLOCO = 1  # demanda direta — exportação forte = altista, mult_bloco = +1
 FONTE = "USDA FAS – Export Sales Reporting (ESR) · Soybeans · destino WORLD"
 
 SERIES_LAST_DATE_FIELD = "ultima_data_serie"
@@ -219,7 +219,7 @@ def main():
         percentil = float("nan")
 
     # -------------------------
-    # Score final (bloco 2 -> mult_bloco = -1)
+    # Score final (bloco 1 -> mult_bloco = +1, sem inversão)
     # -------------------------
     mult_bloco = 1.0 if BLOCO == 1 else -1.0
     score_raw = float(nivel_score + tendencia_score + momento_score)
