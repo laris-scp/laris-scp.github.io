@@ -340,7 +340,7 @@ function setTableHeaderByMode(card, mode){
     theadRow.innerHTML = `<th>Data</th><th class="right">Score</th><th>Diagnóstico</th>`; return;
   }
   if(mode === "MDIC_EXPORT"){
-    theadRow.innerHTML = `<th>Data</th><th class="right">Toneladas</th><th class="right">Kg</th>`; return;
+    theadRow.innerHTML = `<th>Data</th><th class="right">Toneladas</th><th class="right">Sacas (60kg)</th>`; return;
   }
   if(mode === "CROP_CONDITION"){
     theadRow.innerHTML = `<th>Semana</th><th class="right">2026</th><th class="right">2025</th><th class="right">Média 5y</th>`; return;
@@ -951,11 +951,13 @@ async function loadSeriesIntoCard(card, url){
       } else {
         for(let i=rowsLast5Y.length-1; i>=0; i--){
           const r = rowsLast5Y[i];
+          const kgVal = Number.isFinite(Number(r.kg)) ? Number(r.kg) : (Number(r.toneladas) * 1000);
+          const sacas = kgVal / 60;
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td>${fmtDateBR(r.date)}</td>
             <td class="right">${fmtNumber(Number(r.toneladas), 0)}</td>
-            <td class="right">${fmtNumber(Number(r.kg), 0)}</td>
+            <td class="right">${fmtNumber(sacas, 0)}</td>
           `;
           tbody.appendChild(tr);
         }
