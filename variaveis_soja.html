@@ -1017,13 +1017,20 @@ async function loadSeriesIntoCard(card, url){
       for(let y = myCur - 5; y <= myCur - 1; y++) baseYears.push(y);
 
       // A safra tem ~52 semanas (set -> ago). Eixo X = semana da safra.
+      // Para não sobrepor rótulos, exibe o nome do mês apenas na 1ª semana
+      // de cada mês da safra; as demais semanas ficam com rótulo vazio.
       const MAX_WEEK = 52;
+      const MONTHS_CROP = ["Set","Out","Nov","Dez","Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago"];
       const weekLabels = [];
+      let lastMonthShown = -1;
       for(let w=1; w<=MAX_WEEK; w++){
-        // rótulo aproximado de mês (semana 1 = inicio de setembro)
-        const monthIdx = Math.floor((w - 1) / 4.33);
-        const MONTHS_CROP = ["Set","Out","Nov","Dez","Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago"];
-        weekLabels.push(`S${w} (${MONTHS_CROP[Math.min(monthIdx,11)]})`);
+        const monthIdx = Math.min(Math.floor((w - 1) / 4.33), 11);
+        if(monthIdx !== lastMonthShown){
+          weekLabels.push(MONTHS_CROP[monthIdx]);
+          lastMonthShown = monthIdx;
+        } else {
+          weekLabels.push("");
+        }
       }
 
       function commitmentAt(my, wk){
