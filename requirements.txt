@@ -12,3 +12,4 @@ netCDF4
 cdsapi
 pdfplumber
 openai
+anthropic
