@@ -67,7 +67,7 @@ jobs:
       # =========================
       - name: Update ai_diagnostico.json
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           python scripts/cafe/update_ai_diagnostico.py
 
