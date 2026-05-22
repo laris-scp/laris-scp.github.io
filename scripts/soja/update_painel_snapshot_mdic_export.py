@@ -34,7 +34,7 @@ WINDOW_YEARS = 5
 # Fora dessa janela, Momento força NEUTRO (evita ruído de meses de baixa estação)
 MOMENTO_ACTIVE_MONTHS = {1, 2, 3, 4, 5, 6, 7}
 
-DEFAULT_PESO = 2.0
+DEFAULT_PESO = 1.0
 
 
 def _now_utc_str():
