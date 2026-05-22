@@ -234,6 +234,7 @@ const SERIES_MAP = {
   "fundamental_stu": "data/soja/series/fundamental_stu.json",
   "crop_condition":  "data/soja/series/crop_condition.json",
   "mdic_export": "data/soja/series/mdic_export.json",
+  "esr_export": "data/soja/series/esr.json",
   "crush_spread": "data/soja/series/crush_spread.json",
   "oil_crops_outlook": "data/soja/series/oil_crops_outlook.json"
 };
@@ -300,6 +301,7 @@ function getSeriesModeById(varId){
   if(varId === "ico_ia") return "ICO_IA";
   if(varId === "oil_crops_outlook") return "ICO_IA";
   if(varId === "mdic_export") return "MDIC_EXPORT";
+  if(varId === "esr_export") return "ESR_EXPORT";
   if(varId === "crop_condition") return "CROP_CONDITION";
   return "DEFAULT";
 }
@@ -312,6 +314,7 @@ function colSpanByMode(mode){
   if(mode === "CLIMA_SOIL") return 3;
   if(mode === "ICO_IA") return 3;
   if(mode === "MDIC_EXPORT") return 3;
+  if(mode === "ESR_EXPORT") return 3;
   if(mode === "CROP_CONDITION") return 4;
   return 4;
 }
@@ -341,6 +344,9 @@ function setTableHeaderByMode(card, mode){
   }
   if(mode === "MDIC_EXPORT"){
     theadRow.innerHTML = `<th>Data</th><th class="right">Toneladas</th><th class="right">Sacas (60kg)</th>`; return;
+  }
+  if(mode === "ESR_EXPORT"){
+    theadRow.innerHTML = `<th>Semana</th><th class="right">Comprometido (t)</th><th class="right">Δ semana (t)</th>`; return;
   }
   if(mode === "CROP_CONDITION"){
     theadRow.innerHTML = `<th>Semana</th><th class="right">2026</th><th class="right">2025</th><th class="right">Média 5y</th>`; return;
@@ -972,6 +978,107 @@ async function loadSeriesIntoCard(card, url){
         xCategories: MONTHS_PT,
         yDecimals: 0,
         showMarkers: true
+      }));
+      return;
+    }
+
+    /* ---------- ESR_EXPORT ---------- */
+    if(mode === "ESR_EXPORT"){
+      setTableHeaderByMode(card, mode);
+
+      // raw = pontos semanais com: date, market_year, week_index, total_commitment, weekly_exports...
+      const rowsAll = raw
+        .map(p => ({
+          date: (p.date || p.Data || p.data),
+          my: Number(p.market_year),
+          wk: Number(p.week_index),
+          commitment: Number(p.total_commitment),
+          weekly: Number(p.weekly_exports)
+        }))
+        .filter(r => !!r.date && Number.isFinite(r.my) && Number.isFinite(r.wk))
+        .sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+
+      const marketYears = Array.from(new Set(rowsAll.map(r => r.my))).sort((a,b)=>a-b);
+      const myCur = marketYears.length ? Math.max(...marketYears) : null;
+      const myPrev = (myCur !== null) ? (myCur - 1) : null;
+
+      if(myCur === null){
+        tbody.innerHTML = `<tr><td colspan="3" class="muted">Série vazia.</td></tr>`;
+        renderEmptyChart(card, "Série vazia.");
+        return;
+      }
+
+      // Indexa commitment por (marketYear, week_index)
+      const byMyWk = new Map();
+      for(const r of rowsAll){
+        byMyWk.set(`${r.my}-${r.wk}`, r.commitment);
+      }
+      const baseYears = [];
+      for(let y = myCur - 5; y <= myCur - 1; y++) baseYears.push(y);
+
+      // A safra tem ~52 semanas (set -> ago). Eixo X = semana da safra.
+      const MAX_WEEK = 52;
+      const weekLabels = [];
+      for(let w=1; w<=MAX_WEEK; w++){
+        // rótulo aproximado de mês (semana 1 = inicio de setembro)
+        const monthIdx = Math.floor((w - 1) / 4.33);
+        const MONTHS_CROP = ["Set","Out","Nov","Dez","Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago"];
+        weekLabels.push(`S${w} (${MONTHS_CROP[Math.min(monthIdx,11)]})`);
+      }
+
+      function commitmentAt(my, wk){
+        const v = byMyWk.get(`${my}-${wk}`);
+        return (v === undefined || Number.isNaN(v)) ? null : v;
+      }
+      function avg5At(wk){
+        const vals = [];
+        for(const y of baseYears){
+          const v = commitmentAt(y, wk);
+          if(v !== null) vals.push(v);
+        }
+        if(vals.length === 0) return null;
+        return vals.reduce((a,b)=>a+b,0) / vals.length;
+      }
+
+      const sCur = [], sPrev = [], sAvg = [];
+      for(let w=1; w<=MAX_WEEK; w++){
+        sCur.push(commitmentAt(myCur, w));
+        sPrev.push((myPrev !== null) ? commitmentAt(myPrev, w) : null);
+        sAvg.push(avg5At(w));
+      }
+
+      // Tabela: semanas da safra atual (mais recente em cima), com Δ semanal
+      const curRows = rowsAll
+        .filter(r => r.my === myCur)
+        .sort((a,b)=> a.wk - b.wk);
+
+      tbody.innerHTML = "";
+      if(curRows.length === 0){
+        tbody.innerHTML = `<tr><td colspan="3" class="muted">Sem dados na safra atual.</td></tr>`;
+      } else {
+        for(let i=curRows.length-1; i>=0; i--){
+          const r = curRows[i];
+          const prev = (i > 0) ? curRows[i-1].commitment : null;
+          const delta = (prev !== null) ? (r.commitment - prev) : null;
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${fmtDateBR(r.date)}</td>
+            <td class="right">${fmtNumber(r.commitment, 0)}</td>
+            <td class="right">${delta === null ? "—" : fmtNumber(delta, 0)}</td>
+          `;
+          tbody.appendChild(tr);
+        }
+      }
+
+      renderChart(card, baseChartOptions([
+        {name: `Safra ${myCur-1}/${String(myCur).slice(2)}`, data: sCur},
+        {name: 'Média 5 safras',                             data: sAvg},
+        {name: `Safra ${myPrev-1}/${String(myPrev).slice(2)}`, data: sPrev}
+      ], {
+        xType:'category',
+        xCategories: weekLabels,
+        yDecimals: 0,
+        showMarkers: false
       }));
       return;
     }
