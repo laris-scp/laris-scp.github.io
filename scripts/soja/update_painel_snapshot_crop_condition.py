@@ -32,7 +32,7 @@ VAR_NAME = "CROP CONDITION (Soja EUA · G+E)"
 FREQUENCIA = "Semanal"
 
 DEFAULT_BLOCO = 2
-DEFAULT_PESO = 3.0
+DEFAULT_PESO = 2.0
 
 OUT_OF_WINDOW_DAYS = 21
 WINDOW_5Y_TOLERANCE_DAYS = 7   # margem para matching de "mesma semana" no histórico
