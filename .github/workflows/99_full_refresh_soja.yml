@@ -29,10 +29,8 @@ jobs:
 
       # =========================
       # 1) SERIES (todas as 9 variáveis)
+      # Nomes derivados dos workflows 50-69 da soja.
       # =========================
-      # ATENÇÃO: confira cada nome de arquivo contra o repositório.
-      # Os do mdic_export e esr estão confirmados; os demais seguem o
-      # padrão update_<var>_series.py — ajuste se o nome real for outro.
       - name: Run series scripts
         env:
           CDS_API_KEY: ${{ secrets.CDS_API_KEY }}
@@ -40,15 +38,15 @@ jobs:
           NASS_API_KEY: ${{ secrets.NASS_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          python scripts/soja/update_preco_soja_series.py          # CONFERIR nome
-          python scripts/soja/update_cot_report_series.py          # CONFERIR nome
-          python scripts/soja/update_usd_brl_series.py             # CONFERIR nome
-          python scripts/soja/update_fundamental_stu_series.py     # CONFERIR nome
-          python scripts/soja/update_crop_condition_series.py      # CONFERIR nome
-          python scripts/soja/update_crush_spread_series.py        # CONFERIR nome
-          python scripts/soja/update_oil_crops_outlook_series.py   # CONFERIR nome
-          python scripts/soja/update_mdic_export_series.py         # confirmado
-          python scripts/soja/update_esr_series.py                 # confirmado
+          python scripts/soja/update_preco_soja_series.py
+          python scripts/soja/update_cot_report_series.py
+          python scripts/soja/update_usd_brl.py
+          python scripts/soja/update_fundamental_stu_series.py
+          python scripts/soja/update_crop_condition_series.py
+          python scripts/soja/update_crush_spread_series.py
+          python scripts/soja/update_oil_crops_outlook_series.py
+          python scripts/soja/update_mdic_export_series.py
+          python scripts/soja/update_esr_series.py
 
       # =========================
       # 2) SNAPSHOT (todas as 9 variáveis)
@@ -57,21 +55,19 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          python scripts/soja/update_painel_snapshot_preco_soja.py        # CONFERIR nome
-          python scripts/soja/update_painel_snapshot_cot_report.py        # CONFERIR nome
-          python scripts/soja/update_painel_snapshot_usd_brl.py           # CONFERIR nome
-          python scripts/soja/update_painel_snapshot_fundamental_stu.py   # CONFERIR nome
-          python scripts/soja/update_painel_snapshot_crop_condition.py    # CONFERIR nome
-          python scripts/soja/update_painel_snapshot_crush_spread.py      # CONFERIR nome
-          python scripts/soja/update_painel_snapshot_oil_crops_outlook.py # CONFERIR nome
-          python scripts/soja/update_painel_snapshot_mdic_export.py       # confirmado
-          python scripts/soja/update_painel_snapshot_esr.py               # confirmado
+          python scripts/soja/update_painel_snapshot_preco_soja.py
+          python scripts/soja/update_painel_snapshot_cot_report.py
+          python scripts/soja/update_painel_snapshot_usd_brl.py
+          python scripts/soja/update_painel_snapshot_fundamental_stu.py
+          python scripts/soja/update_painel_snapshot_crop_condition.py
+          python scripts/soja/update_painel_snapshot_crush_spread.py
+          python scripts/soja/update_painel_snapshot_oil_crops_outlook.py
+          python scripts/soja/update_painel_snapshot_mdic_export.py
+          python scripts/soja/update_painel_snapshot_esr.py
 
       # =========================
-      # 2.5) AI DIAGNÓSTICO (lê snapshot)
+      # 2.5) AI DIAGNÓSTICO (lê snapshot) — workflow 68
       # =========================
-      # CONFERIR: este script já existe para a soja? Se ainda não,
-      # comente este passo até criá-lo.
       - name: Update ai_diagnostico.json
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -79,13 +75,12 @@ jobs:
           python scripts/soja/update_ai_diagnostico.py
 
       # =========================
-      # 3) TERMÔMETROS + HIST
+      # 3) TERMÔMETROS (wf66) + HIST (wf67)
       # =========================
       - name: Update thermometros in painel_snapshot.json
         run: |
-          python scripts/soja/update_painel_thermometros.py     # confirmado (wf66)
+          python scripts/soja/update_painel_thermometros.py
 
-      # CONFERIR: este script já existe para a soja?
       - name: Update hist_termometro.json
         run: |
           python scripts/soja/update_hist_termometro.py
