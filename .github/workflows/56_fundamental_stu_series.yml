@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
   schedule:
     # Rodar nos dias 5 e 15 às 14:00 UTC (mesma cadência do café)
-    - cron: "0 14 5 * *"
-    - cron: "0 14 15 * *"
+    - cron: "17 14 5 * *"
+    - cron: "17 14 15 * *"
 
 permissions:
   contents: write
