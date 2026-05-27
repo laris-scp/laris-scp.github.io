@@ -66,6 +66,10 @@ def _download_ticker(symbol: str, period: str) -> pd.Series:
                 time.sleep(2)
                 continue
 
+            # Força o nome do índice. Versões recentes do yfinance variam o nome
+            # do índice (Date / Datetime / index / sem nome); fixar aqui garante
+            # comportamento estável a jusante.
+            close.index.name = "date"
             return close
 
         except Exception as e:
@@ -90,9 +94,11 @@ def _build_crush_df(period: str) -> pd.DataFrame:
     # Fórmula CME
     df["crush"] = (df["zm"] * 0.022) + (df["zl"] * 0.11) - (df["zs"] / 100.0)
 
+    # O índice é a data. reset_index() o transforma na PRIMEIRA coluna do df.
+    # Renomeamos por POSIÇÃO (df.columns[0]), não por nome, para não depender
+    # de como o yfinance nomeou o índice nesta versão.
     df = df.reset_index()
-    if "Date" in df.columns:
-        df = df.rename(columns={"Date": "date"})
+    df = df.rename(columns={df.columns[0]: "date"})
     df["date"] = pd.to_datetime(df["date"]).dt.strftime("%Y-%m-%d")
 
     return df
