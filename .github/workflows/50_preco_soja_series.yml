@@ -5,7 +5,7 @@ on:
   schedule:
     # 10:35 UTC = 07:35 America/Sao_Paulo (UTC-3)
     # Roda 5min depois do preço arábica pra não conflitar
-    - cron: "35 10 * * *"
+    - cron: "43 10 * * *"
 
 permissions:
   contents: write
