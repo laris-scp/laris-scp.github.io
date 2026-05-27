@@ -5,7 +5,7 @@ on:
   schedule:
     # Roda toda terça a sexta às 22:00 UTC (após fechamento do mercado americano)
     # CBOT fecha às 14:20 CT (~19:20 UTC); 22h dá folga para Yahoo atualizar
-    - cron: "0 22 * * 2,3,4,5"
+    - cron: "09 22 * * 2,3,4,5"
 
 permissions:
   contents: write
