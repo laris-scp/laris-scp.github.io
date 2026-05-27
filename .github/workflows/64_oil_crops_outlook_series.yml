@@ -8,8 +8,8 @@ on:
         required: true
         default: "3"
   schedule:
-    - cron: "0 16 15 * *"
-    - cron: "0 16 17 * *"
+    - cron: "08 16 15 * *"
+    - cron: "08 16 17 * *"
 
 permissions:
   contents: write
