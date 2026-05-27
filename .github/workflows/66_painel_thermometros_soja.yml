@@ -48,11 +48,23 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
           git add data/soja/painel_snapshot.json
           if git diff --cached --quiet; then
             echo "No changes to commit"
             exit 0
           fi
+
           git commit -m "data(soja): update painel_snapshot.json (thermometros)"
-          git pull --rebase origin main
-          git push
+
+          # Push resiliente a falhas transitórias (HTTP 502) e race conditions
+          # (cannot lock ref). O pull --rebase dentro do loop rebaseia na nova
+          # posição do main a cada tentativa.
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin main && git push && exit 0
+            echo "Push falhou (tentativa $i). Aguardando antes de tentar de novo..."
+            sleep 15
+          done
+
+          echo "Push falhou após 5 tentativas."
+          exit 1
