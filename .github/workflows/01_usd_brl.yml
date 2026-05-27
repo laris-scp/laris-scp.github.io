@@ -22,7 +22,6 @@ jobs:
         with:
           fetch-depth: 0
 
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -42,13 +41,22 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          if git diff --quiet; then
+          git add data/cafe/series/usd_brl.json
+          if git diff --cached --quiet; then
             echo "No changes detected. Skipping commit."
             exit 0
           fi
 
-          git add data/cafe/series/usd_brl.json
           git commit -m "data(cafe): update usd_brl.json"
-          git pull --rebase origin main
 
-          git push
+          # Push resiliente a falhas transitórias (HTTP 502) e race conditions
+          # (cannot lock ref). O pull --rebase dentro do loop rebaseia na nova
+          # posição do main a cada tentativa.
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin main && git push && exit 0
+            echo "Push falhou (tentativa $i). Aguardando antes de tentar de novo..."
+            sleep 15
+          done
+
+          echo "Push falhou após 5 tentativas."
+          exit 1
