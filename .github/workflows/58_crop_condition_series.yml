@@ -5,8 +5,8 @@ on:
   schedule:
     # Toda terça e quarta às 22:00 UTC
     # NASS publica segunda-feira ~21h UTC (16h ET); terça/quarta cobre fuso + revisões
-    - cron: "0 22 * * 2"
-    - cron: "0 22 * * 3"
+    - cron: "03 22 * * 2"
+    - cron: "03 22 * * 3"
 
 permissions:
   contents: write
