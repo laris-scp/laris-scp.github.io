@@ -1,14 +1,14 @@
 {
   "commodity": "soja",
-  "updated_at": "2026-05-27 13:04:40",
+  "updated_at": "2026-05-27 13:10:14",
   "rows": [
     {
       "id": "preco_soja",
       "bloco": 1,
       "variavel": "PREÇO SOJA",
       "peso": 1.0,
-      "ultimo_valor": 1196.5,
-      "percentil": 0.844,
+      "ultimo_valor": 1186.0,
+      "percentil": 0.8269,
       "nivel": "MUITO ALTO",
       "valor_nivel": 1.0,
       "tendencia": "ALTA",
@@ -18,10 +18,10 @@
       "score": 2.5,
       "score_ponderado": 2.5,
       "frequencia": "Diária",
-      "ultima_atualizacao": "2026-05-22",
+      "ultima_atualizacao": "2026-05-26",
       "regra_de_sinal": "Nível indica se o preço da soja está baixo ou alto versus o histórico recente; Tendência mostra a direção atual comparando o preço com médias de curto e longo prazo; Momento indica se essa tendência está ganhando ou perdendo força ao observar a evolução mensal da média de curto prazo; Score combina Nível, Tendência e Momento (com peso) em um único indicador.",
       "fonte": "Yahoo Finance (ZS=F).",
-      "ultima_data_serie": "2026-05-22"
+      "ultima_data_serie": "2026-05-26"
     },
     {
       "id": "cot_report",
@@ -81,7 +81,7 @@
       "score": 0.5,
       "score_ponderado": 2.5,
       "frequencia": "Anual",
-      "ultima_atualizacao": "2026-05-22",
+      "ultima_atualizacao": "2026-05-27",
       "regra_de_sinal": "Este indicador mostra a relacao entre os estoques globais de soja e o consumo mundial (stock-to-use). Valores mais baixos indicam um mercado mais apertado, com menos soja disponivel em relacao a demanda, o que tende a ser positivo para os precos. O painel avalia o nivel atual em relacao ao historico e a direcao recente dessa relacao para identificar se o equilibrio entre oferta e demanda esta melhorando ou se deteriorando.",
       "fonte": "USDA/FAS PSD API — Oilseed, Soybean"
     },
