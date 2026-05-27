@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     # Sexta 23:00 UTC = 20:00 America/Sao_Paulo (UTC-3)
-    - cron: "0 23 * * 5"
+    - cron: "18 23 * * 5"
 
 permissions:
   contents: write
