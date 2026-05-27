@@ -5,9 +5,9 @@ on:
   schedule:
     # Roda nos dias 5, 10 e 15 do mês às 14:00 UTC
     # MDIC publica dados consolidados nos primeiros dias úteis do mês seguinte
-    - cron: "0 14 5 * *"
-    - cron: "0 14 10 * *"
-    - cron: "0 14 15 * *"
+    - cron: "22 14 5 * *"
+    - cron: "22 14 10 * *"
+    - cron: "22 14 15 * *"
 
 permissions:
   contents: write
