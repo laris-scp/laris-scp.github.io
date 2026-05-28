@@ -27,17 +27,34 @@ jobs:
       - run: |
           python -m pip install --upgrade pip
           pip install pandas
-      - run: |
-          python scripts/soja/update_painel_snapshot_preco_soja.py
-      - run: |
+
+      - name: Run script + push resiliente
+        run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/soja/painel_snapshot.json
-          if git diff --cached --quiet; then
-            echo "No changes detected. Skipping commit."
-            exit 0
-          fi
-          git commit -m "data(soja): update painel_snapshot (preco_soja)"
-          git pull --rebase origin main
 
-          git push
+          for i in 1 2 3 4 5; do
+            # Garante que estamos no HEAD mais recente antes de rodar o script
+            git pull origin main
+
+            python scripts/soja/update_painel_snapshot_preco_soja.py
+
+            git add data/soja/painel_snapshot.json
+            if git diff --cached --quiet; then
+              echo "No changes detected. Skipping commit."
+              exit 0
+            fi
+
+            git commit -m "data(soja): update painel_snapshot (preco_soja)"
+
+            if git push; then
+              exit 0
+            fi
+
+            echo "Push falhou (tentativa $i). Revertendo commit local e tentando novamente..."
+            git reset --soft HEAD~1
+            sleep 10
+          done
+
+          echo "Push falhou após 5 tentativas."
+          exit 1
