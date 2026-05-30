@@ -1,6 +1,6 @@
 {
   "commodity": "soja",
-  "updated_at": "2026-05-30 11:57:11",
+  "updated_at": "2026-05-30 11:57:22",
   "rows": [
     {
       "id": "preco_soja",
@@ -204,8 +204,8 @@
     }
   ],
   "thermometers": {
-    "bloco_1": 0.11,
+    "bloco_1": 0.39,
     "bloco_2": 0.12,
-    "geral": 0.11
+    "geral": 0.3
   }
 }
