@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: cafe-main-push
+  group: soja-main-push
   cancel-in-progress: false
 
 jobs:
@@ -31,29 +31,32 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Run hist_termometro updater
-        run: |
-          python scripts/soja/update_hist_termometro.py
-
       - name: Commit and push if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add data/soja/hist_termometro.json
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-            exit 0
-          fi
-
-          git commit -m "data(soja): update hist_termometro.json"
-
-          # Push resiliente a falhas transitórias (HTTP 502) e race conditions
-          # (cannot lock ref). O pull --rebase dentro do loop rebaseia na nova
-          # posição do main a cada tentativa.
           for i in 1 2 3 4 5; do
-            git pull --rebase origin main && git push && exit 0
-            echo "Push falhou (tentativa $i). Aguardando antes de tentar de novo..."
+            # Garante estado limpo antes de cada tentativa
+            git checkout -- .
+            git pull --rebase origin main
+
+            python scripts/soja/update_hist_termometro.py
+
+            git add data/soja/hist_termometro.json
+            if git diff --cached --quiet; then
+              echo "No changes to commit"
+              exit 0
+            fi
+
+            git commit -m "data(soja): update hist_termometro.json"
+
+            if git push; then
+              exit 0
+            fi
+
+            echo "Push falhou (tentativa $i). Revertendo commit e aguardando..."
+            git reset --soft HEAD~1
             sleep 15
           done
 
