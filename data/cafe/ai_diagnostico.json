@@ -1,20 +1,21 @@
 {
-  "date": "2026-05-27",
-  "summary": "O mercado de café arábica apresenta sinais contraditórios: fundamentos estruturais de oferta permanecem altistas (Estoques Globais em nível muito baixo e em queda, Estoques Certificados restritos, Fertilizante caro e acelerando), mas os vetores de curto prazo exercem forte pressão baixista (Dólar em queda pronunciada, posição de fundos reduzindo e Exportações fracas e acelerando queda). A soma ponderada do Bloco 1 (curto prazo) é negativa em -20,5 pontos, enquanto o Bloco 2 (estrutural) é positivo em +15,5 pontos. O aperto estrutural é real, mas o timing desfavorável e o sentimento técnico-financeiro fragilizado indicam ambiente de consolidação ou correção no curto prazo, com viés direcional indefinido.",
+  "date": "2026-06-06",
+  "summary": "O mercado de café arábica enfrenta um cenário misto com forças estruturais altistas confrontadas por pressões de curto prazo baixistas. Do lado altista, os Estoques Globais permanecem em patamar muito baixo e em queda, sinalizando aperto estrutural de oferta no médio e longo prazo. Esse quadro é reforçado por Fretes muito elevados e em aceleração, que aumentam custos logísticos e dificultam o escoamento, e pelo Fertilizante em nível muito alto, pressionando custos de produção futuros. Os Estoques Certificados na ICE, embora muito baixos, estão lateralizados, mantendo viés altista estrutural mas sem gerar novo impulso direcional. No lado baixista, a Posição de fundos no café está em queda, indicando redução do apetite especulativo e pressão vendedora no curto prazo. O Dólar em queda reduz o preço em reais e enfraquece o incentivo exportador, exercendo força baixista de curto prazo. As Exportações de café verde do Brasil apresentam queda acelerada, sinalizando fraqueza no fluxo efetivo de demanda. Por fim, o Clima apresenta melhora com redução do estresse hídrico, removendo prêmio de risco climático, e o Relatório da ICO mantém-se neutro. O confronto entre fundamentos estruturais altistas e dinâmica de curto prazo baixista gera incerteza direcional.",
   "drivers_bull": [
-    "Estoques Globais em nível muito baixo e em queda (desacelerando), sustentando aperto estrutural de oferta no médio e longo prazo",
-    "Estoques Certificados muito baixos e lateralizados, indicando restrição de oferta disponível imediata",
-    "Fertilizante em patamar muito alto e alta acelerando, elevando custo marginal de produção e reduzindo incentivo à expansão futura",
-    "Fretes em nível muito alto, mantendo fricção logística e custo all-in elevados"
+    "Estoques Globais em nível muito baixo e em queda, indicando aperto estrutural de oferta no médio e longo prazo",
+    "Fretes muito elevados e em aceleração, aumentando custos logísticos e dificultando escoamento",
+    "Fertilizante em patamar muito alto, pressionando custos marginais de produção futura",
+    "Estoques Certificados na ICE em nível muito baixo, mantendo viés altista estrutural de curto prazo"
   ],
   "drivers_bear": [
-    "Dólar em queda (nível muito baixo, queda desacelerando), reduzindo o preço em reais, o incentivo exportador e a sustentação nominal do mercado no curto prazo",
-    "Posição de fundos em nível baixo e queda desacelerando, sinalizando desinteresse financeiro e timing desfavorável",
-    "Exportações de café verde do Brasil fracas (nível baixo) e queda acelerando, indicando demanda de curto prazo enfraquecida"
+    "Posição de fundos no café em queda, sinalizando redução de apetite especulativo e pressão vendedora",
+    "Dólar em queda, reduzindo preço em reais e enfraquecendo incentivo exportador no curto prazo",
+    "Exportações de café verde do Brasil em queda acelerada, indicando fraqueza de fluxo efetivo de demanda"
   ],
   "limited_impact": [
-    "Clima (estresse hídrico em nível muito alto, mas em queda acelerando) reduz prêmio de risco climático, atuando como alívio marginal sem alterar fundamentos",
-    "Relatório da ICO neutro e com peso baixo, exercendo papel apenas de validação cruzada sem força direcional própria"
+    "Estoques Certificados lateralizados não geram novo impulso direcional apesar do nível baixo",
+    "Clima com redução do estresse hídrico remove prêmio de risco mas sem impacto marginal relevante",
+    "Relatório da ICO neutro, servindo apenas como validação cruzada sem sinalização direcional"
   ],
   "bias": "LATERAL",
   "confidence": "MEDIA"
