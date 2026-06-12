@@ -401,8 +401,25 @@
       "pdf_sha256": "68a662e76ac34653a49bdd6d1f524931ad2f8f700fec400a2dbb12f3fac5e3c9",
       "model": "claude-sonnet-4-5",
       "prompt_version": "v3"
+    },
+    {
+      "date": "2026-05-01",
+      "close": -1.0,
+      "signal": -1.0,
+      "label": "BEARISH",
+      "evidencias": [
+        "CONAB revisou produção do Brasil 2026/27 para recorde de 66,7 milhões de sacas (+0,5 mi), com Arábica subindo para 45,8 mi (+28% a/a e +1,67 mi vs estimativa anterior). Revisão positiva de safra é BEARISH.",
+        "Expectativas de mercado apontam safra vietnamita 2025/26 acima de 31 milhões de sacas (+10% a/a), com exportações de abril/26 recordes (3,41 mi sacas, +12,1% a/a). Aumento de produção e fluxo acelerado do Robusta são BEARISH.",
+        "Exportações globais de café verde caíram apenas -1,9% em abril/26 (10,51 mi vs 10,71 mi sacas), mas Robusta cresceu +11,2% impulsionado por chegada de nova safra no Brasil e Vietnã. Aceleração de embarques de Robusta é BEARISH.",
+        "Estoques certificados em Nova York caíram -13,5% (0,48 mi sacas) e Londres -0,1% (0,64 mi), atingindo mínimos de vários meses. Queda de estoques é BULLISH.",
+        "Regra aplicada: 3 evidências BEARISH vs 1 BULLISH. Diferença ≥2 → sinal -1.0. Pressão baixista domina por expectativa de oferta ampla, especialmente de Arábica brasileiro, apesar de estoques apertados."
+      ],
+      "pdf_url": "https://www.ico.org/documents/cy2025-26/cmr-0526-e.pdf",
+      "pdf_sha256": "1602de1b8184640c5de13c703c236fcbd8ebf5078aaaf7378f4d7ad9c007c02a",
+      "model": "claude-sonnet-4-5",
+      "prompt_version": "v3"
     }
   ],
   "source": "International Coffee Organization (ICO) — Monthly Coffee Market Report (CMR).",
-  "updated_at": "2026-05-21T19:18:27Z"
+  "updated_at": "2026-06-12T18:03:01Z"
 }
