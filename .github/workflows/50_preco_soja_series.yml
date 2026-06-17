@@ -47,23 +47,23 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          for i in 1 2 3 4 5; do
-            git add data/soja/series/preco_soja.json
+          git add data/soja/series/preco_soja.json
 
-            if git diff --cached --quiet; then
-              echo "No changes detected. Skipping commit."
-              exit 0
-            fi
+          if git diff --cached --quiet; then
+            echo "No changes detected. Skipping commit."
+            exit 0
+          fi
+
+          for i in 1 2 3 4 5; do
+            git commit -m "data(soja): update preco_soja.json"
 
             git pull --rebase origin main
-
-            git commit -m "data(soja): update preco_soja.json"
 
             if git push; then
               exit 0
             fi
 
-            echo "Push falhou (tentativa $i). Rebasing e tentando novamente..."
+            echo "Push falhou (tentativa $i). Desfazendo commit e tentando novamente..."
             git reset --soft HEAD~1
             sleep 10
           done
