@@ -1,19 +1,20 @@
 {
-  "date": "2026-06-07",
-  "summary": "O mercado de soja apresenta viés altista no curto prazo, sustentado por forte demanda derivada (Margem de Esmagamento em nível muito alto e em alta desacelerando) e posicionamento técnico favorável (Posição de fundos na soja em nível muito alto, embora lateral). As Exportações de soja em grão do Brasil seguem em patamar alto e em trajetória de alta, reforçando o fluxo efetivo de demanda. A Condição da Lavoura dos EUA está em nível alto e lateral, sinalizando menor risco imediato à oferta. Contudo, o viés altista enfrenta resistência estrutural importante: os Estoques Globais permanecem em nível muito alto, apesar da tendência de queda desacelerando, o que limita o potencial de alta no médio prazo. Adicionalmente, o Dólar está em nível baixo e neutro, exercendo pressão baixista marginal no curto prazo ao reduzir o incentivo ao exportador e a sustentação nominal em reais. O Relatório Oil Crops Outlook está neutro, não adicionando direção. O balanço pende levemente para alta no curto prazo, mas com confiança média devido ao contrapeso estrutural dos estoques elevados e à neutralidade do câmbio.",
+  "date": "2026-06-17",
+  "summary": "O cenário apresenta sinais mistos, com forças baixistas de curto prazo predominando levemente sobre fundamentos estruturais altistas. O Dólar em nível muito baixo (5,04) pressiona o preço em reais e reduz o incentivo à exportação no curto prazo, exercendo o principal vetor baixista. Simultaneamente, os Estoques Globais seguem em queda (STU em nível muito alto, mas tendência de queda desacelerando), sinalizando aperto estrutural de oferta que sustenta viés altista de médio prazo, porém com força marginal reduzida. No lado da demanda, a Margem de Esmagamento em patamar muito alto evidencia forte incentivo industrial e demanda derivada sólida, reforçando o viés altista. A Posição de fundos na soja mantém-se elevada e lateral, indicando suporte técnico-financeiro sem pressão direcional adicional. As Exportações de soja em grão do Brasil seguem em nível alto com tendência de alta, sinalizando fluxo físico de demanda forte no curto prazo. A Condição da Lavoura dos EUA está em nível alto (66% Good+Excellent) e lateral, indicando expectativa de safra robusta, o que limita o potencial altista de risco de oferta. O Relatório Oil Crops Outlook está neutro, servindo apenas como validação cruzada sem viés direcional. A combinação de pressão cambial baixista de curto prazo com fundamentos estruturais altistas gera um ambiente de lateralidade com leve inclinação baixista no horizonte imediato, porém com sustentação de médio prazo.",
   "drivers_bull": [
-    "Margem de Esmagamento em nível muito alto e em alta desacelerando, indicando forte incentivo industrial e demanda derivada robusta",
-    "Posição de fundos na soja em nível muito alto, sinalizando posicionamento técnico favorável, apesar do momento lateral",
-    "Exportações de soja em grão do Brasil em nível alto e tendência de alta, evidenciando fluxo efetivo de demanda no curto prazo",
-    "Condição da Lavoura dos EUA em nível alto e lateral, reduzindo o risco de oferta no curto prazo"
+    "Margem de Esmagamento em nível muito alto, evidenciando forte demanda industrial e incentivo robusto ao esmagamento",
+    "Estoques Globais em trajetória de queda, sinalizando aperto estrutural de oferta no médio prazo",
+    "Exportações de soja em grão do Brasil em nível alto e tendência de alta, indicando fluxo físico de demanda forte",
+    "Posição de fundos na soja elevada, fornecendo suporte técnico-financeiro ao mercado"
   ],
   "drivers_bear": [
-    "Estoques Globais em nível muito alto, apesar da queda desacelerando, indicando aperto estrutural ainda limitado e pressão baixista no médio prazo",
-    "Dólar em nível baixo e neutro, exercendo pressão baixista marginal ao reduzir o incentivo ao exportador e a sustentação nominal do preço em reais"
+    "Dólar em nível muito baixo (5,04), reduzindo o preço em reais e o incentivo à exportação no curto prazo",
+    "Condição da Lavoura dos EUA em nível alto (66% Good+Excellent), sinalizando expectativa de safra robusta e oferta ampla"
   ],
   "limited_impact": [
-    "Relatório Oil Crops Outlook neutro, sem adicionar viés direcional ao diagnóstico"
+    "Relatório Oil Crops Outlook neutro, sem viés direcional definido",
+    "Desaceleração da queda dos Estoques Globais reduz a força marginal altista de médio prazo"
   ],
-  "bias": "ALTA",
+  "bias": "LATERAL",
   "confidence": "MEDIA"
 }
