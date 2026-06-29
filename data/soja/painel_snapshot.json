@@ -1,14 +1,14 @@
 {
   "commodity": "soja",
-  "updated_at": "2026-06-29 14:38:06",
+  "updated_at": "2026-06-29 14:38:12",
   "rows": [
     {
       "id": "preco_soja",
       "bloco": 1,
       "variavel": "PREÇO SOJA",
       "peso": 1.0,
-      "ultimo_valor": 1156.25,
-      "percentil": 0.7728,
+      "ultimo_valor": 1126.25,
+      "percentil": 0.714,
       "nivel": "ALTO",
       "valor_nivel": 0.5,
       "tendencia": "NEUTRO",
