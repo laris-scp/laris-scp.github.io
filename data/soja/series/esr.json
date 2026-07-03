@@ -7,7 +7,7 @@
   "metric_principal": "total_commitment",
   "frequency": "weekly",
   "crop_year": "set-ago",
-  "updated_at": "2026-06-26 15:28:24",
+  "updated_at": "2026-07-03 15:16:35",
   "series": [
     {
       "date": "1999-09-02",
@@ -15397,6 +15397,17 @@
       "gross_new_sales": 466617.0,
       "net_sales": 455405.0,
       "total_commitment": 41039453.0
+    },
+    {
+      "date": "2026-06-25",
+      "market_year": 2026,
+      "week_index": 43,
+      "weekly_exports": 388026.0,
+      "accumulated_exports": 37153261.0,
+      "outstanding_sales": 3927978.0,
+      "gross_new_sales": 49828.0,
+      "net_sales": 41786.0,
+      "total_commitment": 41081239.0
     }
   ]
 }
