@@ -219,12 +219,19 @@ def find_ocs_pdf_links(html: str, base_url: str) -> list[str]:
 
 
 def find_pub_detail_links(html: str, base_url: str) -> list[str]:
-    """Extrai links das páginas de detalhe de cada edição (pub-details?pubid=...)."""
-    matches = re.findall(
+    """Extrai links das páginas de detalhe de cada edição.
+    Suporta o padrão novo do Drupal 10 (/publications/{id}) e mantém
+    compatibilidade com o padrão antigo (/publications/pub-details?pubid={id})."""
+    matches_new = re.findall(
+        r'href=["\']([^"\']*/publications/\d+(?:\?[^"\']*)?)["\']',
+        html, flags=re.IGNORECASE,
+    )
+    matches_old = re.findall(
         r'href=["\']([^"\']*pub-details\?pubid=\d+[^"\']*)["\']',
         html, flags=re.IGNORECASE,
     )
-    urls = [urljoin(base_url, m.strip()).split("#")[0] for m in matches]
+    urls = [urljoin(base_url, m.strip()).split("#")[0]
+            for m in matches_new + matches_old]
     return sorted(set(urls))
 
 
