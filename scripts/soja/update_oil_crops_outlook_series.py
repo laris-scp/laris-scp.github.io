@@ -18,7 +18,7 @@ import json
 import hashlib
 import warnings
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from urllib.parse import urljoin
 
 import requests
@@ -28,8 +28,13 @@ from requests.exceptions import SSLError, HTTPError
 
 SERIES_PATH = Path("data/soja/series/oil_crops_outlook.json")
 
-# Página índice da série Oil Crops Outlook na ERS
-ERS_SERIES_URL = "https://www.ers.usda.gov/publications?series=OCS"
+# Sitemap do ERS (índice -> sitemap.xml -> páginas paginadas). Usado para
+# descobrir novas edições do Oil Crops Outlook. A página de busca antiga
+# (?series=OCS) passou a ser renderizada via JS e não expõe mais links
+# no HTML estático (confirmado em 2026-07 — ela retorna "There was an
+# error. Please refresh the page." em requisição direta).
+SITEMAP_INDEX_URL = "https://www.ers.usda.gov/index/sitemap.xml"
+SITEMAP_RECENT_DAYS = 45  # janela de "candidato recente" pra não varrer o sitemap inteiro
 
 # Fallbacks (caso o scraping falhe). Atualize quando souber de novas edições.
 FALLBACK_PDFS = [
@@ -218,64 +223,105 @@ def find_ocs_pdf_links(html: str, base_url: str) -> list[str]:
     return sorted(set(u for u in urls if u))
 
 
-def find_pub_detail_links(html: str, base_url: str) -> list[str]:
-    """Extrai links das páginas de detalhe de cada edição.
-    Suporta o padrão novo do Drupal 10 (/publications/{id}) e mantém
-    compatibilidade com o padrão antigo (/publications/pub-details?pubid={id})."""
-    matches_new = re.findall(
-        r'href=["\']([^"\']*/publications/\d+(?:\?[^"\']*)?)["\']',
-        html, flags=re.IGNORECASE,
-    )
-    matches_old = re.findall(
-        r'href=["\']([^"\']*pub-details\?pubid=\d+[^"\']*)["\']',
-        html, flags=re.IGNORECASE,
-    )
-    urls = [urljoin(base_url, m.strip()).split("#")[0]
-            for m in matches_new + matches_old]
-    return sorted(set(urls))
-
-
 def strip_pdf_query(url: str) -> str:
     """Remove o sufixo ?v=NNNNN para deduplicar e normalizar."""
     return url.split("?")[0]
 
 
+def _fetch_xml(url: str, headers: dict) -> str:
+    r = requests.get(url, timeout=30, headers=headers)
+    r.raise_for_status()
+    return r.text
+
+
+def get_recent_publication_candidates(max_age_days: int = SITEMAP_RECENT_DAYS) -> list[str]:
+    """
+    Varre o sitemap do ERS (3 níveis: índice -> sitemap.xml -> páginas
+    paginadas) e retorna as URLs /publications/{id} cujo <lastmod> é
+    recente. Isso substitui a antiga dependência da página de busca
+    (?series=OCS), que passou a ser renderizada via JS.
+    """
+    headers = {"User-Agent": "Mozilla/5.0"}
+
+    try:
+        idx_xml = _fetch_xml(SITEMAP_INDEX_URL, headers)
+        top_locs = re.findall(r"<loc>(.*?)</loc>", idx_xml)
+        if not top_locs:
+            print("DEBUG: índice do sitemap sem <loc>.")
+            return []
+
+        mid_xml = _fetch_xml(top_locs[0].strip(), headers)
+        page_locs = re.findall(r"<loc>(.*?)</loc>", mid_xml)
+        if not page_locs:
+            print("DEBUG: sitemap intermediário sem páginas.")
+            return []
+    except Exception as e:
+        print(f"DEBUG: falha ao navegar o índice do sitemap: {e}")
+        return []
+
+    cutoff = datetime.now(timezone.utc) - timedelta(days=max_age_days)
+    candidates: list[str] = []
+
+    for page_url in page_locs:
+        try:
+            page_xml = _fetch_xml(page_url.strip(), headers)
+        except Exception as e:
+            print(f"DEBUG: falha ao buscar {page_url}: {e}")
+            continue
+
+        blocks = re.findall(
+            r"<url>\s*<loc>(.*?)</loc>\s*<lastmod>(.*?)</lastmod>.*?</url>",
+            page_xml, flags=re.DOTALL,
+        )
+        for loc, lastmod in blocks:
+            loc = loc.strip()
+            if not re.search(r"/publications/\d+$", loc):
+                continue
+            try:
+                dt = datetime.fromisoformat(lastmod.strip())
+            except ValueError:
+                continue
+            if dt >= cutoff:
+                candidates.append(loc)
+
+    candidates = sorted(set(candidates))
+    print(f"DEBUG: {len(candidates)} candidatos com lastmod <= {max_age_days} dias")
+    return candidates
+
+
 def discover_pdfs_via_scraping() -> list[str]:
     """
-    1. Pega o HTML da página de série (?series=OCS).
-    2. Tenta achar links diretos OCS-NN[a-l].pdf.
-    3. Senão, segue as páginas de detalhe e extrai o PDF de cada uma.
+    Descobre PDFs do Oil Crops Outlook via sitemap do ERS:
+    1. Pega candidatos recentes de /publications/{id} pelo sitemap.
+    2. Abre cada candidato e confirma pelo <title> se é do Oil Crops Outlook.
+    3. Extrai o link do PDF de cada página confirmada (find_ocs_pdf_links
+       já trata link relativo via urljoin, sem precisar de mudança).
     """
     headers = {"User-Agent": "Mozilla/5.0"}
     pdf_urls: list[str] = []
 
-    try:
-        r = requests.get(ERS_SERIES_URL, timeout=30, headers=headers)
-        r.raise_for_status()
-        list_html = r.text
-    except Exception as e:
-        print(f"DEBUG: falha ao buscar página de série: {e}")
-        return []
+    candidates = get_recent_publication_candidates()
+    print(f"DEBUG: {len(candidates)} páginas candidatas (via sitemap)")
 
-    direct = find_ocs_pdf_links(list_html, ERS_SERIES_URL)
-    if direct:
-        print(f"DEBUG: scraping direto encontrou {len(direct)} PDFs")
-        pdf_urls.extend(direct)
-
-    detail_pages = find_pub_detail_links(list_html, ERS_SERIES_URL)
-    print(f"DEBUG: encontradas {len(detail_pages)} páginas de detalhe")
-
-    for page_url in detail_pages[:18]:
+    for page_url in candidates:
         try:
-            rp = requests.get(page_url, timeout=30, headers=headers)
-            if not rp.ok:
+            r = requests.get(page_url, timeout=30, headers=headers)
+            if not r.ok:
                 continue
-            page_pdfs = find_ocs_pdf_links(rp.text, page_url)
-            if page_pdfs:
-                pdf_urls.extend(page_pdfs)
+            html = r.text
         except Exception as e:
             print(f"DEBUG: falha ao abrir {page_url}: {e}")
             continue
+
+        title_match = re.search(r"<title>(.*?)</title>", html, flags=re.IGNORECASE | re.DOTALL)
+        title = title_match.group(1) if title_match else ""
+        if "oil crops outlook" not in title.lower():
+            continue
+
+        print(f"DEBUG: página do Oil Crops Outlook encontrada: {page_url} | title={title.strip()}")
+        page_pdfs = find_ocs_pdf_links(html, page_url)
+        if page_pdfs:
+            pdf_urls.extend(page_pdfs)
 
     return sorted(set(pdf_urls))
 
