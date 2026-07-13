@@ -93,8 +93,26 @@
       "pdf_sha256": "da0cf164d754a278fb90ce477dcdfc0f99ded0c8f9301e817c99f7c923ecb217",
       "model": "claude-sonnet-4-5",
       "prompt_version": "v1"
+    },
+    {
+      "date": "2026-06-01",
+      "close": 1.0,
+      "signal": 1.0,
+      "label": "BULLISH",
+      "regime": "MENSAL",
+      "evidencias": [
+        "Regime MENSAL identificado (junho 2026). Contagem final: 3 BEARISH vs 7 BULLISH, diferença de +4 favorece alta.",
+        "Esmagamento (crush) dos EUA revisado para cima em 20 milhões de bushels no MY2025/26 (para 2,65 bi) e mantido em 2,75 bi para MY2026/27, refletindo demanda robusta de derivados e margens fortes - forte sinal BULLISH.",
+        "Exportações de farelo de soja dos EUA aumentadas para 20,0 milhões de toneladas curtas (+16% nos compromissos vs ano anterior); uso de óleo de soja para biodiesel subiu 8% (out-mar) e participação elevada no mix de feedstock - ambos BULLISH.",
+        "Produção da Argentina revisada para cima em 2 MT (MY2025/26, para 50 MT) e estoques globais ligeiramente maiores são sinais BEARISH, mas compensados pela forte demanda de esmagamento argentino (+0,5 MT revisão).",
+        "Impacto esperado: pressão de alta no preço da soja CBOT devido à demanda doméstica robusta por produtos (farelo e óleo), margens de esmagamento elevadas e forte uso industrial de óleo, superando o peso da safra maior na Argentina."
+      ],
+      "pdf_url": "https://www.ers.usda.gov/media/29222/ocs-26f.pdf",
+      "pdf_sha256": "cc97c5b375464bb9927685cd8730d57db90edea51d62728d2c3d3e17a5769a3c",
+      "model": "claude-sonnet-4-5",
+      "prompt_version": "v1"
     }
   ],
   "source": "USDA, Economic Research Service — Oil Crops Outlook.",
-  "updated_at": "2026-05-21T19:44:51Z"
+  "updated_at": "2026-07-13T13:09:24Z"
 }
