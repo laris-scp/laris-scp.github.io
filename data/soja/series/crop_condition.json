@@ -5,7 +5,7 @@
     "frequency": "Semanal (jun-set)",
     "metric": "good + excellent (pct)",
     "source": "USDA NASS Quick Stats",
-    "updated_at": "2026-07-08 23:11:55"
+    "updated_at": "2026-07-14 23:01:53"
   },
   "data": [
     {
@@ -1867,6 +1867,12 @@
       "close": 64.0,
       "good": 53.0,
       "excellent": 11.0
+    },
+    {
+      "date": "2026-07-12",
+      "close": 65.0,
+      "good": 53.0,
+      "excellent": 12.0
     }
   ]
 }
