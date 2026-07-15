@@ -3,7 +3,7 @@
     "id": "fundamental_stu",
     "title": "FUNDAMENTAL S&D (STU Global)",
     "frequency": "Anual",
-    "updated_at": "2026-07-05 15:16:06",
+    "updated_at": "2026-07-15 15:20:35",
     "world_name": "World",
     "weight_method": "w_prod_5y = mean(prod_country,last5y)/mean(prod_world,last5y)",
     "delta_method": "d_prod_yoy = prod(t) - prod(t-1)",
