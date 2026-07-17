@@ -1,20 +1,20 @@
 {
-  "date": "2026-07-07",
-  "summary": "O cenário atual apresenta forças contraditórias, com predominância baixista de curto prazo. As Exportações de soja em grão dos EUA registram queda acelerada (nível baixo, momento bearish forte: -5.0), sinalizando fraqueza da demanda efetiva norte-americana e pressão sobre os preços. Simultaneamente, os Estoques Globais permanecem em patamar muito alto (STU 19,8%), embora em trajetória de queda desacelerando, o que mantém viés estrutural baixista (-2.5), indicando conforto de oferta no médio prazo. Do lado altista, a Condição da Lavoura dos EUA está em nível alto (65% Good+Excellent) e melhorando (+2.0), mas paradoxalmente isso reforça expectativa de safra robusta, gerando pressão baixista sobre o preço — a interpretação correta é que lavoura saudável sinaliza oferta abundante futura. A Margem de Esmagamento segue em patamar muito alto (+1.0), sustentando alguma demanda derivada, enquanto as Exportações de soja em grão do Brasil mantêm-se elevadas e laterais (+0.5), oferecendo suporte marginal. Dólar, Posição de fundos na soja e Relatório Oil Crops Outlook estão neutros, exercendo impacto limitado no momento. O saldo líquido aponta para viés baixista de curto prazo, com confiança média, dada a força dos drivers negativos (demanda fraca dos EUA e estoques confortáveis) superando os suportes pontuais.",
+  "date": "2026-07-17",
+  "summary": "O cenário apresenta forte pressão baixista no curto prazo. O Dólar em queda acelerada (-10.0) é o principal fator de peso, reduzindo a competitividade das exportações brasileiras e enfraquecendo a sustentação nominal do mercado. A redução da Posição de fundos na soja (-6.0) amplifica o viés negativo, sinalizando menor apetite especulativo. As Exportações de soja em grão dos EUA (-5.0) também caem de forma acelerada, evidenciando fraqueza de demanda global de curto prazo. A Margem de Esmagamento (-2.0) está em queda acelerada, indicando menor incentivo industrial para compra de soja. Os Estoques Globais (-2.5) em nível muito alto e queda desacelerando atenuam marginalmente o aperto estrutural, enfraquecendo o suporte de médio prazo. Do lado altista, a Condição da Lavoura dos EUA (2.0) em nível alto sinaliza risco moderado de safra menor, e o Relatório Oil Crops Outlook (1.0) apresenta viés altista residual. As Exportações de soja em grão do Brasil (0.5) estão laterais e exercem impacto limitado. O saldo líquido aponta para viés de queda com confiança alta.",
   "drivers_bull": [
-    "Margem de Esmagamento em patamar muito alto, sustentando demanda derivada industrial",
-    "Exportações de soja em grão do Brasil em nível alto, indicando fluxo robusto de demanda"
+    "Condição da Lavoura dos EUA em nível alto com tendência de alta, sinalizando risco moderado de oferta menor e suporte altista de médio prazo",
+    "Relatório Oil Crops Outlook com viés altista residual, validando expectativas de aperto pontual de oferta"
   ],
   "drivers_bear": [
-    "Exportações de soja em grão dos EUA em queda acelerada e nível baixo, sinalizando fraqueza aguda da demanda norte-americana",
-    "Estoques Globais em patamar muito alto (STU ~19,8%), mantendo conforto estrutural de oferta apesar da desaceleração da queda",
-    "Condição da Lavoura dos EUA em nível alto e melhorando, reforçando expectativa de safra volumosa e pressão futura de oferta"
+    "Dólar em queda acelerada, reduzindo a competitividade das exportações brasileiras e enfraquecendo a sustentação nominal do mercado no curto prazo",
+    "Posição de fundos na soja em queda desacelerando, sinalizando menor apetite especulativo e pressão vendedora residual",
+    "Exportações de soja em grão dos EUA em queda acelerada, evidenciando fraqueza de demanda global de curto prazo",
+    "Margem de Esmagamento em queda acelerada, indicando menor incentivo industrial para compra de soja e demanda derivada fraca",
+    "Estoques Globais em nível muito alto com queda desacelerando, atenuando o aperto estrutural de oferta de médio prazo"
   ],
   "limited_impact": [
-    "Dólar lateral e neutro, sem amplificação direcional no curto prazo",
-    "Posição de fundos na soja neutra, sem pressão especulativa relevante",
-    "Relatório Oil Crops Outlook neutro, sem sinalização adicional"
+    "Exportações de soja em grão do Brasil em nível alto com tendência lateral e momento neutro, exercendo impacto limitado no curto prazo"
   ],
   "bias": "QUEDA",
-  "confidence": "MEDIA"
+  "confidence": "ALTA"
 }
