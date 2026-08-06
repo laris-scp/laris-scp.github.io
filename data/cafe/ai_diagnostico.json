@@ -1,21 +1,21 @@
 {
-  "date": "2026-07-14",
-  "summary": "O mercado de café arábica apresenta viés estruturalmente altista, sustentado por aperto de oferta global e pressões logísticas e de custos. Os Estoques Globais permanecem em nível muito baixo e em trajetória de queda, ainda que desacelerando, sinalizando fragilidade estrutural da oferta no médio prazo. No curto prazo, Fretes em forte alta e aceleração ampliam fricções logísticas e encarecem o escoamento, enquanto o Fertilizante elevado mantém pressão sobre os custos de produção, embora com dinâmica marginal menos intensa. Os Estoques Certificados na ICE, apesar de muito baixos, encontram-se lateralizados, mantendo pressão altista estrutural mas sem gerar novo impulso direcional. O principal fator contrário provém das Exportações de café verde do Brasil, que seguem fracas e em queda, indicando debilidade da demanda de curto prazo, ainda que desacelerando. O Relatório da ICO também aponta para viés baixista, porém com baixa relevância. O Dólar, a Posição de fundos no café e o Clima encontram-se neutros, exercendo impacto limitado sobre a dinâmica de preços. O cenário resultante favorece a continuidade da tendência de alta, com confiança média, dado o conflito entre fundamentos estruturais altistas robustos e sinais de fraqueza de curto prazo no fluxo físico.",
+  "date": "2026-08-06",
+  "summary": "O mercado de café arábica enfrenta pressões mistas de curto prazo. O Dólar em queda (BAIXO, queda desacelerando) exerce forte pressão baixista no curto prazo, reduzindo a sustentação nominal e o incentivo exportador. As Exportações de café verde do Brasil desaceleraram para níveis baixos, sinalizando fraqueza da demanda efetiva de curto prazo. Os Estoques Globais, embora estruturalmente apertados (MUITO BAIXO), estão em alta desacelerando, o que enfraquece o impulso marginal altista. O Relatório da ICO mantém viés baixista. Em contrapartida, os Fretes seguem em patamar muito alto e em alta acelerando, ampliando custos logísticos e dificultando o escoamento. O Fertilizante (ureia) permanece muito alto, elevando o custo marginal de produção, embora também em alta desacelerando. Os Estoques Certificados na ICE estão muito baixos, mas lateralizados, mantendo apoio estrutural sem gerar novo impulso direcional. A Posição de fundos no café e o Clima permanecem neutros, exercendo impacto limitado. O balanço de forças sugere viés de queda no curto prazo, porém com fundamentos estruturais de suporte latentes.",
   "drivers_bull": [
-    "Estoques Globais muito baixos e em queda, reforçando aperto estrutural de oferta no médio prazo",
-    "Fretes em forte alta e aceleração, ampliando fricções logísticas e pressionando custos all-in",
-    "Fertilizante elevado, mantendo pressão sobre custos de produção futura",
-    "Estoques Certificados na ICE em nível muito baixo, sustentando pressão estrutural de curto prazo"
+    "Fretes em patamar muito alto e em alta acelerando, ampliando custos logísticos e dificultando escoamento",
+    "Fertilizante (ureia) em nível muito alto, elevando custo marginal de produção"
   ],
   "drivers_bear": [
-    "Exportações de café verde do Brasil fracas e em queda, sinalizando debilidade da demanda de curto prazo",
-    "Relatório da ICO com viés baixista, embora com baixa relevância"
+    "Dólar em queda (nível baixo, queda desacelerando), reduzindo sustentação nominal e incentivo exportador no curto prazo",
+    "Exportações de café verde do Brasil desaceleraram para níveis baixos, indicando fraqueza da demanda efetiva de curto prazo",
+    "Estoques Globais em alta desacelerando, enfraquecendo impulso marginal altista apesar do aperto estrutural",
+    "Relatório da ICO mantém viés baixista"
   ],
   "limited_impact": [
-    "Dólar neutro, sem efeito direcional sobre competitividade ou amplificação de preços",
-    "Posição de fundos no café neutra e lateral, sem pressão especulativa relevante",
-    "Clima sem estresse hídrico significativo, sem prêmio de risco climático"
+    "Estoques Certificados na ICE muito baixos, porém lateralizados, mantêm apoio estrutural sem gerar novo impulso direcional",
+    "Posição de fundos no café neutra e lateralizada",
+    "Clima sem estresse hídrico relevante, sem prêmio de risco adicional"
   ],
-  "bias": "ALTA",
+  "bias": "QUEDA",
   "confidence": "MEDIA"
 }
