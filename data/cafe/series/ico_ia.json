@@ -418,8 +418,25 @@
       "pdf_sha256": "1602de1b8184640c5de13c703c236fcbd8ebf5078aaaf7378f4d7ad9c007c02a",
       "model": "claude-sonnet-4-5",
       "prompt_version": "v3"
+    },
+    {
+      "date": "2026-06-01",
+      "close": 1.0,
+      "signal": 1.0,
+      "label": "BULLISH",
+      "evidencias": [
+        "Estoques certificados ICE caíram para 1,09 milhão de sacas em 30/jun/26, menor nível desde fev/24. Regra: queda de estoques = BULLISH. Impacto: reduz buffer contra choques de oferta, amplifica volatilidade de preços.",
+        "Exportações globais de café verde caíram 4,1% em mai/26 (10,8 mi sacas vs 11,26 mi em mai/25), com Arábica recuando 9,3% e acumulando 13 meses de queda. Regra: queda de exportações por restrição de oferta (estoques baixos, problemas climáticos no Brasil) = BULLISH. Impacto: aperta disponibilidade física global.",
+        "Chuvas acima da média no Brasil (1.956% da média histórica em Minas Gerais na semana de 28/jun) atrasaram colheita 2026/27 para 44% vs 51% no ano anterior e média de 47%. Regra: restrição de oferta por clima adverso = BULLISH. Impacto: atraso na colheita reduz fluxo de exportação e deteriora qualidade.",
+        "Previsão de Super El Niño com 67% de confiança (JMA e NOAA, jun/26) indica risco de seca no Sudeste Asiático e Centro América e chuvas erráticas na África Oriental para safra 2026/27. Regra: risco climático futuro = BULLISH. Impacto: prêmio de risco climático sustenta preços.",
+        "Exportações da Etiópia caíram 26% entre fev-mai/26 vs ano anterior (após 26 meses de alta) devido à ausência de liberação de estoques induzida por preços (I-CIP 23,4% menor em mai/26 vs mai/25). Regra: queda de exportações por esgotamento de estoques = BULLISH. Impacto: reduz oferta disponível de Arábica e Naturais Brasileiros."
+      ],
+      "pdf_url": "https://www.ico.org/documents/cy2025-26/cmr-0626-e.pdf",
+      "pdf_sha256": "4002bb6a45fb2049b7d887f67e23adbf4aff7fd4714195d963af28d8d0ceff18",
+      "model": "claude-sonnet-4-5",
+      "prompt_version": "v3"
     }
   ],
   "source": "International Coffee Organization (ICO) — Monthly Coffee Market Report (CMR).",
-  "updated_at": "2026-06-12T18:03:01Z"
+  "updated_at": "2026-08-10T16:46:28Z"
 }
