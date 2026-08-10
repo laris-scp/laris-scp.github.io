@@ -1,6 +1,6 @@
 {
   "commodity": "cafe",
-  "updated_at": "2026-08-10 14:23:13",
+  "updated_at": "2026-08-10 16:46:49",
   "rows": [
     {
       "id": "preco_arabica",
@@ -171,21 +171,21 @@
       "bloco": 1,
       "variavel": "ICO (IA)",
       "peso": 1.0,
-      "ultimo_valor": -1.0,
+      "ultimo_valor": 1.0,
       "percentil": null,
-      "nivel": "BEARISH",
-      "valor_nivel": -1.0,
+      "nivel": "BULLISH",
+      "valor_nivel": 1.0,
       "tendencia": "NEUTRO",
       "valor_tendencia": 0.0,
       "momento": "NEUTRO",
       "valor_momento": 0.0,
-      "score": -1.0,
-      "score_ponderado": -1.0,
+      "score": 1.0,
+      "score_ponderado": 1.0,
       "frequencia": "Mensal",
-      "ultima_atualizacao": "2026-05-01",
+      "ultima_atualizacao": "2026-06-01",
       "regra_de_sinal": "Este indicador lê o relatório mensal do ICO e classifica o impacto para o preço do café. Quando o relatório sugere mais oferta (produção maior / revisão positiva), o sinal tende a ser BEARISH. Quando sugere aperto de oferta (estoques baixos / riscos de quebra / restrições), tende a ser BULLISH. Se os sinais forem mistos, fica NEUTRAL.",
       "fonte": "International Coffee Organization (ICO) — Monthly Coffee Market Report (CMR).",
-      "ultima_data_serie": "2026-05-01"
+      "ultima_data_serie": "2026-06-01"
     },
     {
       "id": "mdic_export",
