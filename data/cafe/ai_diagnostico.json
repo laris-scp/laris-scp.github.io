@@ -1,21 +1,21 @@
 {
-  "date": "2026-08-06",
-  "summary": "O mercado de café arábica enfrenta pressões mistas de curto prazo. O Dólar em queda (BAIXO, queda desacelerando) exerce forte pressão baixista no curto prazo, reduzindo a sustentação nominal e o incentivo exportador. As Exportações de café verde do Brasil desaceleraram para níveis baixos, sinalizando fraqueza da demanda efetiva de curto prazo. Os Estoques Globais, embora estruturalmente apertados (MUITO BAIXO), estão em alta desacelerando, o que enfraquece o impulso marginal altista. O Relatório da ICO mantém viés baixista. Em contrapartida, os Fretes seguem em patamar muito alto e em alta acelerando, ampliando custos logísticos e dificultando o escoamento. O Fertilizante (ureia) permanece muito alto, elevando o custo marginal de produção, embora também em alta desacelerando. Os Estoques Certificados na ICE estão muito baixos, mas lateralizados, mantendo apoio estrutural sem gerar novo impulso direcional. A Posição de fundos no café e o Clima permanecem neutros, exercendo impacto limitado. O balanço de forças sugere viés de queda no curto prazo, porém com fundamentos estruturais de suporte latentes.",
+  "date": "2026-08-14",
+  "summary": "O mercado de café arábica apresenta viés altista moderado no curto prazo, sustentado por fatores estruturais de custo e fricção logística. Fretes em alta acelerando e fertilizante em patamar muito elevado pressionam os custos marginais de produção e dificultam o escoamento, criando sustentação de preços. Estoques Certificados na ICE permanecem em nível muito baixo, indicando oferta disponível imediata restrita, ainda que lateralizada. No lado negativo, Exportações de café verde do Brasil seguem em desaceleração, sinalizando fraqueza no fluxo efetivo de curto prazo, enquanto Estoques Globais apresentam recuperação marginal, reduzindo parte do aperto estrutural. Clima normalizado e ausência de estresse hídrico relevante removem prêmio de risco climático. Dólar e posição de fundos estão neutros, sem impulso direcional. O cenário é de sustentação altista por custos e fricção, mas sem catalisador de demanda ou deterioração climática no horizonte imediato.",
   "drivers_bull": [
-    "Fretes em patamar muito alto e em alta acelerando, ampliando custos logísticos e dificultando escoamento",
-    "Fertilizante (ureia) em nível muito alto, elevando custo marginal de produção"
+    "Fretes em alta acelerando, dificultando o escoamento e elevando o custo all-in",
+    "Fertilizante em patamar muito elevado, pressionando o custo marginal de produção",
+    "Estoques Certificados na ICE em nível muito baixo, indicando oferta disponível imediata restrita"
   ],
   "drivers_bear": [
-    "Dólar em queda (nível baixo, queda desacelerando), reduzindo sustentação nominal e incentivo exportador no curto prazo",
-    "Exportações de café verde do Brasil desaceleraram para níveis baixos, indicando fraqueza da demanda efetiva de curto prazo",
-    "Estoques Globais em alta desacelerando, enfraquecendo impulso marginal altista apesar do aperto estrutural",
-    "Relatório da ICO mantém viés baixista"
+    "Exportações de café verde do Brasil em desaceleração, sinalizando fraqueza no fluxo efetivo de curto prazo",
+    "Estoques Globais em recuperação marginal, reduzindo parte do aperto estrutural de oferta"
   ],
   "limited_impact": [
-    "Estoques Certificados na ICE muito baixos, porém lateralizados, mantêm apoio estrutural sem gerar novo impulso direcional",
-    "Posição de fundos no café neutra e lateralizada",
-    "Clima sem estresse hídrico relevante, sem prêmio de risco adicional"
+    "Clima sem estresse hídrico relevante, removendo prêmio de risco climático",
+    "Dólar lateral, sem amplificação direcional no curto prazo",
+    "Posição de fundos no café neutra, sem impulso especulativo",
+    "Relatório da ICO sem sinalização direcional relevante"
   ],
-  "bias": "QUEDA",
+  "bias": "ALTA",
   "confidence": "MEDIA"
 }
