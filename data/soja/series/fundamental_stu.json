@@ -3,7 +3,7 @@
     "id": "fundamental_stu",
     "title": "FUNDAMENTAL S&D (STU Global)",
     "frequency": "Anual",
-    "updated_at": "2026-08-05 16:07:57",
+    "updated_at": "2026-08-15 14:42:16",
     "world_name": "World",
     "weight_method": "w_prod_5y = mean(prod_country,last5y)/mean(prod_world,last5y)",
     "delta_method": "d_prod_yoy = prod(t) - prod(t-1)",
@@ -260,15 +260,15 @@
     },
     {
       "date": "2024-01-01",
-      "close": 0.21117013605921275
+      "close": 0.21118093654008666
     },
     {
       "date": "2025-01-01",
-      "close": 0.20331402262451514
+      "close": 0.2026414880436631
     },
     {
       "date": "2026-01-01",
-      "close": 0.19643297833969284
+      "close": 0.19640592634757997
     }
   ],
   "decomp": {
@@ -277,56 +277,56 @@
       {
         "country": "BR",
         "country_resolved": "BR",
-        "w_prod_5y": 0.41227350272389823,
+        "w_prod_5y": 0.4123915092179505,
         "prod": 186000.0,
-        "prod_prev": 180000.0,
-        "d_prod_yoy": 6000.0,
-        "contrib": 2473.6410163433893
+        "prod_prev": 180500.0,
+        "d_prod_yoy": 5500.0,
+        "contrib": 2268.1533006987274
       },
       {
         "country": "US",
         "country_resolved": "US",
-        "w_prod_5y": 0.2827183627100304,
-        "prod": 121790.0,
+        "w_prod_5y": 0.28321149586523886,
+        "prod": 122988.0,
         "prod_prev": 115989.0,
-        "d_prod_yoy": 5801.0,
-        "contrib": 1640.0492220808865
+        "d_prod_yoy": 6999.0,
+        "contrib": 1982.1972595608067
       },
       {
         "country": "AR",
         "country_resolved": "AR",
-        "w_prod_5y": 0.10816417261288819,
+        "w_prod_5y": 0.10789087412056486,
         "prod": 50000.0,
-        "prod_prev": 50000.0,
-        "d_prod_yoy": 0.0,
-        "contrib": 0.0
+        "prod_prev": 49500.0,
+        "d_prod_yoy": 500.0,
+        "contrib": 53.94543706028243
       },
       {
         "country": "CH",
         "country_resolved": "CH",
-        "w_prod_5y": 0.049990693709236755,
+        "w_prod_5y": 0.049975777120586554,
         "prod": 21000.0,
         "prod_prev": 20900.0,
         "d_prod_yoy": 100.0,
-        "contrib": 4.999069370923675
+        "contrib": 4.997577712058655
       },
       {
         "country": "IN",
         "country_resolved": "IN",
-        "w_prod_5y": 0.028784405549828196,
+        "w_prod_5y": 0.028775816648469378,
         "prod": 11500.0,
         "prod_prev": 11027.0,
         "d_prod_yoy": 473.0,
-        "contrib": 13.615023825068736
+        "contrib": 13.610961274726016
       },
       {
         "country": "PA",
         "country_resolved": "PA",
-        "w_prod_5y": 0.026351750788141566,
+        "w_prod_5y": 0.026343887760094675,
         "prod": 11100.0,
         "prod_prev": 12100.0,
         "d_prod_yoy": -1000.0,
-        "contrib": -26.351750788141565
+        "contrib": -26.343887760094674
       }
     ]
   }
