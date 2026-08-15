@@ -111,8 +111,26 @@
       "pdf_sha256": "cc97c5b375464bb9927685cd8730d57db90edea51d62728d2c3d3e17a5769a3c",
       "model": "claude-sonnet-4-5",
       "prompt_version": "v1"
+    },
+    {
+      "date": "2026-07-01",
+      "close": -1.0,
+      "signal": -1.0,
+      "label": "BEARISH",
+      "regime": "NOVA_SAFRA",
+      "evidencias": [
+        "Regime NOVA SAFRA (julho 2026) introduz projeções para MY 2026/27. Contagem final: 5 BEARISH vs 3 BULLISH, diferença de 2 aciona classificação BEARISH.",
+        "BEARISH: Produção recorde EUA (4.5 bi bu, +5% área), produção global aumenta para 441.7 MMT, estoques EUA mantidos em 310 mi bu, estoques globais caem apenas 1.2 MMT (estoque ainda alto em 124.2 MMT), área plantada EUA sobe para 85.4 mi acres.",
+        "BULLISH: Exportações EUA sobem para 1.66 bi bu (vs 1.52 bi em MY25/26), crush China aumenta para 111 MMT (+2 MMT), importações China sobem para 115 MMT (+1 MMT).",
+        "Pressão de oferta domina: safra recorde dos EUA e produção global elevada compensam o aumento marginal de demanda chinesa e exportações americanas.",
+        "Impacto esperado: pressão baixista sobre preços CBOT no curto prazo devido à abundância de oferta, apesar de demanda firme por esmagamento."
+      ],
+      "pdf_url": "https://www.ers.usda.gov/media/29345/ocs-26g.pdf",
+      "pdf_sha256": "a25f33f275c9f1bbd5e0f1e4b0cdcee83f058d90aa7159ab0e5f8838d52e84b1",
+      "model": "claude-sonnet-4-5",
+      "prompt_version": "v1"
     }
   ],
   "source": "USDA, Economic Research Service — Oil Crops Outlook.",
-  "updated_at": "2026-07-13T13:09:24Z"
+  "updated_at": "2026-08-15T16:35:50Z"
 }
