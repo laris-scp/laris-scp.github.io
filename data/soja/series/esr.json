@@ -7,7 +7,7 @@
   "metric_principal": "total_commitment",
   "frequency": "weekly",
   "crop_year": "set-ago",
-  "updated_at": "2026-08-28 22:58:58",
+  "updated_at": "2026-09-04 16:48:56",
   "series": [
     {
       "date": "1999-09-02",
@@ -15438,7 +15438,7 @@
       "weekly_exports": 298723.0,
       "accumulated_exports": 38480749.0,
       "outstanding_sales": 2899464.0,
-      "gross_new_sales": 116943.0,
+      "gross_new_sales": 175610.0,
       "net_sales": 56351.0,
       "total_commitment": 41380213.0
     },
@@ -15460,7 +15460,7 @@
       "weekly_exports": 346012.0,
       "accumulated_exports": 39317091.0,
       "outstanding_sales": 2397539.0,
-      "gross_new_sales": 50893.0,
+      "gross_new_sales": 109020.0,
       "net_sales": 32157.0,
       "total_commitment": 41714630.0
     },
@@ -15496,6 +15496,17 @@
       "gross_new_sales": 99202.0,
       "net_sales": 73913.0,
       "total_commitment": 41948678.0
+    },
+    {
+      "date": "2026-08-27",
+      "market_year": 2026,
+      "week_index": 52,
+      "weekly_exports": 311846.0,
+      "accumulated_exports": 40755524.0,
+      "outstanding_sales": 1098973.0,
+      "gross_new_sales": 7897.0,
+      "net_sales": -94181.0,
+      "total_commitment": 41854497.0
     }
   ]
 }
