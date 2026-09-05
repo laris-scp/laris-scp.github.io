@@ -4600,7 +4600,7 @@
       "stress_6m": 0.006245757078195524
     }
   ],
-  "updated_at": "2026-08-10T14:22:17Z",
+  "updated_at": "2026-09-05T15:45:34Z",
   "revision_months": 6,
   "source": "ERA5-Land (ECMWF/Copernicus) — swvl3 (Volumetric soil water layer 3), média regional Brasil cafeeiro (bbox [-15, -55, -25, -40])."
 }
