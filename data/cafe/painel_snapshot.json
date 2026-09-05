@@ -1,6 +1,6 @@
 {
   "commodity": "cafe",
-  "updated_at": "2026-09-05 16:39:43",
+  "updated_at": "2026-09-05 16:59:43",
   "rows": [
     {
       "id": "preco_arabica",
@@ -110,8 +110,8 @@
       "id": "estoques_certificados",
       "bloco": 2,
       "variavel": "ESTOQUES CERTIFICADOS",
-      "ultimo_valor": 264179.0,
-      "percentil": 0.10457516339869281,
+      "ultimo_valor": 223976.0,
+      "percentil": 0.08794788273615635,
       "nivel": "MUITO BAIXO",
       "valor_nivel": -1.0,
       "tendencia": "LATERAL",
@@ -122,7 +122,7 @@
       "peso": 3.0,
       "score_ponderado": 3.0,
       "frequencia": "Mensal",
-      "ultima_atualizacao": "2026-07-31",
+      "ultima_atualizacao": "2026-08-31",
       "regra_de_sinal": "Nível indica se os estoques certificados da ICE estão baixos ou altos versus os últimos anos; Tendência compara a média de 1 ano com 2 e 3 anos para dizer se os estoques vêm subindo, caindo ou andando de lado; Momento mostra se essa tendência está acelerando ou perdendo força; Score combina Nível, Tendência e Momento (com ajuste de bloco e peso) em um único indicador.",
       "fonte": "ICE – Certified Stocks (EOM)"
     },
