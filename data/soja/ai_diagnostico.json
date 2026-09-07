@@ -1,19 +1,19 @@
 {
-  "date": "2026-08-16",
-  "summary": "O cenário atual apresenta forças contrárias equilibradas. Os Estoques Globais em queda sustentam viés estrutural altista de médio prazo, reforçado por Exportações de soja em grão do Brasil em nível alto e Posição de fundos na soja elevada. No entanto, a Margem de Esmagamento em queda sinaliza enfraquecimento da demanda derivada industrial, o Relatório Oil Crops Outlook aponta viés baixista e o Dólar encontra-se neutro, sem oferecer suporte adicional no curto prazo. A Condição da Lavoura dos EUA permanece neutra. O saldo é de leve viés altista estrutural, mas com pressão baixista de curto prazo pela demanda industrial fraca, resultando em cenário misto com lateralização provável no curtíssimo prazo.",
+  "date": "2026-09-07",
+  "summary": "O cenário para a soja apresenta pressão baixista dominante no curto prazo. O Dólar em queda forte (-8.0) reduz o preço em reais e enfraquece o incentivo exportador, sendo o principal fator de pressão. Exportações dos EUA em queda acelerada (-5.0) sinalizam demanda global fraca. A Margem de Esmagamento em queda acelerada (-2.0) indica desaquecimento da demanda industrial. No front estrutural, os Estoques Globais em queda desacelerada (-2.5) mantêm suporte altista de médio prazo, porém com força marginal reduzida, enquanto a Condição da Lavoura dos EUA em deterioração moderada (-2.0) limita expectativas de safra recorde. A Posição de fundos na soja permanece muito alta e lateral (+4.0), oferecendo suporte técnico moderado, e as Exportações de soja em grão do Brasil seguem fortes (+1.5), indicando fluxo físico robusto. O Relatório Oil Crops Outlook (-1.0) reforça o viés baixista com tom de oferta ampla. O saldo líquido aponta para pressão baixista no curto prazo, com o macro e a demanda derivada sobrepondo-se aos fundamentos estruturais.",
   "drivers_bull": [
-    "Estoques Globais em queda sustentam aperto estrutural de oferta e viés altista de médio prazo",
-    "Exportações de soja em grão do Brasil em nível alto indicam fluxo robusto de demanda efetiva no curto prazo",
-    "Posição de fundos na soja elevada reforça viés altista e dá sustentação ao timing do mercado"
+    "Estoques Globais em queda desacelerada mantêm suporte estrutural altista de médio prazo, sinalizando aperto relativo de oferta",
+    "Condição da Lavoura dos EUA em deterioração moderada limita expectativas de safra recorde e reduz risco de oferta excessiva",
+    "Posição de fundos na soja em nível muito alto e lateral oferece suporte técnico moderado ao mercado",
+    "Exportações de soja em grão do Brasil em alta e com fluxo forte indicam demanda física robusta no curto prazo"
   ],
   "drivers_bear": [
-    "Margem de Esmagamento em queda sinaliza enfraquecimento da demanda derivada industrial e recuo do esmagador",
-    "Relatório Oil Crops Outlook com viés baixista indica pressão de oferta ampla ou safra recorde no cenário global"
+    "Dólar em queda forte reduz preço em reais, enfraquece incentivo exportador e retira sustentação nominal do mercado no curto prazo",
+    "Exportações dos EUA em queda acelerada sinalizam fraqueza acentuada da demanda global de curto prazo",
+    "Margem de Esmagamento em queda acelerada indica desaquecimento da demanda industrial e recuo do esmagador",
+    "Relatório Oil Crops Outlook com viés baixista reforça cenário de oferta ampla e pressão sobre preços"
   ],
-  "limited_impact": [
-    "Dólar em patamar neutro, sem tendência clara, exerce impacto limitado no curto prazo",
-    "Condição da Lavoura dos EUA neutra e estável não altera perspectiva de oferta neste momento"
-  ],
-  "bias": "LATERAL",
+  "limited_impact": [],
+  "bias": "QUEDA",
   "confidence": "MEDIA"
 }
