@@ -435,8 +435,42 @@
       "pdf_sha256": "4002bb6a45fb2049b7d887f67e23adbf4aff7fd4714195d963af28d8d0ceff18",
       "model": "claude-sonnet-4-5",
       "prompt_version": "v3"
+    },
+    {
+      "date": "2026-07-01",
+      "close": 1.0,
+      "signal": 1.0,
+      "label": "BULLISH",
+      "evidencias": [
+        "Estoques certificados de Arábica nos EUA caíram 30% em julho/2026 para 0,29 milhões de sacas, menor nível desde janeiro/2024 → BULLISH por restrição de oferta imediata",
+        "Colheita brasileira 2026/27 estava 64% completa em 15/julho vs 77% no ano anterior e média de 70%, com atrasos por chuvas excessivas prejudicando secagem e qualidade → BULLISH por restrição de disponibilidade",
+        "Exportações de Robusta da Indonésia caíram 33,3% em junho/2026 (0,58M vs 0,86M sacas) com relatos de escassez de diesel subsidiado aumentando tempo de transporte de 5 para 10 dias e inundações de novembro/2025 afetando 25% das fazendas → BULLISH por restrição logística e de oferta",
+        "Exportações totais de café da África caíram 13,5% em junho/2026, com Uganda reduzindo 30,6% após ano recorde, indicando normalização de estoques → NEUTRAL (normalização pós-pico)",
+        "Exportações globais de café verde subiram apenas 0,8% em junho/2026 (10,48M vs 10,4M sacas), crescimento marginal insuficiente para caracterizar aceleração de oferta → NEUTRAL"
+      ],
+      "pdf_url": "https://www.ico.org/documents/cy2025-26/cmr-0726-e.pdf",
+      "pdf_sha256": "90934c1bcd2da64b07ed3d59e243aa9ff180abcb109a3e87868fe969bd63510b",
+      "model": "claude-sonnet-4-5",
+      "prompt_version": "v3"
+    },
+    {
+      "date": "2026-08-01",
+      "close": -1.0,
+      "signal": -1.0,
+      "label": "BEARISH",
+      "evidencias": [
+        "Produção mundial estimada em 183,6 milhões de sacas em 2025/26 (+4,4% vs ano anterior), com Robusta subindo 6,5% e Arábica +2,8% — aumento de produção → BEARISH",
+        "Mercado projetado para surplus de 3,0 milhões de sacas em 2025/26, revertendo 4 anos consecutivos de déficit (2021/22 a 2024/25) — excesso de oferta → BEARISH",
+        "Estoques certificados de Robusta em Londres subiram 19,5% (julho-agosto 2026), atingindo máxima de 9 meses em 0,83 milhão de sacas — aumento de estoques → BEARISH",
+        "Consumo mundial estimado em queda de 0,8% em 2025/26 (180,6 vs 182,2 milhões), com redução esperada nos EUA (maior consumidor global) — demanda enfraquecendo → BEARISH",
+        "Estoques certificados de Arábica em NY caíram para 0,24 milhão de sacas (menor nível desde 1999, -68% vs ano anterior) — queda de estoques → BULLISH"
+      ],
+      "pdf_url": "https://www.ico.org/documents/cy2025-26/cmr-0826-e.pdf",
+      "pdf_sha256": "636555a08330e7afecffac7be28200fd95ceaf28378ad7e9ab87d0f6ef4eebbc",
+      "model": "claude-sonnet-4-5",
+      "prompt_version": "v3"
     }
   ],
   "source": "International Coffee Organization (ICO) — Monthly Coffee Market Report (CMR).",
-  "updated_at": "2026-08-10T16:46:28Z"
+  "updated_at": "2026-09-10T18:52:47Z"
 }
