@@ -129,8 +129,26 @@
       "pdf_sha256": "a25f33f275c9f1bbd5e0f1e4b0cdcee83f058d90aa7159ab0e5f8838d52e84b1",
       "model": "claude-sonnet-4-5",
       "prompt_version": "v1"
+    },
+    {
+      "date": "2026-08-01",
+      "close": 0.0,
+      "signal": 0.0,
+      "label": "NEUTRAL",
+      "regime": "MENSAL",
+      "evidencias": [
+        "Regime MENSAL (agosto 2026): revisões do ano-safra MY 2026/27 em curso. Contagem final: 6 BEARISH vs 6 BULLISH = diferença zero → NEUTRAL obrigatório.",
+        "BEARISH: produção EUA +44 mi bu (recorde 4,52 bi bu), área colhida +1,4 mi acres, estoques finais EUA +10 mi bu (320 mi), crush global +0,6 mi ton (384,8 mi), produção Canadá canola +0,5 mi ton (recorde 22,5 mi), exportações EUA soja inalteradas (1,66 bi bu sem aceleração).",
+        "BULLISH: crush EUA +30 mi bu (recorde 2,78 bi), demanda farelo global +1,1 mi ton (297,1 mi ton com crescimento 3%), exportações farelo EUA elevadas (share de 23% vs média 20%), uso óleo para biocombustível EUA elevado (17,8 bi lbs), demanda óleo industrial global +3,4 mi ton, crush Canadá +1,0 mi ton (13,7 mi).",
+        "Yield EUA caiu 0,3 bu/acre para 52,7 (primeira pesquisa vs tendência), condição de safra 63% boa/excelente (abaixo dos 69% do ano anterior), precipitação abaixo da média em julho. Estoques globais soja praticamente inalterados (124 mi ton).",
+        "Impacto esperado: forças opostas se equilibram. Oferta recorde (produção e estoques) neutralizada por demanda robusta (esmagamento, farelo, óleo para biodiesel). Mercado aguarda clima de agosto nos EUA e dados de demanda chinesa para definir direção."
+      ],
+      "pdf_url": "https://www.ers.usda.gov/media/29456/ocs-26h.pdf",
+      "pdf_sha256": "6e5478cd047dc4c75d1e8ae3ba0cc206929c1781ec68fae549d24b35dd18637e",
+      "model": "claude-sonnet-4-5",
+      "prompt_version": "v1"
     }
   ],
   "source": "USDA, Economic Research Service — Oil Crops Outlook.",
-  "updated_at": "2026-08-15T16:35:50Z"
+  "updated_at": "2026-09-15T19:39:53Z"
 }
