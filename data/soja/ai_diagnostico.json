@@ -1,20 +1,21 @@
 {
-  "date": "2026-09-17",
-  "summary": "O mercado da soja apresenta um cenário misto, com forças altistas de curto prazo sendo parcialmente compensadas por pressões baixistas estruturais e de demanda. No lado altista, destacam-se: a Posição de fundos na soja em nível muito alto, indicando forte presença especulativa comprada e suporte financeiro ao mercado; as Exportações de soja em grão do Brasil em alta, sinalizando demanda física consistente; e as exportações dos EUA também em tendência crescente, reforçando o fluxo global de demanda. No lado baixista, os Estoques Globais permanecem em nível muito alto, embora estejam em trajetória de queda desacelerando — o que mantém pressão estrutural sobre o preço, ainda que com menor intensidade marginal. A Margem de Esmagamento encontra-se em queda acelerando, indicando enfraquecimento da demanda industrial derivada e redução do incentivo ao esmagamento. O Dólar está em patamar baixo e lateral, reduzindo o suporte nominal ao preço em reais e o incentivo exportador no curto prazo. A Condição da Lavoura dos EUA está neutra e fora do período crítico, exercendo impacto limitado. O Relatório Oil Crops Outlook também está neutro, servindo apenas como validação cruzada sem direcionalidade. O balanço entre suporte financeiro e fluxo físico versus pressão estrutural e enfraquecimento da demanda industrial sugere um ambiente de disputa entre compradores e vendedores, com viés ligeiramente altista no curtíssimo prazo, mas vulnerável à deterioração caso a demanda derivada continue a enfraquecer ou os estoques se estabilizem em níveis elevados.",
+  "date": "2026-10-07",
+  "summary": "O mercado de soja apresenta um cenário de conflito entre forças de curto prazo. O forte posicionamento comprado dos fundos na bolsa (Posição de fundos na soja em nível muito alto e acelerando) e a margem de esmagamento elevada (Margem de Esmagamento em patamar muito alto) sustentam demanda técnica e industrial robusta. Exportações dos EUA e do Brasil também reforçam fluxo de demanda ativo. Contudo, a aceleração da queda do Dólar (nível baixo e queda acelerando) pressiona o preço em reais, reduz incentivos ao exportador brasileiro e mina a sustentação nominal no curto prazo, gerando forte pressão baixista. Estruturalmente, os Estoques Globais seguem em queda (ainda que desacelerando), mantendo aperto de oferta no médio prazo, porém com menor força marginal. A Condição da Lavoura dos EUA está neutra e o Relatório Oil Crops Outlook não apresenta viés direcional. O embate entre demanda técnica/industrial forte e macro adversa (real forte) resulta em viés lateral de curto prazo, com risco de pressão baixista caso o Dólar continue caindo, e potencial altista se houver reversão cambial ou reforço nos fundamentos de demanda.",
   "drivers_bull": [
-    "Posição de fundos na soja em nível muito alto, sustentando o mercado com forte presença especulativa comprada",
-    "Exportações de soja em grão do Brasil em alta, refletindo demanda física consistente no curto prazo",
-    "Exportações dos EUA em tendência de alta, reforçando o fluxo global de demanda"
+    "Posição de fundos na soja em nível muito alto e em alta acelerando, indicando forte apetite especulativo e sustentação técnica",
+    "Margem de Esmagamento em patamar muito alto, sinalizando demanda industrial robusta e incentivo ao esmagamento",
+    "Exportações de soja em grão do Brasil em alta, refletindo fluxo efetivo de demanda no curto prazo",
+    "Exportações dos EUA em alta, reforçando demanda física ativa",
+    "Estoques Globais em queda (ainda que desacelerando), mantendo aperto estrutural de oferta no médio prazo"
   ],
   "drivers_bear": [
-    "Estoques Globais em nível muito alto, exercendo pressão estrutural sobre o preço mesmo com queda desacelerando",
-    "Margem de Esmagamento em queda acelerando, sinalizando enfraquecimento da demanda industrial derivada",
-    "Dólar em patamar baixo e lateral, reduzindo o suporte nominal ao preço em reais e o incentivo exportador no curto prazo"
+    "Dólar em queda acelerada (nível baixo), pressionando o preço em reais, reduzindo incentivo ao exportador brasileiro e minando a sustentação nominal no curto prazo",
+    "Estoques Globais desacelerando a queda, reduzindo a força marginal altista estrutural"
   ],
   "limited_impact": [
-    "Condição da Lavoura dos EUA neutra e fora do período crítico de safra",
-    "Relatório Oil Crops Outlook neutro, sem direcionalidade clara e servindo apenas como validação cruzada"
+    "Condição da Lavoura dos EUA neutra e lateral, sem risco de oferta relevante na janela atual",
+    "Relatório Oil Crops Outlook neutro, sem viés direcional adicional"
   ],
-  "bias": "ALTA",
-  "confidence": "BAIXA"
+  "bias": "LATERAL",
+  "confidence": "MEDIA"
 }
