@@ -469,8 +469,25 @@
       "pdf_sha256": "636555a08330e7afecffac7be28200fd95ceaf28378ad7e9ab87d0f6ef4eebbc",
       "model": "claude-sonnet-4-5",
       "prompt_version": "v3"
+    },
+    {
+      "date": "2026-09-01",
+      "close": -1.0,
+      "signal": -1.0,
+      "label": "BEARISH",
+      "evidencias": [
+        "BEARISH: Brasil atinge safra recorde de 67,6 milhões de sacas (CONAB, set/2026), acréscimo de 34,8% no Arábica e máxima histórica — regra: aumento de produção → pressão baixista sobre preços",
+        "BEARISH: Excedente global estimado em 3,0 milhões de sacas para 2025/26 após quatro anos de déficit (ICO) — regra: surplus reduz tensão de oferta → bearish",
+        "BEARISH: Estoques certificados Robusta em Londres sobem para máxima de 10 meses (0,87 milhão de sacas, set/2026) — regra: aumento de estoques → bearish",
+        "BEARISH: Exportações globais de café verde sobem 15,6% em agosto/2026 (10,94 milhões de sacas vs 9,46 milhões ago/2025), impulsionadas por disponibilidade da safra brasileira — regra: aceleração de embarques → bullish, mas contrabalanceado por origem na alta oferta",
+        "BULLISH: Estoques certificados Arábica em NY permanecem extremamente baixos (0,27 milhão de sacas, menor nível desde 1999) — regra: queda de estoques → bullish, mas recuperação em curso reduz impacto"
+      ],
+      "pdf_url": "https://www.ico.org/documents/cy2025-26/cmr-0926-e.pdf",
+      "pdf_sha256": "06f0765dc0adc6e127ed9e6852b397df586e43224cd7c9f3b122730f8bcac783",
+      "model": "claude-sonnet-4-5",
+      "prompt_version": "v3"
     }
   ],
   "source": "International Coffee Organization (ICO) — Monthly Coffee Market Report (CMR).",
-  "updated_at": "2026-09-10T18:52:47Z"
+  "updated_at": "2026-10-10T19:40:16Z"
 }
