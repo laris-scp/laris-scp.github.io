@@ -147,8 +147,26 @@
       "pdf_sha256": "6e5478cd047dc4c75d1e8ae3ba0cc206929c1781ec68fae549d24b35dd18637e",
       "model": "claude-sonnet-4-5",
       "prompt_version": "v1"
+    },
+    {
+      "date": "2026-09-01",
+      "close": -1.0,
+      "signal": -1.0,
+      "label": "BEARISH",
+      "regime": "MENSAL",
+      "evidencias": [
+        "Regime MENSAL (setembro 2026): revisões mês a mês do ano-safra 2026/27 em curso.",
+        "Contagem final: 5 BEARISH vs 3 BULLISH (diferença ≥2 → classificação BEARISH obrigatória).",
+        "Fatores BEARISH dominantes: produção EUA aumentada (+16 mi bu), área plantada e colhida ampliadas (+0,1 mi acres cada), rendimento recorde em 7 estados, estoques finais reduzidos apenas marginalmente (-10 mi bu para 310 mi bu), produção global de canola/girassol elevada (embora não seja soja, pressiona complexo de óleos).",
+        "Fatores BULLISH presentes mas insuficientes: exportações EUA elevadas (+25 mi bu para 1,69 bi bu), crush mantido forte (2,78 bi bu), demanda chinesa retomada (285 mi bu vs zero no ano anterior), uso de óleo de soja em biocombustíveis atingiu recorde mensal (1.556 mi libras em junho) e projeção 2026/27 sobe 3 bi libras.",
+        "Impacto esperado: pressão baixista prevalece pela oferta abundante (produção e estoques elevados), apesar da demanda sólida; preço médio da safra elevado para US$12,00/bu reflete ajuste técnico mas não altera balanço estrutural de oferta ampla."
+      ],
+      "pdf_url": "https://www.ers.usda.gov/media/29635/ocs-26i.pdf",
+      "pdf_sha256": "41eeeda96aeb6fd8404204d521944802d3a6aaf3a61be3bfc3fcd9cf197c22cf",
+      "model": "claude-sonnet-4-5",
+      "prompt_version": "v1"
     }
   ],
   "source": "USDA, Economic Research Service — Oil Crops Outlook.",
-  "updated_at": "2026-09-15T19:39:53Z"
+  "updated_at": "2026-10-15T19:50:00Z"
 }
